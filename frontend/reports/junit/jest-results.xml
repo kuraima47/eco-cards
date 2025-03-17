@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="24" failures="2" errors="0" time="22.252">
+  <testsuite name="QRCodePreview" errors="0" failures="0" skipped="0" timestamp="2025-03-04T09:27:49" time="17.745" tests="3">
+    <testcase classname="QRCodePreview affiche un QR Code avec l&apos;URL donnée" name="QRCodePreview affiche un QR Code avec l&apos;URL donnée" time="0.458">
+    </testcase>
+    <testcase classname="QRCodePreview affiche le QR Code avec un logo si un logo est fourni" name="QRCodePreview affiche le QR Code avec un logo si un logo est fourni" time="0.188">
+    </testcase>
+    <testcase classname="QRCodePreview fonctionne sans logo" name="QRCodePreview fonctionne sans logo" time="0.047">
+    </testcase>
+  </testsuite>
+  <testsuite name="ProtectedRoute" errors="0" failures="0" skipped="0" timestamp="2025-03-04T09:27:49" time="17.882" tests="3">
+    <testcase classname="ProtectedRoute redirige vers /auth si l’utilisateur n’est pas authentifié" name="ProtectedRoute redirige vers /auth si l’utilisateur n’est pas authentifié" time="0.222">
+    </testcase>
+    <testcase classname="ProtectedRoute redirige vers / si l’utilisateur n’a pas le rôle requis" name="ProtectedRoute redirige vers / si l’utilisateur n’a pas le rôle requis" time="0.036">
+    </testcase>
+    <testcase classname="ProtectedRoute affiche le contenu si l’utilisateur est authentifié et a le bon rôle" name="ProtectedRoute affiche le contenu si l’utilisateur est authentifié et a le bon rôle" time="0.062">
+    </testcase>
+  </testsuite>
+  <testsuite name="CardPreview" errors="0" failures="2" skipped="0" timestamp="2025-03-04T09:27:49" time="18.147" tests="4">
+    <testcase classname="CardPreview should render the correct number of cards" name="CardPreview should render the correct number of cards" time="0.516">
+    </testcase>
+    <testcase classname="CardPreview should apply correct card dimensions from metrics" name="CardPreview should apply correct card dimensions from metrics" time="0.15">
+      <failure>TestingLibraryElementError: Found multiple elements with the role &quot;img&quot;
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+&lt;img
+  alt=&quot;Card 0&quot;
+  role=&quot;img&quot;
+  src=&quot;image1.jpg&quot;
+  style=&quot;max-width: 100%; max-height: 100%; object-fit: contain;&quot;
+/&gt;
+
+Ignored nodes: comments, script, style
+&lt;img
+  alt=&quot;Card 1&quot;
+  role=&quot;img&quot;
+  src=&quot;image2.jpg&quot;
+  style=&quot;max-width: 100%; max-height: 100%; object-fit: contain;&quot;
+/&gt;
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+&lt;body&gt;
+  &lt;div&gt;
+    &lt;div
+      style=&quot;display: flex; flex-wrap: wrap;&quot;
+    &gt;
+      &lt;div
+        style=&quot;width: 50mm; height: 80mm; margin: 4px; border: 1px solid #ccc; display: flex; justify-content: center; align-items: center;&quot;
+      &gt;
+        &lt;img
+          alt=&quot;Card 0&quot;
+          role=&quot;img&quot;
+          src=&quot;image1.jpg&quot;
+          style=&quot;max-width: 100%; max-height: 100%; object-fit: contain;&quot;
+        /&gt;
+      &lt;/div&gt;
+      &lt;div
+        style=&quot;width: 50mm; height: 80mm; margin: 4px; border: 1px solid #ccc; display: flex; justify-content: center; align-items: center;&quot;
+      &gt;
+        &lt;img
+          alt=&quot;Card 1&quot;
+          role=&quot;img&quot;
+          src=&quot;image2.jpg&quot;
+          style=&quot;max-width: 100%; max-height: 100%; object-fit: contain;&quot;
+        /&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+    at Object.getElementError (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/@testing-library/dom/dist/config.js:37:19)
+    at getElementError (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/@testing-library/dom/dist/query-helpers.js:20:35)
+    at getMultipleElementsFoundError (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/@testing-library/dom/dist/query-helpers.js:23:10)
+    at /home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/@testing-library/dom/dist/query-helpers.js:55:13
+    at /home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+    at Object.&lt;anonymous&gt; (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/src/components/CardPreview.test.tsx:38:32)
+    at Promise.then.completed (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/jest-circus/build/run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/jest-circus/build/run.js:252:3)
+    at _runTestsForDescribeBlock (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/jest-circus/build/run.js:126:9)
+    at _runTestsForDescribeBlock (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/jest-circus/build/run.js:121:9)
+    at run (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/jest-circus/build/run.js:71:3)
+    at runAndTransformResultsToJestFormat (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/jest-runner/build/runTest.js:444:34)
+    at Object.worker (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
+    </testcase>
+    <testcase classname="CardPreview should render the images with the correct src attribute" name="CardPreview should render the images with the correct src attribute" time="0.143">
+    </testcase>
+    <testcase classname="CardPreview should apply the correct card style for each image" name="CardPreview should apply the correct card style for each image" time="0.163">
+      <failure>TestingLibraryElementError: Found multiple elements with the role &quot;img&quot;
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+&lt;img
+  alt=&quot;Card 0&quot;
+  role=&quot;img&quot;
+  src=&quot;image1.jpg&quot;
+  style=&quot;max-width: 100%; max-height: 100%; object-fit: contain;&quot;
+/&gt;
+
+Ignored nodes: comments, script, style
+&lt;img
+  alt=&quot;Card 1&quot;
+  role=&quot;img&quot;
+  src=&quot;image2.jpg&quot;
+  style=&quot;max-width: 100%; max-height: 100%; object-fit: contain;&quot;
+/&gt;
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+&lt;body&gt;
+  &lt;div&gt;
+    &lt;div
+      style=&quot;display: flex; flex-wrap: wrap;&quot;
+    &gt;
+      &lt;div
+        style=&quot;width: 50mm; height: 80mm; margin: 4px; border: 1px solid #ccc; display: flex; justify-content: center; align-items: center;&quot;
+      &gt;
+        &lt;img
+          alt=&quot;Card 0&quot;
+          role=&quot;img&quot;
+          src=&quot;image1.jpg&quot;
+          style=&quot;max-width: 100%; max-height: 100%; object-fit: contain;&quot;
+        /&gt;
+      &lt;/div&gt;
+      &lt;div
+        style=&quot;width: 50mm; height: 80mm; margin: 4px; border: 1px solid #ccc; display: flex; justify-content: center; align-items: center;&quot;
+      &gt;
+        &lt;img
+          alt=&quot;Card 1&quot;
+          role=&quot;img&quot;
+          src=&quot;image2.jpg&quot;
+          style=&quot;max-width: 100%; max-height: 100%; object-fit: contain;&quot;
+        /&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+    at Object.getElementError (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/@testing-library/dom/dist/config.js:37:19)
+    at getElementError (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/@testing-library/dom/dist/query-helpers.js:20:35)
+    at getMultipleElementsFoundError (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/@testing-library/dom/dist/query-helpers.js:23:10)
+    at /home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/@testing-library/dom/dist/query-helpers.js:55:13
+    at /home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+    at Object.&lt;anonymous&gt; (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/src/components/CardPreview.test.tsx:61:32)
+    at Promise.then.completed (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/jest-circus/build/utils.js:298:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/jest-circus/build/utils.js:231:10)
+    at _callCircusTest (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/jest-circus/build/run.js:316:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/jest-circus/build/run.js:252:3)
+    at _runTestsForDescribeBlock (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/jest-circus/build/run.js:126:9)
+    at _runTestsForDescribeBlock (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/jest-circus/build/run.js:121:9)
+    at run (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/jest-circus/build/run.js:71:3)
+    at runAndTransformResultsToJestFormat (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:122:21)
+    at jestAdapter (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:79:19)
+    at runTestInternal (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/jest-runner/build/runTest.js:367:16)
+    at runTest (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/jest-runner/build/runTest.js:444:34)
+    at Object.worker (/home/soumah/Documents/Master/PFE/cartes-dynamique/frontend/node_modules/jest-runner/build/testWorker.js:106:12)</failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="ImageUpload" errors="0" failures="0" skipped="0" timestamp="2025-03-04T09:27:49" time="19.307" tests="4">
+    <testcase classname="ImageUpload affiche les éléments de base" name="ImageUpload affiche les éléments de base" time="0.237">
+    </testcase>
+    <testcase classname="ImageUpload accepte un fichier valide et affiche l&apos;aperçu" name="ImageUpload accepte un fichier valide et affiche l&apos;aperçu" time="0.059">
+    </testcase>
+    <testcase classname="ImageUpload rejette un fichier portrait" name="ImageUpload rejette un fichier portrait" time="0.032">
+    </testcase>
+    <testcase classname="ImageUpload supprime l&apos;image lorsqu&apos;on clique sur le bouton de suppression" name="ImageUpload supprime l&apos;image lorsqu&apos;on clique sur le bouton de suppression" time="0.023">
+    </testcase>
+  </testsuite>
+  <testsuite name="QRCodeGenerator" errors="0" failures="0" skipped="0" timestamp="2025-03-04T09:27:49" time="19.449" tests="2">
+    <testcase classname="QRCodeGenerator affiche les éléments principaux du générateur de QR Code" name="QRCodeGenerator affiche les éléments principaux du générateur de QR Code" time="0.182">
+    </testcase>
+    <testcase classname="QRCodeGenerator utilise correctement le hook useQRCode" name="QRCodeGenerator utilise correctement le hook useQRCode" time="0.028">
+    </testcase>
+  </testsuite>
+  <testsuite name="QRCodeForm" errors="0" failures="0" skipped="0" timestamp="2025-03-04T09:27:49" time="19.68" tests="4">
+    <testcase classname="QRCodeForm affiche les champs URL, couleur, upload logo et le bouton de téléchargement" name="QRCodeForm affiche les champs URL, couleur, upload logo et le bouton de téléchargement" time="0.197">
+    </testcase>
+    <testcase classname="QRCodeForm permet de modifier l&apos;URL" name="QRCodeForm permet de modifier l&apos;URL" time="0.056">
+    </testcase>
+    <testcase classname="QRCodeForm permet de changer la couleur du QR Code" name="QRCodeForm permet de changer la couleur du QR Code" time="0.033">
+    </testcase>
+    <testcase classname="QRCodeForm déclenche la fonction de téléchargement quand on clique sur le bouton" name="QRCodeForm déclenche la fonction de téléchargement quand on clique sur le bouton" time="0.037">
+    </testcase>
+  </testsuite>
+  <testsuite name="Home" errors="0" failures="0" skipped="0" timestamp="2025-03-04T09:27:49" time="19.874" tests="4">
+    <testcase classname="Home affiche un message si un message est passé dans location.state" name="Home affiche un message si un message est passé dans location.state" time="0.144">
+    </testcase>
+    <testcase classname="Home n&apos;affiche pas de message si aucun message n&apos;est passé dans location.state" name="Home n&apos;affiche pas de message si aucun message n&apos;est passé dans location.state" time="0.014">
+    </testcase>
+    <testcase classname="Home affiche correctement toutes les features avec des icônes mockées" name="Home affiche correctement toutes les features avec des icônes mockées" time="0.02">
+    </testcase>
+    <testcase classname="Home redirige vers /games lorsqu&apos;on clique sur le bouton &quot;Commencer une Partie&quot;" name="Home redirige vers /games lorsqu&apos;on clique sur le bouton &quot;Commencer une Partie&quot;" time="0.018">
+    </testcase>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,118 @@
+const cardService = require('../services/CardService');
+const { Category } = require('../models');
+
+class CardController {
+    async getAllCards(req, res) {
+        try {
+            const cards = await cardService.getAllCards();
+            res.json(cards);
+        } catch (error) {
+            console.error("Error retrieving cards:", error);
+            res.status(500).json({ message: "Failed to retrieve cards", error: error.message });
+        }
+    }
+
+    async getCardById(req, res) {
+        try {
+            const card = await cardService.getCardById(req.params.id);
+            if (!card) {
+                return res.status(404).json({ message: "Card not found" });
+            }
+            const cardWithImage = {
+                ...card,
+                cardImageData: card.cardImageData ? card.cardImageData.toString('base64') : null
+            };
+            res.json(cardWithImage);
+        } catch (error) {
+            console.error("Error retrieving card:", error);
+            res.status(500).json({ message: "Failed to retrieve card", error: error.message });
+        }
+    }
+
+    async createCard(req, res) {
+        console.log("Received POST request with body:", req.body);
+        try {
+            const { cardName, description, cardActual, cardProposition, category, cardValue, cardImage } = req.body;
+
+            // Récupérer cardCategoryID à partir des infos envoyées
+            const categoryRecord = await Category.findOne({
+                where: {
+                    categoryName: category
+                }
+            });
+            if (!categoryRecord) {
+                return res.status(404).json({ message: "Category not found" });
+            }
+            const cardCategoryId = categoryRecord.categoryId;
+
+            let cardImageData;
+            if (cardImage) {
+                const base64Data = cardImage.split(',')[1];
+                cardImageData = Buffer.from(base64Data, 'base64');
+            }
+
+            const newCard = await cardService.createCard({ cardName, description, cardActual, cardProposition, cardCategoryId, cardImageData, cardValue });
+
+            res.status(201).json(newCard);
+        } catch (error) {
+            console.error("Error inserting card:", error);
+            res.status(500).json({ message: "Failed to create card", error: error.message });
+        }
+    }
+
+    async updateCard(req, res) {
+        try {
+            console.log("[CardController] Received PUT request with body:", req.body);
+            const { cardName, description, cardActual, cardProposition, category, cardValue, cardImage } = req.body;
+
+            // Récupérer cardCategoryID à partir des infos envoyées
+            const categoryRecord = await Category.findOne({
+                where: {
+                    categoryName: category
+                }
+            });
+            if (!categoryRecord) {
+                return res.status(404).json({ message: "Category not found" });
+            }
+            const cardCategoryId = categoryRecord.categoryId;
+
+            let cardImageData;
+            if (cardImage) {
+                const base64Data = cardImage.split(',')[1];
+                cardImageData = Buffer.from(base64Data, 'base64');
+            }
+
+            const updatedCard = await cardService.updateCard(req.params.id, { cardName, description, cardActual, cardProposition, cardCategoryId, cardImageData, cardValue });
+
+            if (!updatedCard) {
+                return res.status(404).json({ message: "Card not found" });
+            }
+            else {
+                res.status(200).json(updatedCard);
+            }
+        } catch (error) {
+            console.error("Error updating card:", error);
+            res.status(500).json({ message: "Failed to update card", error: error.message });
+        }
+    }
+
+    async deleteCard(req, res) {
+        try {
+            const success = await cardService.deleteCard(req.params.id);
+            if (!success) {
+                return res.status(404).json({ message: "Card not found" });
+            }
+            res.status(204).send();
+        } catch (error) {
+            console.error("Error deleting card:", error);
+            res.status(500).json({ message: "Failed to delete card", error: error.message });
+        }
+    }
+
+    async isCardComplete(req, res) {
+        const isComplete = await cardService.isCardComplete(req.params.id);
+        res.json({ isComplete });
+    }
+}
+
+module.exports = new CardController();

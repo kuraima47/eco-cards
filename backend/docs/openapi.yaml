@@ -1,0 +1,853 @@
+openapi: 3.0.3
+info:
+  title: EcoCards
+  description: API documentation for EcoCards application.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+tags:
+  - name: auth
+    description: Operations about authentication
+  - name: user
+    description: Operations about users
+  - name: card
+    description: Operations about cards
+  - name: deck
+    description: Operations about decks
+  - name: deck-content
+    description: Operations about deck contents
+  - name: session
+    description: Operations about sessions
+  - name: group
+    description: Operations about groups
+  - name: group-player
+    description: Operations about group players
+  - name: group-accepted-card
+    description: Operations about group accepted cards
+paths:
+  /api/auth/register:
+    post:
+      tags:
+        - auth
+      summary: Register a new user
+      requestBody:
+        description: User registration details
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /api/auth/login:
+    post:
+      tags:
+        - auth
+      summary: Login a user
+      requestBody:
+        description: User login details
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /api/users:
+    get:
+      tags:
+        - user
+      summary: Get all users
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+    post:
+      tags:
+        - user
+      summary: Create a new user
+      requestBody:
+        description: User object that needs to be added
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /api/users/{id}:
+    get:
+      tags:
+        - user
+      summary: Get a user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    put:
+      tags:
+        - user
+      summary: Update a user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: User object that needs to be updated
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    delete:
+      tags:
+        - user
+      summary: Delete a user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: User deleted successfully
+  /api/cards:
+    get:
+      tags:
+        - card
+      summary: Get all cards
+      responses:
+        '200':
+          description: A list of cards
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Card'
+    post:
+      tags:
+        - card
+      summary: Create a new card
+      requestBody:
+        description: Card object that needs to be added
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Card'
+      responses:
+        '201':
+          description: Card created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+  /api/cards/{id}:
+    get:
+      tags:
+        - card
+      summary: Get a card by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Card details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+    put:
+      tags:
+        - card
+      summary: Update a card by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Card object that needs to be updated
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Card'
+      responses:
+        '200':
+          description: Card updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Card'
+    delete:
+      tags:
+        - card
+      summary: Delete a card by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Card deleted successfully
+  /api/cards/{id}/complete:
+    get:
+      tags:
+        - card
+      summary: Check if a card is complete
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Card completion status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isComplete:
+                    type: boolean
+  /api/decks:
+    get:
+      tags:
+        - deck
+      summary: Get all decks
+      responses:
+        '200':
+          description: A list of decks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Deck'
+    post:
+      tags:
+        - deck
+      summary: Create a new deck
+      requestBody:
+        description: Deck object that needs to be added
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Deck'
+      responses:
+        '201':
+          description: Deck created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deck'
+  /api/decks/{id}:
+    get:
+      tags:
+        - deck
+      summary: Get a deck by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deck details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deck'
+    put:
+      tags:
+        - deck
+      summary: Update a deck by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Deck object that needs to be updated
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Deck'
+      responses:
+        '200':
+          description: Deck updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deck'
+    delete:
+      tags:
+        - deck
+      summary: Delete a deck by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Deck deleted successfully
+  /api/deck-contents:
+    get:
+      tags:
+        - deck-content
+      summary: Get all deck contents
+      responses:
+        '200':
+          description: A list of deck contents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeckContent'
+    post:
+      tags:
+        - deck-content
+      summary: Create a new deck content
+      requestBody:
+        description: Deck content object that needs to be added
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeckContent'
+      responses:
+        '201':
+          description: Deck content created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeckContent'
+  /api/deck-contents/deck/{deckId}:
+    get:
+      tags:
+        - deck-content
+      summary: Get deck contents by deck ID
+      parameters:
+        - name: deckId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deck contents for the specified deck
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeckContent'
+  /api/deck-contents/{deckId}/{cardId}:
+    delete:
+      tags:
+        - deck-content
+      summary: Delete a deck content by deck ID and card ID
+      parameters:
+        - name: deckId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: cardId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Deck content deleted successfully
+  /api/sessions:
+    get:
+      tags:
+        - session
+      summary: Get all sessions
+      responses:
+        '200':
+          description: A list of sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Session'
+    post:
+      tags:
+        - session
+      summary: Create a new session
+      requestBody:
+        description: Session object that needs to be added
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Session'
+      responses:
+        '201':
+          description: Session created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+  /api/sessions/{id}:
+    get:
+      tags:
+        - session
+      summary: Get a session by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Session details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+    put:
+      tags:
+        - session
+      summary: Update a session by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Session object that needs to be updated
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Session'
+      responses:
+        '200':
+          description: Session updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+    delete:
+      tags:
+        - session
+      summary: Delete a session by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Session deleted successfully
+  /api/groups:
+    get:
+      tags:
+        - group
+      summary: Get all groups
+      responses:
+        '200':
+          description: A list of groups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+    post:
+      tags:
+        - group
+      summary: Create a new group
+      requestBody:
+        description: Group object that needs to be added
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+      responses:
+        '201':
+          description: Group created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+  /api/groups/{id}:
+    get:
+      tags:
+        - group
+      summary: Get a group by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Group details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+    put:
+      tags:
+        - group
+      summary: Update a group by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Group object that needs to be updated
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+      responses:
+        '200':
+          description: Group updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+    delete:
+      tags:
+        - group
+      summary: Delete a group by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Group deleted successfully
+  /api/group-players:
+    get:
+      tags:
+        - group-player
+      summary: Get all group players
+      responses:
+        '200':
+          description: A list of group players
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupPlayer'
+    post:
+      tags:
+        - group-player
+      summary: Create a new group player
+      requestBody:
+        description: Group player object that needs to be added
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupPlayer'
+      responses:
+        '201':
+          description: Group player created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupPlayer'
+  /api/group-players/group/{groupId}:
+    get:
+      tags:
+        - group-player
+      summary: Get group players by group ID
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Group players for the specified group
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupPlayer'
+  /api/group-players/{groupId}/{userId}:
+    delete:
+      tags:
+        - group-player
+      summary: Delete a group player by group ID and user ID
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Group player deleted successfully
+  /api/group-accepted-cards:
+    get:
+      tags:
+        - group-accepted-card
+      summary: Get all group accepted cards
+      responses:
+        '200':
+          description: A list of group accepted cards
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupAcceptedCard'
+    post:
+      tags:
+        - group-accepted-card
+      summary: Create a new group accepted card
+      requestBody:
+        description: Group accepted card object that needs to be added
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupAcceptedCard'
+      responses:
+        '201':
+          description: Group accepted card created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupAcceptedCard'
+  /api/group-accepted-cards/group/{groupId}:
+    get:
+      tags:
+        - group-accepted-card
+      summary: Get group accepted cards by group ID
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Group accepted cards for the specified group
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GroupAcceptedCard'
+  /api/group-accepted-cards/{groupId}/{cardId}:
+    delete:
+      tags:
+        - group-accepted-card
+      summary: Delete a group accepted card by group ID and card ID
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: cardId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Group accepted card deleted successfully
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        userId:
+          type: integer
+        username:
+          type: string
+        email:
+          type: string
+        userPassword:
+          type: string
+        role:
+          type: string
+          enum:
+            - admin
+            - player
+    Card:
+      type: object
+      properties:
+        cardId:
+          type: integer
+        cardName:
+          type: string
+        cardActual:
+          type: string
+        cardProposition:
+          type: string
+        cardImage:
+          type: string
+    Deck:
+      type: object
+      properties:
+        deckId:
+          type: integer
+        deckName:
+          type: string
+        adminId:
+          type: integer
+    DeckContent:
+      type: object
+      properties:
+        deckId:
+          type: integer
+        cardId:
+          type: integer
+    Session:
+      type: object
+      properties:
+        sessionId:
+          type: integer
+        adminId:
+          type: integer
+        sessionName:
+          type: string
+        deckId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+    Group:
+      type: object
+      properties:
+        groupId:
+          type: integer
+        sessionId:
+          type: integer
+        groupName:
+          type: string
+    GroupPlayer:
+      type: object
+      properties:
+        groupId:
+          type: integer
+        userId:
+          type: integer
+    GroupAcceptedCard:
+      type: object
+      properties:
+        groupId:
+          type: integer
+        cardId:
+          type: integer
