@@ -1,10 +1,23 @@
 import { useState, useCallback, useRef } from 'react';
 
-export function useQRCode() {
-    const [url, setUrl] = useState('https://example.com');
-    const [qrColor, setQrColor] = useState('#4F46E5');
-    const [bgColor, setBgColor] = useState('#ffffff');
-    const [logo, setLogo] = useState<string | null>(null);
+interface UseQRCodeOptions {
+    initialUrl?: string;
+    initialQrColor?: string;
+    initialBgColor?: string;
+    initialLogo?: string;
+}
+
+export function useQRCode({
+    initialUrl = '',
+    initialQrColor = '#000000',
+    initialBgColor = '#FFFFFF',
+    initialLogo = undefined
+}: UseQRCodeOptions = {}) {
+    const [url, setUrl] = useState<string>(initialUrl);
+    const [qrColor, setQrColor] = useState<string>(initialQrColor);
+    const [bgColor, setBgColor] = useState<string>(initialBgColor);
+    const [logo, setLogo] = useState<string | undefined>(initialLogo);
+  
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleLogoUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {

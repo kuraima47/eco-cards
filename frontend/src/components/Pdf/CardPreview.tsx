@@ -2,14 +2,19 @@ import React, { forwardRef } from 'react';
 import Card from '../Card/Card';
 import { CardBack } from '../Card/CardBack';
 import { CardMetrics } from '../../types';
+import { GameCard } from '../../types/game';
 
 interface CardPreviewProps {
-    cards: any[];
+    cards: GameCard[];
     metrics: CardMetrics;
+    categories: {
+        categoryIcon: string;
+        categoryColor: string;
+    }[];
 }
 
 export const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
-    ({ cards, metrics }, ref) => {
+    ({ cards, metrics, categories }, ref) => {
         // Dimensions A4 en mm
         const a4Width = 210;
         const a4Height = 297;
@@ -80,21 +85,21 @@ export const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
                                                 cardData={card.data}
                                                 width={mmToPx(metrics.printWidth) * previewScale}
                                                 height={mmToPx(metrics.printHeight) * previewScale}
+                                                categoryColor={categories[originalIndex].categoryColor}
+                                                categoryIcon={categories[originalIndex].categoryIcon}
                                             />
                                         ) : (
                                             <CardBack
                                                 cardData={{
                                                     ...card.data,
                                                     deckName: "Eco Actions",
-                                                    categoryColor: "bg-green-600",
                                                     cardNumber: originalIndex + 1,
                                                     totalCards: cards.length,
-                                                    qrCodeColor: "#000000",
-                                                    qrCodeLogoImage: "",
-                                                    backgroundColor: "#ffffff",
-                                                    width: mmToPx(metrics.printWidth) * previewScale,
-                                                    height: mmToPx(metrics.printHeight) * previewScale
                                                 }}
+                                                width={mmToPx(metrics.printWidth) * previewScale}
+                                                height={mmToPx(metrics.printHeight) * previewScale}
+                                                categoryColor={categories[originalIndex].categoryColor}
+                                                categoryIcon={categories[originalIndex].categoryIcon}
                                             />
                                         )}
                                     </div>

@@ -45,6 +45,11 @@ const Session = sequelize.define('Session', {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
         field: 'createdat'
+    },
+    endedAt: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        field: 'endedat'
     }
 }, {
     tableName: 'sessions',

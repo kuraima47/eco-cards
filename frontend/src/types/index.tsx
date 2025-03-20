@@ -1,5 +1,9 @@
 import { RefObject } from 'react';
 
+export interface ImageFormat {
+    data: Uint8Array;
+    type: string;
+}
 export interface QRCodeFormProps {
     url: string;
     setUrl: (url: string) => void;
@@ -30,13 +34,15 @@ export interface CardMetrics {
 
 export interface Deck {
     id: string;
-    name: string;
+    deckName: string;
     categories: Category[];
 }
 
 export interface Category {
-    id: string;
-    name: string;
+    categoryId: string;
+    categoryName: string;
+    categoryColor: string;
+    categoryIcon: string;
     deckId: string;
     cards: Card[];
 }

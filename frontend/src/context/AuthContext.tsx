@@ -1,11 +1,5 @@
-import { createContext, useState, useEffect, ReactNode } from 'react';
-
-export interface User {
-    userId: number;
-    username: string;
-    email: string;
-    role: 'admin' | 'player';
-}
+import { createContext, ReactNode, useEffect, useState } from 'react';
+import { User } from '../types/game';
 
 export interface AuthContextType {
     isAuthenticated: boolean;
@@ -17,14 +11,15 @@ export interface AuthContextType {
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [user, setUser] = useState<User | null>(null);
+    const storedUser = localStorage.getItem('user');
+    const initialUser = storedUser ? JSON.parse(storedUser) : null;
+
+    const [isAuthenticated, setIsAuthenticated] = useState(!!initialUser);
+    const [user, setUser] = useState<User | null>(initialUser);
 
     useEffect(() => {
-        const userData = localStorage.getItem('user');
-        if (userData) {
-            const parsedUserData = JSON.parse(userData);
-            setUser(parsedUserData);
+        if (storedUser && !user) {
+            setUser(JSON.parse(storedUser));
             setIsAuthenticated(true);
         }
     }, []);

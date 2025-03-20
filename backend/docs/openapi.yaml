@@ -207,9 +207,25 @@ paths:
         description: Card object that needs to be added
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Card'
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                cardName:
+                  type: string
+                description:
+                  type: string
+                cardActual:
+                  type: string
+                cardProposition:
+                  type: string
+                category:
+                  type: string
+                cardValue:
+                  type: number
       responses:
         '201':
           description: Card created successfully
@@ -230,11 +246,13 @@ paths:
             type: integer
       responses:
         '200':
-          description: Card details
+          description: Card retrieved successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Card'
+        '404':
+          description: Card not found
     put:
       tags:
         - card
@@ -246,12 +264,28 @@ paths:
           schema:
             type: integer
       requestBody:
-        description: Card object that needs to be updated
+        description: Card object with updated data
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Card'
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                cardName:
+                  type: string
+                description:
+                  type: string
+                cardActual:
+                  type: string
+                cardProposition:
+                  type: string
+                category:
+                  type: string
+                cardValue:
+                  type: number
       responses:
         '200':
           description: Card updated successfully
@@ -259,6 +293,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Card'
+        '404':
+          description: Card not found
     delete:
       tags:
         - card
@@ -272,6 +308,8 @@ paths:
       responses:
         '204':
           description: Card deleted successfully
+        '404':
+          description: Card not found
   /api/cards/{id}/complete:
     get:
       tags:
@@ -285,7 +323,7 @@ paths:
             type: integer
       responses:
         '200':
-          description: Card completion status
+          description: Card completeness status
           content:
             application/json:
               schema:
@@ -338,11 +376,13 @@ paths:
             type: integer
       responses:
         '200':
-          description: Deck details
+          description: Deck retrieved successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Deck'
+        '404':
+          description: Deck not found
     put:
       tags:
         - deck
@@ -354,7 +394,7 @@ paths:
           schema:
             type: integer
       requestBody:
-        description: Deck object that needs to be updated
+        description: Deck object with updated data
         required: true
         content:
           application/json:
@@ -367,6 +407,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Deck'
+        '404':
+          description: Deck not found
     delete:
       tags:
         - deck
@@ -380,6 +422,71 @@ paths:
       responses:
         '204':
           description: Deck deleted successfully
+        '404':
+          description: Deck not found
+  /api/decks/{id}/cards:
+    get:
+      tags:
+        - deck
+      summary: Get all cards in a deck
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of cards in the deck
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Card'
+        '404':
+          description: Deck not found
+  /api/decks/{id}/cards/{cardId}:
+    post:
+      tags:
+        - deck
+      summary: Add a card to a deck
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: cardId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Card added to deck successfully
+        '404':
+          description: Deck or card not found
+    delete:
+      tags:
+        - deck
+      summary: Remove a card from a deck
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: cardId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Card removed from deck successfully
+        '404':
+          description: Deck or card not found
   /api/deck-contents:
     get:
       tags:
@@ -470,7 +577,7 @@ paths:
         - session
       summary: Create a new session
       requestBody:
-        description: Session object that needs to be added
+        description: Session object that needs to be created
         required: true
         content:
           application/json:
@@ -496,11 +603,13 @@ paths:
             type: integer
       responses:
         '200':
-          description: Session details
+          description: Session retrieved successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Session'
+        '404':
+          description: Session not found
     put:
       tags:
         - session
@@ -512,7 +621,7 @@ paths:
           schema:
             type: integer
       requestBody:
-        description: Session object that needs to be updated
+        description: Session object with updated data
         required: true
         content:
           application/json:
@@ -525,6 +634,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Session'
+        '404':
+          description: Session not found
     delete:
       tags:
         - session
@@ -538,6 +649,86 @@ paths:
       responses:
         '204':
           description: Session deleted successfully
+        '404':
+          description: Session not found
+  /api/sessions/{id}/status:
+    put:
+      tags:
+        - session
+      summary: Update the status of a session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Status object to update the session
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+      responses:
+        '200':
+          description: Session status updated successfully
+        '404':
+          description: Session not found
+  /api/sessions/status/{status}:
+    get:
+      tags:
+        - session
+      summary: Get sessions by status
+      parameters:
+        - name: status
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A list of sessions with the specified status
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Session'
+  /api/sessions/{id}/sendLink:
+    post:
+      tags:
+        - session
+      summary: Send a session link to a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Session link sent successfully
+        '404':
+          description: Session not found
+  /api/sessions/{id}/join:
+    post:
+      tags:
+        - session
+      summary: Join a session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Joined session successfully
+        '404':
+          description: Session not found
   /api/groups:
     get:
       tags:
@@ -583,11 +774,13 @@ paths:
             type: integer
       responses:
         '200':
-          description: Group details
+          description: Group retrieved successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Group'
+        '404':
+          description: Group not found
     put:
       tags:
         - group
@@ -599,7 +792,7 @@ paths:
           schema:
             type: integer
       requestBody:
-        description: Group object that needs to be updated
+        description: Group object with updated data
         required: true
         content:
           application/json:
@@ -612,6 +805,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Group'
+        '404':
+          description: Group not found
     delete:
       tags:
         - group
@@ -625,6 +820,30 @@ paths:
       responses:
         '204':
           description: Group deleted successfully
+        '404':
+          description: Group not found
+  /api/groups/session/{sessionId}:
+    get:
+      tags:
+        - group
+      summary: Get groups by session ID
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A list of groups associated with the session
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+        '404':
+          description: Session not found
   /api/group-players:
     get:
       tags:
@@ -792,12 +1011,22 @@ components:
           type: integer
         cardName:
           type: string
+        description:
+          type: string
         cardActual:
           type: string
         cardProposition:
           type: string
-        cardImage:
+        cardImageData:
           type: string
+          format: binary
+        cardCategoryId:
+          type: integer
+        cardValue:
+          type: integer
+        times_selected:
+          type: integer
+          description: Number of times the card has been selected
     Deck:
       type: object
       properties:
@@ -825,9 +1054,27 @@ components:
           type: string
         deckId:
           type: integer
+        phase:
+          type: integer
+          description: Current phase of the session
+        round:
+          type: integer
+          description: Current round of the session
+        status:
+          type: string
+          enum:
+            - active
+            - pending
+            - closed
+          description: Status of the session
         createdAt:
           type: string
           format: date-time
+          description: Timestamp when the session was created
+        endedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the session ended (if applicable)
     Group:
       type: object
       properties:
@@ -844,6 +1091,9 @@ components:
           type: integer
         userId:
           type: integer
+        username:
+          type: string
+          description: The username of the player in the group
     GroupAcceptedCard:
       type: object
       properties:
@@ -851,3 +1101,13 @@ components:
           type: integer
         cardId:
           type: integer
+        co2estimation:
+          type: integer
+          description: Estimated CO2 impact of the card
+        acceptancelevel:
+          type: string
+          enum:
+            - high
+            - medium
+            - low
+          description: Level of acceptance for the card

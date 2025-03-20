@@ -4,6 +4,7 @@ import { groupService } from "../services/groupService";
 import { deckService } from "../services/deckService";
 import { categoryService } from "../services/categoryService";
 import type { Session, Group, GameDeck, GameCard, Category, TableData } from "../types/game";
+import { groupAcceptedCardService } from "../services/groupAcceptedCardService";
 
 export const useSessionData = (sessionId: string) => {
   const [loading, setLoading] = useState(true);
@@ -14,6 +15,8 @@ export const useSessionData = (sessionId: string) => {
   const [cards, setCards] = useState<GameCard[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [tables, setTables] = useState<TableData[]>([]);
+  const [co2Estimations, setCO2Estimations] = useState({});
+  const [acceptanceLevels, setAcceptanceLevels] = useState({});
 
   useEffect(() => {
     const loadSessionData = async () => {
@@ -22,15 +25,25 @@ export const useSessionData = (sessionId: string) => {
         const sessionData = await sessionService.getSessionById(sessionId);
         if (!sessionData) throw new Error("Session not found");
 
+        // Fetch deck, groups, and categories
         const [deckData, groupsData, categoriesData] = await Promise.all([
           deckService.getDeckById(sessionData.deckId.toString()),
           groupService.getGroupsBySessionId(Number(sessionId)),
           categoryService.getCategoryByDeckId(sessionData.deckId.toString()),
         ]);
 
+        // Fetch accepted cards for each group using the group's id
+        const acceptedCardsArrays = await Promise.all(
+          groupsData.map((group) =>
+            groupAcceptedCardService.getGroupAcceptedCardsByGroupId(group.groupId.toString())
+          )
+        );
+        // Flatten the accepted cards arrays into a single list
+        const groupAcceptedCards = acceptedCardsArrays.flat();
+
         // Get deck contents
         const deckContents = await deckService.getDeckCards(sessionData.deckId.toString());
-        console.log('Deck contents:', deckContents);
+        console.log("Deck contents:", deckContents);
 
         // Map deck contents to GameCard interface
         const cardsData = deckContents.map((content: any) => ({
@@ -39,30 +52,20 @@ export const useSessionData = (sessionId: string) => {
           cardId: content.dataValues?.cardId,
           deckId: content.dataValues?.deckId,
           cardName: content.dataValues?.cardName,
-          description: content.dataValues?.cardDescription || content.dataValues?.description || '',
-          cardImageType: 'default',
+          description: content.dataValues?.cardDescription || content.dataValues?.description || "",
           cardImageData: content.dataValues?.cardImageData || null,
-          qrCodeColor: '#000000',
-          qrCodeLogoImage: '',
-          backgroundColor: '#ffffff',
-          textColor: '#000000',
-          category: content.dataValues?.category || '',
+          qrCodeColor: content.dataValues?.qrCodeColor || "#000000",
+          qrCodeLogoImageData: content.dataValues?.qrCodeLogoImageData || null,
+          backgroundColor: content.dataValues?.backgroundColor || "#ffffff",
+          category: content.dataValues?.category || "",
           cardValue: content.dataValues?.cardValue,
           cardActual: content.dataValues?.cardActual ? [content.dataValues?.cardActual] : [],
           cardProposition: content.dataValues?.cardProposition ? [content.dataValues?.cardProposition] : [],
-          deckName: deckData?.deckName || '',
+          deckName: deckData?.deckName || "",
           cardNumber: content.dataValues?.cardNumber || 0,
           totalCards: content.dataValues?.totalCards || 0,
-          times_selected: content.dataValues?.times_selected || 0
+          times_selected: content.dataValues?.times_selected || 0,
         }));
-
-        // Log transformed cards
-        console.log('Transformed cards:', cardsData.map(card => ({
-          cardId: card.cardId,
-          cardCategoryId: card.cardCategoryId,
-          hasCategoryId: card.cardCategoryId !== undefined,
-          category: card.category
-        })));
 
         // Initialize tables (one per group) with empty category and no cards.
         const initialTables = groupsData.map((group, index) => ({
@@ -72,12 +75,26 @@ export const useSessionData = (sessionId: string) => {
           cards: [],
         }));
 
+        // Build initial CO₂ estimations and acceptance levels from the accepted cards
+        const initialCO2 = groupAcceptedCards.reduce((acc: any, card: any) => {
+          acc[card.groupId] = acc[card.groupId] || {};
+          acc[card.groupId][card.cardId] = card.co2Estimation;
+          return acc;
+        }, {});
+        const initialAcceptance = groupAcceptedCards.reduce((acc: any, card: any) => {
+          acc[card.groupId] = acc[card.groupId] || {};
+          acc[card.groupId][card.cardId] = card.acceptanceLevel;
+          return acc;
+        }, {});
+
         setSession(sessionData);
         setDeck(deckData);
         setGroups(groupsData);
         setCategories(categoriesData);
         setCards(cardsData);
         setTables(initialTables);
+        setCO2Estimations(initialCO2);
+        setAcceptanceLevels(initialAcceptance);
         setError(null);
       } catch (error) {
         console.error("Error loading session data:", error);
@@ -90,5 +107,18 @@ export const useSessionData = (sessionId: string) => {
     if (sessionId) loadSessionData();
   }, [sessionId]);
 
-  return { loading, error, session, groups, deck, cards, categories, tables, setTables };
+  return { 
+    loading, 
+    error, 
+    session, 
+    groups, 
+    deck, 
+    cards, 
+    categories, 
+    tables, 
+    co2Estimations, 
+    acceptanceLevels, 
+    setTables,
+  };
 };
+

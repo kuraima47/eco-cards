@@ -10,7 +10,6 @@ interface CreateCardFormProps {
 }
 
 export function CreateCardForm({ cardData, setCardData, onSubmit }: CreateCardFormProps) {
-    console.log("[CreateCardForm] cardData:", cardData);
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setCardData(prev => ({ ...prev, [name]: value }));
@@ -84,7 +83,15 @@ export function CreateCardForm({ cardData, setCardData, onSubmit }: CreateCardFo
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
             </div>
-
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Logo du QR Code</label>
+                <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleImageUpload(e, 'qrCodeLogoImage')}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+            </div>
             {/* Couleur du QR Code et Logo */}
             <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -98,19 +105,6 @@ export function CreateCardForm({ cardData, setCardData, onSubmit }: CreateCardFo
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Logo du QR Code</label>
-                    <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => handleImageUpload(e, 'qrCodeLogoImage')}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                </div>
-            </div>
-
-            {/* Couleurs de fond et du texte */}
-            <div className="grid grid-cols-2 gap-4">
-                <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Couleur de fond</label>
                     <input
                         type="color"
@@ -120,19 +114,8 @@ export function CreateCardForm({ cardData, setCardData, onSubmit }: CreateCardFo
                         className="w-full h-10 rounded-md cursor-pointer"
                     />
                 </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Couleur du texte</label>
-                    <input
-                        type="color"
-                        name="textColor"
-                        value={cardData.textColor}
-                        onChange={handleChange}
-                        className="w-full h-10 rounded-md cursor-pointer"
-                    />
-                </div>
             </div>
 
-            {/* CO2 économisé */}
             <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">CO2 économisé (kg)</label>
                 <input
@@ -140,6 +123,7 @@ export function CreateCardForm({ cardData, setCardData, onSubmit }: CreateCardFo
                     name="cardValue"
                     value={cardData.cardValue}
                     onChange={handleChange}
+                    min="0"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
             </div>

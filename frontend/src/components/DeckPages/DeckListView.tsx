@@ -10,10 +10,13 @@ import ModalCards from "../Pdf/ModalCards.tsx";
 interface CategoryType {
     categoryId: number;
     categoryName: string;
+    categoryColor: string;
+    categoryIcon: string;
     cards: {
         cardId: string;
         cardName: string;
     }[];
+
 }
 
 interface DeckWithCategories {
@@ -42,7 +45,7 @@ export function DeckListView({ decks, onSelectDeck, refreshParent }: DeckListVie
 
     // État pour l'élément à supprimer (unique)
     const [itemToDelete, setItemToDelete] = useState<{ type: 'deck' | 'category' | 'card'; id: string; name: string; } | null>(null);
-    
+
     const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
     const admin = useAdmin();
@@ -107,7 +110,7 @@ export function DeckListView({ decks, onSelectDeck, refreshParent }: DeckListVie
                 setIsDeleteModalOpen(false);
             } catch (error) {
                 console.error(`Erreur lors de la suppression du ${itemToDelete.type} :`, error);
-                
+
                 if (itemToDelete.type === 'deck') {
                     setNotification({ message: "Erreur lors de la suppression de la carte.", type: "error" });
                 }
@@ -126,13 +129,13 @@ export function DeckListView({ decks, onSelectDeck, refreshParent }: DeckListVie
                 />
             )}
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold">My Decks</h1>
+                <h1 className="text-2xl font-bold">Mes Decks</h1>
                 <button
                     onClick={openAddDeckModal}
                     className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center gap-2"
                 >
                     <Plus className="w-4 h-4 mr-2" />
-                    New Deck
+                    Nouveau Deck
                 </button>
             </div>
 
@@ -158,18 +161,22 @@ export function DeckListView({ decks, onSelectDeck, refreshParent }: DeckListVie
                             </p>
                         </div>
                         <div className="flex space-x-1 justify-end">
+                            {deck.categories &&
+                                deck.categories.length > 0 &&
+                                deck.categories.some(category => category.cards && category.cards.length > 0) && (
 
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    // download deck
-                                    openDownloadModal(deck);
-                                }}
-                                className="text-green-600 hover:text-green-800"
-                                title="Download deck"
-                            >
-                                <Download size={18} />
-                            </button>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            // download deck
+                                            openDownloadModal(deck);
+                                        }}
+                                        className="text-green-600 hover:text-green-800"
+                                        title="Download deck"
+                                    >
+                                        <Download size={18} />
+                                    </button>
+                                )}
 
                             <button
                                 onClick={(e) => {
@@ -195,6 +202,7 @@ export function DeckListView({ decks, onSelectDeck, refreshParent }: DeckListVie
                     </div>
                 ))}
             </div>
+
             <ModalCards
                 key={currentDeck?.deckId}
                 initialData={currentDeck}

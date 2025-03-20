@@ -16,7 +16,7 @@ const Admin = () => {
     const [showNewCategoryModal, setShowNewCategoryModal] = useState(false);
     const [showImportModal, setShowImportModal] = useState(false);
     const [importData, setImportData] = useState('');
-    const [newCategory, setNewCategory] = useState({ name: '', description: '' });
+    const [newCategory, setNewCategory] = useState({ categoryName: '', categoryDescription: '', categoryIcon: '', categoryColor: '' });
     const [newDeck, setNewDeck] = useState({ name: '', category_id: '' });
     const [newCard, setNewCard] = useState({
         cardActual: '',
@@ -31,13 +31,13 @@ const Admin = () => {
     const handleAddCategory = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            if (!newCategory.name || newCategory.name.trim() === '') {
+            if (!newCategory.categoryName || newCategory.categoryName.trim() === '') {
                 alert('Le nom de la catégorie est requis');
                 return;
             }
 
             await admin.addCategory(newCategory);
-            setNewCategory({ name: '', description: '' });
+            setNewCategory({ categoryName: '', categoryDescription: '', categoryIcon: '', categoryColor: '' });
             setShowNewCategoryModal(false);
         } catch (error) {
             console.error('Error adding category:', error);
@@ -153,6 +153,8 @@ const Admin = () => {
                                     <div>
                                         <h3 className="font-medium">{category.categoryName}</h3>
                                         <p className="text-sm text-gray-600">{category.categoryDescription}</p>
+                                        <p className="text-sm text-gray-600">{category.categoryIcon}</p>
+                                        <p className="text-sm text-gray-600">{category.categoryColor}</p>
                                     </div>
                                     <div className="flex gap-2">
                                         <button
@@ -181,8 +183,8 @@ const Admin = () => {
                                 </label>
                                 <input
                                     type="text"
-                                    value={newCategory.name}
-                                    onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+                                    value={newCategory.categoryName}
+                                    onChange={(e) => setNewCategory({ ...newCategory, categoryName: e.target.value })}
                                     className="w-full rounded-md border-gray-300"
                                     placeholder="Ex: Bâtiment"
                                     required
@@ -193,8 +195,8 @@ const Admin = () => {
                                     Description
                                 </label>
                                 <textarea
-                                    value={newCategory.description}
-                                    onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
+                                    value={newCategory.categoryDescription}
+                                    onChange={(e) => setNewCategory({ ...newCategory, categoryDescription: e.target.value })}
                                     className="w-full rounded-md border-gray-300"
                                     rows={3}
                                     placeholder="Description de la catégorie..."

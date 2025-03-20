@@ -97,19 +97,20 @@ function PDFpoc() {
             <div className="max-w-4xl mx-auto space-y-8">
                 <div className="bg-white rounded-lg shadow-md p-6">
                     <h1 className="text-2xl font-bold mb-4">Générateur de Planche de Cartes</h1>
-
+    
                     <div className="mb-6">
                         <CardUploader onImagesUploaded={handleImagesUploaded} />
                     </div>
-
+    
                     {cards.length > 0 && (
                         <div className="space-y-6">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">
+                                    <label htmlFor="printWidth" className="block text-sm font-medium text-gray-700">
                                         Largeur d'impression (mm)
                                     </label>
                                     <input
+                                        id="printWidth"
                                         type="number"
                                         value={metrics.printWidth}
                                         onChange={(e) => setMetrics(prev => ({ ...prev, printWidth: Number(e.target.value) }))}
@@ -117,10 +118,11 @@ function PDFpoc() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">
+                                    <label htmlFor="printHeight" className="block text-sm font-medium text-gray-700">
                                         Hauteur d'impression (mm)
                                     </label>
                                     <input
+                                        id="printHeight"
                                         type="number"
                                         value={metrics.printHeight}
                                         onChange={(e) => setMetrics(prev => ({ ...prev, printHeight: Number(e.target.value) }))}
@@ -128,10 +130,11 @@ function PDFpoc() {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700">
+                                    <label htmlFor="dpi" className="block text-sm font-medium text-gray-700">
                                         Résolution (DPI)
                                     </label>
                                     <input
+                                        id="dpi"
                                         type="number"
                                         value={metrics.dpi}
                                         onChange={(e) => setMetrics(prev => ({ ...prev, dpi: Number(e.target.value) }))}
@@ -139,11 +142,11 @@ function PDFpoc() {
                                     />
                                 </div>
                             </div>
-
+    
                             <div className="border rounded-lg p-4">
                                 <CardPreview ref={cardsRef} cards={cards} metrics={metrics} />
                             </div>
-
+    
                             <button
                                 onClick={generatePDF}
                                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -157,6 +160,7 @@ function PDFpoc() {
             </div>
         </div>
     );
+    
 }
 
 export default PDFpoc;

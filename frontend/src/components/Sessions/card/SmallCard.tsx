@@ -1,156 +1,309 @@
-// Card.tsx
-import React, { useState } from 'react';
-import {
-    Activity,
-    Lightbulb,
-    ShoppingCart,
-    Zap,
-    Truck,
-    Utensils,
-    Home,
-    ImageOff,
-    HelpCircle,
-    Sparkles,
-    Search,
-    X
-} from 'lucide-react';
-import { GameCard } from '../../../types/game';
-import CardZoomedInTableModal from './CardZoomedInTableModal';
+import type React from "react"
+import { useState } from "react"
+import { Sparkles, ThumbsUp, Search, Check } from "lucide-react"
+import type { GameCard } from "../../../types/game"
+import { generateCodeFromCO2 } from "../../../utils/formatting"
 
-const MIN_WIDTH = 200;
-const MIN_HEIGHT = 180;
-
-interface CategoryStyle {
-    color: string;
-    icon: React.ElementType;
+interface SmallCardProps {
+    cardData: GameCard
+    width?: number
+    height?: number
+    hiddenCo2?: boolean
+    isFlipped: boolean
+    categoryName?: string
+    categoryIcon?: string
+    categoryColor?: string
+    phase?: number
+    co2Estimation?: number
+    acceptanceLevel?: "high" | "medium" | "low" | null
+    onCO2Estimate?: (value: number, e: React.MouseEvent) => void
+    onAcceptanceChange?: (level: "high" | "medium" | "low" | null, e: React.MouseEvent) => void
+    isSelected?: boolean
+    onSelect?: () => void
+    onOpenModal?: () => void
 }
 
-const categoryStyles: { [key: string]: CategoryStyle } = {
-    Achat: { color: 'bg-blue-600', icon: ShoppingCart },
-    Énergie: { color: 'bg-green-600', icon: Zap },
-    Transport: { color: 'bg-red-600', icon: Truck },
-    Nourriture: { color: 'bg-yellow-600', icon: Utensils },
-    Bâtiment: { color: 'bg-purple-600', icon: Home },
-    Inconnue: { color: 'bg-gray-600', icon: HelpCircle },
-};
+const SmallCard: React.FC<SmallCardProps> = ({
+    cardData,
+    hiddenCo2,
+    isFlipped = false,
+    phase = 1,
+    co2Estimation,
+    acceptanceLevel,
+    onCO2Estimate,
+    onAcceptanceChange,
+    isSelected = false,
+    onSelect,
+    onOpenModal,
+}) => {
+    const [showPhaseControls, setShowPhaseControls] = useState(false)
 
-function generateCodeFromCO2(co2Value: number | null): string {
+    const encodedCo2Value = generateCodeFromCO2(cardData.cardValue)
 
-    const getRandomLetter = () => String.fromCharCode(65 + Math.floor(Math.random() * 26)); // A-Z
-
-    if (co2Value === undefined || co2Value === null) {
-        return '??';
-    }
-
-    const co2Str = String(co2Value);
-    if (co2Str.length === 1) {
-        let letter1 = getRandomLetter();
-        let letter2 = getRandomLetter();
-        while (letter1 === letter2) {
-            letter2 = getRandomLetter();
+    const handleCardClick = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        if (phase > 1) {
+            setShowPhaseControls(!showPhaseControls)
+        } else if (onSelect) {
+            onSelect()
         }
-        const digit1 = Math.floor(Math.random() * 10);
-        return `${letter1}${digit1}/${letter2}${co2Value}`;
-    } else {
-        const letter = getRandomLetter();
-        const part1 = co2Str.slice(0, co2Str.length - 1);
-        const part2 = co2Str.slice(-1);
-        return `${letter}${part1}/${letter}${part2}`;
     }
-}
 
-interface CardProps {
-    cardData: GameCard;
-    width?: number;
-    height?: number;
-    hiddenCo2?: boolean;
-    isFlipped: boolean;
-    categoryName?: string;
-    phase: number;
-    co2Estimation?: number;
-    acceptanceLevel?: 'high' | 'medium' | 'low' | null;
-}
+    const handleSelectClick = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        onSelect && onSelect()
+    }
 
-export function Card({ cardData, width = MIN_WIDTH, height = MIN_HEIGHT, hiddenCo2 = true, isFlipped = false, categoryName, phase, co2Estimation, acceptanceLevel }: CardProps) {
-    console.log("[Card] cardData:", cardData, cardData.cardActual);
-    console.log("[Card] cardData:", cardData, cardData.cardActual);
+    const handleOpenModal = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        onOpenModal && onOpenModal()
+    }
 
-    const [showModal, setShowModal] = useState(false);
-    const encodedCo2Value = generateCodeFromCO2(cardData.cardValue);
+    const handleCO2Estimate = (value: number, e: React.MouseEvent) => {
+        e.stopPropagation()
+        console.log(`SmallCard: CO2 estimation for card ${cardData.cardId}: ${value}`)
+        onCO2Estimate && onCO2Estimate(value, e)
+        setShowPhaseControls(false)
+    }
 
-    const finalWidth = Math.max(width, MIN_WIDTH); // Minimum width de 100px
-    const finalHeight = Math.max(height, MIN_HEIGHT); // Minimum height de 150px
+    const handleAcceptanceChange = (level: "high" | "medium" | "low" | null, e: React.MouseEvent) => {
+        e.stopPropagation()
+        console.log(`SmallCard: Acceptance level for card ${cardData.cardId}: ${level}`)
+        onAcceptanceChange && onAcceptanceChange(level, e)
+        setShowPhaseControls(false)
+    }
+
+    // Render header with indicators (non-overlapping)
+    const renderHeader = () => {
+        return (
+            <div className="flex items-center justify-between bg-gray-800 p-2 text-white">
+                {/* Left section: selection indicator */}
+                <div>
+                    {isSelected && (
+                        <div className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center">
+                            <Check size={16} className="text-white" />
+                        </div>
+                    )}
+                </div>
+                {/* Center section: phase indicators */}
+                <div className="flex items-center space-x-1">
+                    {phase === 2 && co2Estimation && (
+                        <div className="bg-yellow-400/90 text-yellow-900 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold shadow-lg border border-yellow-500">
+                            {co2Estimation}
+                        </div>
+                    )}
+                    {(phase === 3 || phase === 4) && acceptanceLevel && (
+                        <div className={`rounded-full px-2 py-0.5 text-xs font-bold shadow-lg border ${acceptanceLevel === "high"
+                                ? "bg-emerald-400/90 border-emerald-500 text-emerald-900"
+                                : acceptanceLevel === "medium"
+                                    ? "bg-yellow-400/90 border-yellow-500 text-yellow-900"
+                                    : "bg-red-400/90 border-red-500 text-red-900"
+                            }`}>
+                            {acceptanceLevel.charAt(0).toUpperCase()}
+                        </div>
+                    )}
+                    {phase === 4 && co2Estimation && (
+                        <div className="bg-yellow-400/90 text-yellow-900 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold shadow-lg border border-yellow-500">
+                            {co2Estimation}
+                        </div>
+                    )}
+                </div>
+                {/* Right section: search button */}
+                <div>
+                    <button
+                        className="bg-white/80 hover:bg-white rounded-full p-1 shadow-md border border-black"
+                        onClick={handleOpenModal}
+                    >
+                        <Search size={14} className="text-green-800" />
+                    </button>
+                </div>
+            </div>
+        )
+    }
+
+    const renderPhaseControls = () => {
+        if (!showPhaseControls) return null
+
+        if (phase === 2) {
+            return (
+                <div className="absolute inset-0 bg-black/80 z-30 flex flex-col items-center justify-center p-4 backdrop-blur-sm">
+                    <h3 className="text-white font-medium mb-4 flex items-center gap-2">
+                        <Sparkles size={18} className="text-yellow-400" />
+                        Estimation de la réduction en CO2
+                    </h3>
+                    <div className="grid grid-cols-5 gap-2 w-full max-w-[200px]">
+                        {[1, 2, 3, 4, 5].map((value) => (
+                            <button
+                                key={value}
+                                onClick={(e) => handleCO2Estimate(value, e)}
+                                className={`p-2 rounded-lg border-2 transition-all ${co2Estimation === value
+                                        ? "border-yellow-400 bg-yellow-400/20 text-yellow-400"
+                                        : "border-white/20 hover:border-white/40 text-white/60 hover:text-white"
+                                    }`}
+                            >
+                                {value}
+                            </button>
+                        ))}
+                    </div>
+                    <p className="mt-4 text-sm text-white/60 text-center">Notez l'impact de réduction de CO2 (1-5)</p>
+                    <button onClick={() => setShowPhaseControls(false)} className="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg">
+                        Annuler
+                    </button>
+                </div>
+            )
+        } else if (phase === 3) {
+            return (
+                <div className="absolute inset-0 bg-black/80 z-30 flex flex-col items-center justify-center p-4 backdrop-blur-sm">
+                    <h3 className="text-white font-medium mb-4 flex items-center gap-2">
+                        <ThumbsUp size={18} className="text-yellow-400" />
+                        Niveau d'acceptation
+                    </h3>
+                    <div className="grid grid-cols-3 gap-2 w-full max-w-[200px]">
+                        <button
+                            onClick={(e) => handleAcceptanceChange("high", e)}
+                            className={`p-2 rounded-lg border-2 transition-all ${acceptanceLevel === "high"
+                                    ? "border-emerald-400 bg-emerald-400/20 text-emerald-400"
+                                    : "border-white/20 hover:border-white/40 text-white/60 hover:text-white"
+                                }`}
+                        >
+                            Haut
+                        </button>
+                        <button
+                            onClick={(e) => handleAcceptanceChange("medium", e)}
+                            className={`p-2 rounded-lg border-2 transition-all ${acceptanceLevel === "medium"
+                                    ? "border-yellow-400 bg-yellow-400/20 text-yellow-400"
+                                    : "border-white/20 hover:border-white/40 text-white/60 hover:text-white"
+                                }`}
+                        >
+                            Mid
+                        </button>
+                        <button
+                            onClick={(e) => handleAcceptanceChange("low", e)}
+                            className={`p-2 rounded-lg border-2 transition-all ${acceptanceLevel === "low"
+                                    ? "border-red-400 bg-red-400/20 text-red-400"
+                                    : "border-white/20 hover:border-white/40 text-white/60 hover:text-white"
+                                }`}
+                        >
+                            Bas
+                        </button>
+                    </div>
+                    <p className="mt-4 text-sm text-white/60 text-center">Évaluez le niveau d'acceptation de cette proposition</p>
+                    <button onClick={() => setShowPhaseControls(false)} className="mt-4 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg">
+                        Annuler
+                    </button>
+                </div>
+            )
+        }
+        return null
+    }
+
+    const renderCardContent = () => {
+        return (
+            <div className="flex flex-col flex-grow p-2">
+                <div className="flex justify-between items-center mb-2 bg-gray-700 text-white p-1 rounded">
+                    <div className="text-xs font-bold truncate max-w-[70%]">{cardData.cardName}</div>
+                    <div className="flex items-center px-1 py-0.5 bg-green-700 text-white text-xs rounded font-bold">
+                        <span className="mr-1">{hiddenCo2 ? encodedCo2Value : cardData.cardValue}</span>
+                        <Sparkles className="w-3 h-3" />
+                    </div>
+                </div>
+                {/* Card body with actual and proposed content */}
+                <div className="flex-grow overflow-auto text-xs scrollbar-thin">
+                    <div className="mb-1">
+                        <strong className="text-gray-800">Actuellement</strong>
+                        <p className="line-clamp-2 text-gray-700 mb-1">{cardData.cardActual}</p>
+                    </div>
+                    <div className="border-t border-gray-300 pt-1">
+                        <strong className="text-gray-800">Propositions</strong>
+                        <p className="line-clamp-2 text-gray-700">{cardData.cardProposition}</p>
+                    </div>
+                </div>
+                {/* Phase-specific information section */}
+                {phase > 1 && (
+                    <div className="mt-auto pt-1 border-t border-gray-200">
+                        <div className="bg-gray-100 rounded p-1 text-xs">
+                            {phase === 2 && (
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-600">Impact en CO2 :</span>
+                                    {co2Estimation ? (
+                                        <span className="font-bold text-green-600">{co2Estimation}/5</span>
+                                    ) : (
+                                        <span className="italic text-gray-500 text-[10px]">Cliquez pour évaluer</span>
+                                    )}
+                                </div>
+                            )}
+                            {phase === 3 && (
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-600">Acceptation :</span>
+                                    {acceptanceLevel ? (
+                                        <span className={`font-bold ${acceptanceLevel === "high"
+                                                ? "text-green-600"
+                                                : acceptanceLevel === "medium"
+                                                    ? "text-yellow-600"
+                                                    : "text-red-600"
+                                            }`}>
+                                            {acceptanceLevel.charAt(0).toUpperCase() + acceptanceLevel.slice(1)}
+                                        </span>
+                                    ) : (
+                                        <span className="italic text-gray-500 text-[10px]">Cliquez pour évaluer</span>
+                                    )}
+                                </div>
+                            )}
+                            {phase === 4 && (
+                                <div className="grid grid-cols-2 gap-1">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-600 text-[10px]">CO2:</span>
+                                        {co2Estimation ? (
+                                            <span className="font-bold text-green-600 text-[10px]">{co2Estimation}/5</span>
+                                        ) : (
+                                            <span className="italic text-gray-500 text-[10px]">N/A</span>
+                                        )}
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-gray-600 text-[10px]">Acceptation :</span>
+                                        {acceptanceLevel ? (
+                                            <span className={`font-bold text-[10px] ${acceptanceLevel === "high"
+                                                    ? "text-green-600"
+                                                    : acceptanceLevel === "medium"
+                                                        ? "text-yellow-600"
+                                                        : "text-red-600"
+                                                }`}>
+                                                {acceptanceLevel.charAt(0).toUpperCase()}
+                                            </span>
+                                        ) : (
+                                            <span className="italic text-gray-500 text-[10px]">N/A</span>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+                {/* Selection button */}
+                {phase > 1 && (
+                    <button
+                        onClick={handleSelectClick}
+                        className={`mt-1 w-full py-1 text-xs font-medium rounded transition-colors ${isSelected ? "bg-red-100 text-red-700 hover:bg-red-200" : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                            }`}
+                    >
+                        {isSelected ? "Déselectionné" : "Sélectionné"}
+                    </button>
+                )}
+            </div>
+        )
+    }
 
     return (
-        <div className={`relative border-4 border-black bg-white transform transition duration-300 flex flex-col shadow-lg h-full ${isFlipped ? "rotate-y-180" : ""}`}
-            style={{
-                width: finalWidth,
-                height: finalHeight,
-                transformStyle: "preserve-3d",
-                transform: isFlipped ? "rotateY(180deg)" : "",
-                backfaceVisibility: "hidden"
-            }}>
-
-            <button
-                className="absolute top-1 right-1 z-20 bg-white/80 hover:bg-white rounded-full p-1 shadow-md border border-black"
-                onClick={(e) => {
-                    e.stopPropagation();
-                    setShowModal(true);
-                }}
-            >
-                <Search size={14} className="text-green-800" />
-            </button>
-            {/* Titre */}
-            <div className="w-full px-2 my-2">
-                <div className="relative w-full flex justify-between items-center px-2 py-1 text-gray-100 bg-gray-700 border-2 border-black rounded-md shadow-lg">
-                    {/* Titre à gauche */}
-                    <div className="text-sm font-bold truncate max-w-[70%]">
-                        <span className="relative z-10">{cardData.cardName}</span>
-                    </div>
-
-                    {/* Valeur CO2 à droite */}
-                    <div className="flex items-center px-2 py-0.5 bg-green-700 text-white text-xs rounded-lg shadow-md font-bold">
-                        <span className="mr-1">{hiddenCo2 ? encodedCo2Value : cardData.cardValue}</span>
-                        <Sparkles className={`w-3 h-3`} />
-                    </div>
-                </div>
-            </div>
-
-            <div className="flex flex-col flex-grow min-h-0 px-2">
-                <div className="pb-2 flex flex-col bg-white flex-grow min-h-0">
-                    <div className="flex items-start text-black mb-3">
-                        <div className="flex-grow self-start break-words overflow-hidden text-xs">
-                            <strong>Actuellement</strong>
-                            <br />
-                            <div className="line-clamp-2">
-                                {cardData.cardActual}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex items-start text-black border-t-2 border-gray-600 pt-2">
-                        <div className="flex-grow self-start break-words overflow-hidden text-xs">
-                            <strong>Propositions</strong>
-                            <br />
-                            <div className="line-clamp-2">
-                                {cardData.cardProposition}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <CardZoomedInTableModal
-                isOpen={showModal}
-                onClose={() => setShowModal(false)}
-                cardData={cardData}
-                categoryName={categoryName}
-                phase={phase}
-                co2Estimation={co2Estimation}
-                acceptanceLevel={acceptanceLevel}
-            />
+        <div
+            className={`relative flex flex-col border-4 ${isSelected ? "border-blue-500" : "border-black"} bg-white rounded-lg shadow-lg overflow-hidden w-full h-full`}
+            style={{ transformStyle: "preserve-3d", transform: isFlipped ? "rotateY(180deg)" : "" }}
+            onClick={handleCardClick}
+        >
+            {renderHeader()}
+            {renderCardContent()}
+            {renderPhaseControls()}
         </div>
-    );
+    )
 }
 
-export default Card;
+export default SmallCard

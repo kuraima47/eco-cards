@@ -42,6 +42,27 @@ const Card = sequelize.define('Card', {
         type: DataTypes.INTEGER,
         allowNull: true,
         field: 'cardvalue'
+    },
+    times_selected: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: 0,
+        field: "times_selected"
+    },
+    qrCodeLogoImageData: {
+        type: DataTypes.BLOB('long'),
+        allowNull: true,
+        field: 'qrcodelogoimagedata'
+    },
+    qrCodeColor: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        field: 'qrcodecolor'
+    },
+    backgroundColor: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        field: 'backgroundcolor'
     }
 }, {
     tableName: 'cards',

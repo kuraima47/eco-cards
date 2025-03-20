@@ -6,6 +6,10 @@ import CategoryModal from "../Modals/CategoryModal.tsx";
 import DeleteConfirmationModal from "../Modals/DeleteConfirmationModal.tsx";
 import Notification from "../Notification";
 import ModalCards from "../Pdf/ModalCards.tsx";
+import { toPascalCase } from '../../utils/formatting';
+import * as LucideIcons from 'lucide-react';
+import { Category } from '../../types/game.ts';
+import CategoryPreview from '../Card/CategoryPreview.tsx';
 
 interface DeckViewProps {
     deck: Deck;  // deck contient déjà deck.categories filtrées par le parent
@@ -77,6 +81,8 @@ export function DeckView({ deck, onSelectCategory, onCreateCategory, refreshPare
                 await admin.addCategory({
                     categoryName: data.categoryName || '',
                     categoryDescription: data.categoryDescription || '',
+                    categoryColor: data.categoryColor || '',
+                    categoryIcon: data.categoryIcon || '',
                     deckId: currentCategory?.deckId ? Number(currentCategory.deckId) : Number(deck.deckId)
                 });
                 setNotification({ message: "Catégorie créée avec succès !", type: "success" });
@@ -84,23 +90,25 @@ export function DeckView({ deck, onSelectCategory, onCreateCategory, refreshPare
                 // Mise à jour d'une catégorie existante
                 await admin.updateCategory(Number(currentCategory.categoryId), {
                     categoryName: data.categoryName || '',
-                    categoryDescription: data.categoryDescription || ''
+                    categoryDescription: data.categoryDescription || '',
+                    categoryColor: data.categoryColor || '',
+                    categoryIcon: data.categoryIcon || ''
                 });
                 setNotification({ message: "Catégorie modifiée avec succès !", type: "success" });
             }
-    
+
             // On recharge toutes les données globales
             await admin.loadAllData();
-            
+
             // Call the parent's refresh function if provided
             if (refreshParent) {
                 console.log('[DeckView] Calling refreshParent');
                 refreshParent();
             }
-            
+
             // Now we can safely call the refresh method
             admin.refresh();
-            
+
             setIsCategoryModalOpen(false);
         } catch (error) {
             if (modalMode === 'add') {
@@ -124,13 +132,13 @@ export function DeckView({ deck, onSelectCategory, onCreateCategory, refreshPare
                     await admin.deleteCategory(Number(itemToDelete.id));
                     setNotification({ message: "Catégorie supprimée avec succès !", type: "success" });
                     await admin.loadAllData();
-                    
+
                     // Call the parent's refresh function if provided
                     if (refreshParent) {
                         console.log('[DeckView] Calling refreshParent after deletion');
                         refreshParent();
                     }
-                    
+
                     // Now we can safely call the refresh method
                     admin.refresh();
                 }
@@ -142,6 +150,26 @@ export function DeckView({ deck, onSelectCategory, onCreateCategory, refreshPare
                 }
             }
         }
+    };
+
+    const renderCategoryIcon = (categoryIcon?: string, categoryColor?: string) => {
+
+        const defaultIcon = <LucideIcons.Box
+            className="w-5 h-5"
+            style={{ color: categoryColor || '#FFFFFF' }}
+        />
+
+        if (!categoryIcon) return defaultIcon;
+
+        const iconName = toPascalCase(categoryIcon);
+        const IconComponent = LucideIcons[iconName as keyof typeof LucideIcons] as React.ElementType || LucideIcons.Box;
+
+        if (!IconComponent) return defaultIcon;
+
+        return <IconComponent
+            className="w-5 h-5"
+            style={{ color: categoryColor || '#FFFFFF' }}
+        />;
     };
 
     return (
@@ -158,27 +186,30 @@ export function DeckView({ deck, onSelectCategory, onCreateCategory, refreshPare
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold">{deck.deckName}</h1>
                 <div className="flex flex-row gap-2">
-                    <button
-                        onClick={(e) => {
-                            // openEditDeckModal(deck);
-                            console.log("Download Deck");
-                            openDownloadModal();
-                        }}
-                        className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center gap-2"
-                        title="Download deck"
-                    >
-                        <Download className="w-4 h-4 mr-2" />
-                        Download
-                    </button>
+                    {/* Vérifie si le deck a des catégories et si au moins une catégorie a des cartes */}
+                    {deck.categories &&
+                        deck.categories.length > 0 &&
+                        deck.categories.some(category => category.cards && category.cards.length > 0) && (
+                            <button
+                                onClick={(e) => {
+                                    console.log("Download Deck");
+                                    openDownloadModal();
+                                }}
+                                className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center gap-2"
+                                title="Download deck"
+                            >
+                                <Download className="w-4 h-4 mr-2" />
+                                Télécharger
+                            </button>
+                        )}
                     <button
                         onClick={() => openAddCategoryModal(String(deck.deckId))}
                         className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center gap-2"
                     >
                         <Plus className="w-4 h-4 mr-2" />
-                        New Category
+                        Nouvelle Catégorie
                     </button>
                 </div>
-
             </div>
 
             {/* On utilise directement deck.categories */}
@@ -194,42 +225,49 @@ export function DeckView({ deck, onSelectCategory, onCreateCategory, refreshPare
                     >
                         <div className="flex items-center space-x-3">
                             <FolderClosed className="w-6 h-6 text-green-600" />
+                            {renderCategoryIcon(category.categoryIcon, category.categoryColor)}
                             <span className="font-medium">{category.categoryName}</span>
                         </div>
                         <p className="text-sm text-gray-500 mt-2">
-                            {category.cards?.length || 0} cards
+                            {category.cards?.length || 0} carte{(category.cards?.length > 1) ? 's' : ''}
                         </p>
                         <div className="flex space-x-1 justify-end">
-                            <button
+                            <div
+                                role="button"
+                                tabIndex={0}
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     openEditCategoryModal(category);
                                 }}
-                                className="text-blue-600 hover:text-blue-800"
+                                className="text-blue-600 hover:text-blue-800 cursor-pointer"
                                 title="Modifier la catégorie"
                             >
                                 <Edit size={18} />
-                            </button>
-                            <button
+                            </div>
+                            <div
+                                role="button"
+                                tabIndex={0}
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     openDeleteModal('category', String(category.categoryId), category.categoryName);
                                 }}
-                                className="text-red-600 hover:text-red-800"
+                                className="text-red-600 hover:text-red-800 cursor-pointer"
                                 title="Supprimer la catégorie"
                             >
                                 <Trash2 size={18} />
-                            </button>
+                            </div>
                         </div>
                     </button>
+
                 ))}
             </div>
-
             <ModalCards
                 key={deck.id}
                 initialData={deck}
                 isOpen={isDownloadModalOpen}
                 onClose={() => setIsDownloadModalOpen(false)}
+            // categoryIcon={deck.categoryIcon}
+            // categoryColor={deck.categoryColor}
             />
 
             {/* Modale d'ajout/édition de catégorie */}

@@ -6,7 +6,6 @@ const AuthService = require("../services/AuthService");
 
 function  generateSessionCredentials() {
     return {
-        id: Math.random().toString(36).substring(2, 10),
         password: Math.random().toString(36).substring(2, 10),
     };
 }
@@ -53,23 +52,22 @@ class SessionRepository {
     }
 
     async sendLinkToUser(id, email) {
-        // Vérification de la session (désactivée ici)
-        // const session = await Session.findByPk(id);
-        // if (!session) {
-        //     console.log("Session introuvable");
-        //     return false;
-        // }
-        
+        //Vérification de la session (désactivée ici)
+        const session = await Session.findByPk(id);
+        if (!session) {
+            console.log("Session introuvable");
+            return false;
+        }
         // Génération des identifiants
         const credentials = generateSessionCredentials();
-        const sessionLink = `https://localhost/login/${id}`;
+        const sessionLink = `https://localhost:3001/games/${id}/phase/0`;
     
         // 🔹 Configuration du transporteur SMTP avec un mot de passe d'application
         const transporter = nodemailer.createTransport({
             service: "gmail",
             auth: {
-                user: process.env.EMAIL,  // Ton adresse Gmail
-                pass: process.env.PASSWORD,  // Ton mot de passe d'application
+                user: process.env.EMAIL,  
+                pass: process.env.PASSWORD, 
             },
         });
     
@@ -79,10 +77,10 @@ class SessionRepository {
             subject: "Invitation à rejoindre une session",
             html: `
                 <p>Bonjour,</p>
-                <p>Vous êtes invité à rejoindre une session de jeu.</p>
+                <p>Vous êtes invité à rejoindre la session de jeu ${session.sessionName}.</p>
                 <p><strong>Identifiants :</strong></p>
                 <ul>
-                    <li><strong>Username:</strong> ${credentials.id}</li>
+                    <li><strong>Username:</strong> ${email}</li>
                     <li><strong>Password:</strong> ${credentials.password}</li>
                 </ul>
                 <p><a href="${sessionLink}">Cliquez ici pour vous connecter</a></p>
@@ -96,9 +94,9 @@ class SessionRepository {
             console.log("E-mail envoyé avec succès !");
             AuthService.register({
                 email: email,
-                username: credentials.id.toString(),
+                username: email,
                 password: credentials.password.toString(),
-            });//alternative à updateGroup
+            });
     
             return true;
         } catch (error) {

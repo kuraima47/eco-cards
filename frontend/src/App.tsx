@@ -6,7 +6,7 @@ import RGPDFooter from './layouts/RGPDFooter';
 import Admin from './pages/Admin';
 import RGPD from './pages/RGPD'
 import Auth from './pages/Auth';
-import Games from './pages/Games';
+import Games from './pages/session/Games.tsx';
 import Home from './pages/Home';
 import DeckPage from './pages/deckPage.tsx'
 import PDFpoc from "./pages/PDFPoc.tsx";
@@ -14,8 +14,8 @@ import Players from './pages/Players';
 import Rules from './pages/Rules';
 import Stats from './pages/Stats';
 import CreateAdmin from './pages/CreateAdmin';
-import GameSetup from './pages/GameSetup';
-import SessionPhases from './pages/SessionPhase.tsx';
+import GameSetup from './pages/session/GameSetup.tsx';
+import SessionPhases from './pages/session/SessionPhase.tsx';
 import { AuthProvider } from './context/AuthContext';
 
 function App() {

@@ -1,7 +1,11 @@
-import React, { useEffect, useState } from "react"
+"use client"
+
+import type React from "react"
+import { useEffect, useState } from "react"
 import type { GameCard } from "../../../types/game"
 import "./card-animation.css"
 import SmallCard from "./SmallCard"
+import { useAuth } from "../../../hooks/useAuth"
 
 interface PlayingCardProps {
   card: GameCard
@@ -13,24 +17,36 @@ interface PlayingCardProps {
   height?: number
   categoryName?: string
   co2Estimation?: number
-  acceptanceLevel?: 'high' | 'medium' | 'low' | null
+  acceptanceLevel?: "high" | "medium" | "low" | null
+  onCO2Estimate?: (cardId: number, value: number) => void
+  onAcceptanceChange?: (cardId: number, level: "high" | "medium" | "low" | null) => void
+  onOpenModal?: (card: GameCard) => void
+  hideCO2?: boolean
 }
 
-export const PlayingCard: React.FC<PlayingCardProps> = ({ 
-  card, 
-  isSelected, 
-  onCardClick, 
+export const PlayingCard: React.FC<PlayingCardProps> = ({
+  card,
+  isSelected,
+  onCardClick,
   isSelectable,
   phase,
-  width,
-  height,
+  width = 220,
+  height = 260,
   categoryName,
   co2Estimation,
-  acceptanceLevel
+  acceptanceLevel,
+  onCO2Estimate,
+  onAcceptanceChange,
+  onOpenModal,
+  hideCO2,
 }) => {
   const [animating, setAnimating] = useState(false)
   const [showSelected, setShowSelected] = useState(isSelected)
-  
+  const { user } = useAuth()
+
+  // Determine if CO2 should be hidden - use prop if provided, otherwise check user role
+  const shouldHideCO2 = hideCO2 !== undefined ? hideCO2 : user?.role !== "admin"
+
   useEffect(() => {
     if (showSelected !== isSelected) {
       setAnimating(true)
@@ -42,73 +58,58 @@ export const PlayingCard: React.FC<PlayingCardProps> = ({
     }
   }, [isSelected, showSelected])
 
-  const handleClick = () => {
+  const handleCardClick = () => {
     if (isSelectable && !animating) {
+      console.log(`PlayingCard: Card ${card.cardId} clicked, isSelected: ${isSelected}`)
       onCardClick(card.cardId)
     }
   }
 
-  const renderPhaseIndicator = () => {
-    switch (phase) {
-      case 2:
-        return co2Estimation ? (
-          <div className="absolute top-2 left-2 z-20 bg-yellow-400/90 text-yellow-900 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold shadow-lg border border-yellow-500">
-            {co2Estimation}
-          </div>
-        ) : null
-      case 3:
-      case 4:
-        if (!acceptanceLevel) return null
-        const colors = {
-          high: 'bg-emerald-400/90 border-emerald-500 text-emerald-900',
-          medium: 'bg-yellow-400/90 border-yellow-500 text-yellow-900',
-          low: 'bg-red-400/90 border-red-500 text-red-900'
-        }
-        return (
-          <div className={`absolute top-2 left-2 z-20 ${colors[acceptanceLevel]} rounded-full px-2 py-0.5 text-xs font-bold shadow-lg border`}>
-            {acceptanceLevel.charAt(0).toUpperCase()}
-          </div>
-        )
-      default:
-        return null
+  const handleOpenModal = () => {
+    console.log(`PlayingCard: Opening modal for card ${card.cardId}`)
+    onOpenModal && onOpenModal(card)
+  }
+
+  const handleCO2Estimate = (value: number, e: React.MouseEvent) => {
+    e.stopPropagation()
+    console.log(`PlayingCard: CO2 estimation for card ${card.cardId}: ${value}`)
+    if (onCO2Estimate) {
+      onCO2Estimate(card.cardId, value)
+    }
+  }
+
+  const handleAcceptanceChange = (level: "high" | "medium" | "low" | null, e: React.MouseEvent) => {
+    e.stopPropagation()
+    console.log(`PlayingCard: Acceptance level for card ${card.cardId}: ${level}`)
+    if (onAcceptanceChange) {
+      onAcceptanceChange(card.cardId, level)
     }
   }
 
   return (
-    <div 
-      className={`relative w-full pb-[90%] card-wrapper ${isSelectable ? "selectable cursor-pointer" : "cursor-default"}`}
-      onClick={handleClick}
+    <div
+      className={`relative card-wrapper ${isSelectable ? "selectable cursor-pointer" : "cursor-default"}`}
+      style={{ width, height }}
     >
-      <div className="absolute inset-0">
-        {/* Phase-specific indicator */}
-        {renderPhaseIndicator()}
-
-        {/* Selection indicator */}
-        {isSelected && (
-          <div className="selected-badge">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-          </div>
-        )}
-        
-        {/* Card with flip animation */}
-        <div className={`card-container ${isSelected ? "ring-4 ring-blue-500 rounded-lg" : ""}`}>
-          <div className={`card ${isSelected ? "flipped" : ""}`}>
-            <SmallCard 
-              cardData={card} 
-              isFlipped={isSelected} 
-              width={width} 
-              height={height} 
-              hiddenCo2={false} 
-              categoryName={categoryName}
-              phase={phase}
-              co2Estimation={co2Estimation}
-              acceptanceLevel={acceptanceLevel}
-            />
-          </div>
-        </div>
-      </div>
+      <SmallCard
+        cardData={card}
+        isFlipped={false}
+        width={width}
+        height={height}
+        hiddenCo2={shouldHideCO2}
+        categoryName={categoryName}
+        phase={phase}
+        co2Estimation={co2Estimation}
+        acceptanceLevel={acceptanceLevel}
+        onCO2Estimate={handleCO2Estimate}
+        onAcceptanceChange={handleAcceptanceChange}
+        isSelected={showSelected}
+        onSelect={handleCardClick}
+        onOpenModal={handleOpenModal}
+      />
     </div>
   )
 }
+
+export default PlayingCard
+

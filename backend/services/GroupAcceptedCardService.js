@@ -12,7 +12,17 @@ class GroupAcceptedCardService {
     async createGroupAcceptedCard(groupAcceptedCardData) {
         return await groupAcceptedCardRepository.create(groupAcceptedCardData);
     }
-
+    async updateCO2Estimation(groupId, cardId, value) {
+        return groupAcceptedCardRepository.upsert(groupId, cardId, {
+          co2estimation: value
+        });
+      }
+    
+    async updateAcceptanceLevel(groupId, cardId, level) {
+        return groupAcceptedCardRepository.upsert(groupId, cardId, {
+          acceptancelevel: level
+        });
+      }
     async deleteGroupAcceptedCard(groupId, cardId) {
         return await groupAcceptedCardRepository.delete(groupId, cardId);
     }

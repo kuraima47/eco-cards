@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { Eye, EyeOff, Leaf, LogIn, Mail, UserPlus, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Leaf, Mail, Lock, UserPlus, LogIn, Eye, EyeOff } from 'lucide-react';
-import { User } from '../context/AuthContext';
 import { useAuth } from '../hooks/useAuth';
-import { authTokenExpirationTime, API_ENDPOINTS } from '../services/config';
+import { API_ENDPOINTS, authTokenExpirationTime } from '../services/config';
+import { User } from '../types/game';
+
+import CGU from '../components/CGU';
 
 const Auth = () => {
     const navigate = useNavigate();
@@ -17,6 +19,10 @@ const Auth = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    //CGU
+    const [accepted, setAccepted] = useState(false);
+    const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         if (isAuthTokenValid()) {
@@ -86,6 +92,7 @@ const Auth = () => {
         });
 
         if (!response.ok) {
+            console.log(response);
             throw new Error('Erreur lors de la connexion');
         }
 
@@ -221,27 +228,43 @@ const Auth = () => {
                                 </div>
                             </div>
                         )}
+                        {isSignUp && (
+                            <div className="mt-6 flex items-center">
+                                <input
+                                type="checkbox"
+                                id="acceptCGU"
+                                className="mr-2 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                                checked={accepted}
+                                onChange={() => setAccepted(!accepted)}
+                                />
+                                <label htmlFor="acceptCGU" className="text-sm text-gray-700">
+                                Cochez pour accepter nos <span className="text-blue-600 cursor-pointer underline" onClick={() => setShowModal(true)}>Conditions Générales d'Utilisation</span>
+                                </label>
+                            </div>
+                        )}
 
                         <div>
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
-                            >
-                                {loading ? (
-                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
-                                ) : isSignUp ? (
-                                    <>
-                                        <UserPlus className="h-5 w-5 mr-2" />
-                                        S'inscrire
-                                    </>
-                                ) : (
-                                    <>
-                                        <LogIn className="h-5 w-5 mr-2" />
-                                        Se connecter
-                                    </>
-                                )}
-                            </button>
+                        <button
+                            type="submit"
+                            disabled={loading || (isSignUp && !accepted)}
+                            className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white 
+                                ${loading || (isSignUp && !accepted) ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700 focus:ring-green-500"}
+                                focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50`}
+                        >
+                            {loading ? (
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+                            ) : isSignUp ? (
+                                <>
+                                    <UserPlus className="h-5 w-5 mr-2" />
+                                    S'inscrire
+                                </>
+                            ) : (
+                                <>
+                                    <LogIn className="h-5 w-5 mr-2" />
+                                    Se connecter
+                                </>
+                            )}
+                        </button>
                         </div>
                     </form>
 
@@ -260,6 +283,17 @@ const Auth = () => {
                     </div>
                 </div>
             </div>
+
+            {showModal && (
+            <div className="bg-white p-6 rounded-lg shadow-lg max-w-3xl w-full relative">
+            <button className="absolute top-3 right-3 text-gray-500 hover:text-gray-700" onClick={() => setShowModal(false)}>
+                <X className="w-6 h-6" />
+            </button>
+            <div className="max-h-96 overflow-y-auto p-4 border border-gray-300 rounded-lg">
+                <CGU />
+            </div>
+        </div>
+      )}
         </div>
     );
 };

@@ -7,6 +7,8 @@ import { CardModal } from "../Modals/CardModal";
 import DeleteConfirmationModal from "../Modals/DeleteConfirmationModal";
 import ViewCardModal from "../Modals/ViewCardModal.tsx";
 import Notification from "../Notification";
+import * as LucideIcons from 'lucide-react';
+import { toPascalCase, ensureArray } from '../../utils/formatting';
 
 interface CategoryViewProps {
     category: Category;
@@ -25,7 +27,9 @@ export function CategoryView({ category, onCreateCard, refreshParent }: Category
 
     const admin = useAdmin();
 
-    console.log("[CategoryView] category:", category);
+    const iconName = toPascalCase(category.categoryIcon);
+    const CategoryIcon = LucideIcons[iconName as keyof typeof LucideIcons] as React.ElementType || LucideIcons.Box;
+
     const openAddCardModal = () => {
         setModalMode('add');
         setCurrentCard({
@@ -33,18 +37,17 @@ export function CategoryView({ category, onCreateCard, refreshParent }: Category
             deckId: category.deckId,
             cardName: '...',
             description: '...',
-            cardImage: '',
+            cardImageData: '',
             qrCodeColor: '#000000',
-            qrCodeLogoImage: '',
+            qrCodeLogoImageData: '',
             backgroundColor: '#FFFFFF',
-            textColor: '#000000',
             category: category.categoryName,
             cardValue: 0,
             cardActual: [],
             cardProposition: [],
             deckName: admin.getDeck(category.deckId) || '...',
-            cardNumber: category.cards.length + 1,
-            totalCards: modalMode === "edit" ? category.cards.length : category.cards.length + 1 || 0,
+            cardNumber: category.cards.length,
+            totalCards: modalMode === "edit" ? category.cards.length : category.cards.length || 0,
         });
         setIsCardModalOpen(true);
     };
@@ -58,62 +61,47 @@ export function CategoryView({ category, onCreateCard, refreshParent }: Category
     const openEditCardModal = (card: GameCard) => {
         console.log("[EditCardModal] card:", card);
         setModalMode('edit');
-        const cardImageData = card.cardImageData ? arrayBufferToBase64(card.cardImageData.data) : '';
-        const cardImage = card.cardImageData ? `data:${card.cardImageType};base64,${cardImageData}` : '';
 
         setCurrentCard({
             cardId: card.cardId || 0,
             deckId: category.deckId,
             cardName: card.cardName || '...',
             description: card.description || '...',
-            cardImage: cardImage || '',
+            cardImageData: card.cardImageData || null,
             qrCodeColor: card.qrCodeColor || '#000000',
-            qrCodeLogoImage: card.qrCodeLogoImage || '',
+            qrCodeLogoImageData: card.qrCodeLogoImageData || '',
             backgroundColor: card.backgroundColor || '#FFFFFF',
-            textColor: card.textColor || '#000000',
             category: category.categoryName,
+            categoryColor: category.categoryColor,
             cardValue: card.cardValue || 0,
-            cardActual: [card.cardActual] || [],
-            cardProposition: [card.cardProposition] || [],
+            cardActual: ensureArray(card.cardActual),
+            cardProposition: ensureArray(card.cardProposition),
             deckName: admin.getDeck(category.deckId) || '...',
-            cardNumber: getCardNumber(card.cardId) || category.cards.length + 1,
-            totalCards: modalMode === "edit" ? category.cards.length : category.cards.length + 1 || 0,
+            cardNumber: getCardNumber(card.cardId) || category.cards.length,
+            totalCards: modalMode === "edit" ? category.cards.length : category.cards.length || 0,
         });
         setIsCardModalOpen(true);
     };
 
-    const arrayBufferToBase64 = (buffer: Uint8Array) => {
-        let binary = '';
-        const bytes = new Uint8Array(buffer);
-        const len = bytes.byteLength;
-        for (let i = 0; i < len; i++) {
-            binary += String.fromCharCode(bytes[i]);
-        }
-        return window.btoa(binary);
-    };
-
     const openViewCardModal = (card: GameCard) => {
         console.log("[ViewCardModal] card:", card);
-        const cardImageData = card.cardImageData ? arrayBufferToBase64(card.cardImageData.data) : '';
-        const cardImage = card.cardImageData ? `data:${card.cardImageType};base64,${cardImageData}` : '';
-
         setCurrentCard({
             cardId: card.cardId || 0,
             deckId: category.deckId,
             cardName: card.cardName || '...',
             description: card.description || '...',
-            cardImage: cardImage || '',
+            cardImageData: card.cardImageData || '',
             qrCodeColor: card.qrCodeColor || '#000000',
-            qrCodeLogoImage: card.qrCodeLogoImage || '',
+            qrCodeLogoImageData: card.qrCodeLogoImageData || '',
             backgroundColor: card.backgroundColor || '#FFFFFF',
-            textColor: card.textColor || '#000000',
             category: category.categoryName,
+            categoryColor: category.categoryColor,
             cardValue: card.cardValue || 0,
-            cardActual: [card.cardActual] || [],
-            cardProposition: [card.cardProposition] || [],
+            cardActual: ensureArray(card.cardActual),
+            cardProposition: ensureArray(card.cardProposition),
             deckName: admin.getDeck(category.deckId) || '...',
-            cardNumber: getCardNumber(card.cardId) || category.cards.length + 1,
-            totalCards: modalMode === "edit" ? category.cards.length : category.cards.length + 1 || 0,
+            cardNumber: getCardNumber(card.cardId) || category.cards.length,
+            totalCards: modalMode === "edit" ? category.cards.length : category.cards.length || 0,
         });
         setIsViewCardModalOpen(true);
     };
@@ -129,8 +117,8 @@ export function CategoryView({ category, onCreateCard, refreshParent }: Category
             // Convertir les tableaux en chaînes de caractères JSON
             const formattedData = {
                 ...data,
-                cardActual: JSON.stringify(data.cardActual),
-                cardProposition: JSON.stringify(data.cardProposition),
+                cardActual: Array.isArray(data.cardActual) ? JSON.stringify(data.cardActual) : data.cardActual,
+                cardProposition: Array.isArray(data.cardProposition) ? JSON.stringify(data.cardProposition) : data.cardProposition,
             };
 
             if (modalMode === 'add') {
@@ -167,7 +155,10 @@ export function CategoryView({ category, onCreateCard, refreshParent }: Category
 
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold">{category.categoryName}</h1>
+                    <div className="flex items-center gap-2">
+                        <CategoryIcon className="w-6 h-6" style={{ color: category.categoryColor || "#000000" }} />
+                        <h1 className="text-2xl font-bold">{category.categoryName}</h1>
+                    </div>
                     {category.categoryDescription && (
                         <p className="text-gray-600 mt-1">{category.categoryDescription}</p>
                     )}
@@ -177,13 +168,12 @@ export function CategoryView({ category, onCreateCard, refreshParent }: Category
                     className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center gap-2"
                 >
                     <Plus className="w-4 h-4 mr-2" />
-                    New Card
+                    Nouvelle carte
                 </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {category.cards && category.cards.map((card: GameCard) => (
-
                     <div key={card.cardId} className="p-4 bg-white rounded-lg shadow border border-gray-200">
                         <h3 className="font-semibold text-lg mb-2">{card.cardName}</h3>
                         <p className="text-gray-600">{card.description}</p>
@@ -222,7 +212,6 @@ export function CategoryView({ category, onCreateCard, refreshParent }: Category
                     </div>
                 ))}
             </div>
-
             <ViewCardModal
                 key={currentCard?.cardId ? currentCard?.cardId * 1000000000 : undefined} // ou un autre identifiant unique
                 isOpen={isViewCardModalOpen}
@@ -231,6 +220,8 @@ export function CategoryView({ category, onCreateCard, refreshParent }: Category
                     setIsViewCardModalOpen(false)
                 }
                 }
+                categoryIcon={category.categoryIcon}
+                categoryColor={category.categoryColor}
                 mode={modalMode}
                 initialData={
                     currentCard
@@ -249,6 +240,8 @@ export function CategoryView({ category, onCreateCard, refreshParent }: Category
                 }
                 onSubmit={handleCardSubmit}
                 currentDeckId={String(category.deckId)}
+                categoryIcon={category.categoryIcon}
+                categoryColor={category.categoryColor}
             />
 
             <DeleteConfirmationModal

@@ -1,22 +1,27 @@
 import type React from "react"
 import ReactDOM from "react-dom"
-import { X, Check, Sparkles, AlertTriangle } from "lucide-react"
-import type { GameCard } from "../../../types/game"
+import { X, Check, ArrowLeft } from "lucide-react"
+import type { Category, GameCard } from "../../../types/game"
 import { Card } from "../../Card/Card"
-import {useAdmin} from "../../../hooks/useAdmin.ts";
+import { useAdmin } from "../../../hooks/useAdmin"
+import { useAuth } from "../../../hooks/useAuth"
 
 interface CardZoomedInTableModalProps {
   isOpen: boolean
   onClose: () => void
   cardData: GameCard
   categoryName?: string
+  categoryIcon?: string
+  categoryColor?: string
   isSelected?: boolean
   onSelect?: () => void
   phase: number
   co2Estimation?: number
-  acceptanceLevel?: 'high' | 'medium' | 'low' | null
+  acceptanceLevel?: "high" | "medium" | "low" | null
   onCO2Estimate?: (value: number) => void
-  onAcceptanceChange?: (level: 'high' | 'medium' | 'low' | null) => void
+  onAcceptanceChange?: (level: "high" | "medium" | "low" | null) => void
+  isReadOnly?: boolean
+  hideCO2?: boolean
 }
 
 const CardZoomedInTableModal: React.FC<CardZoomedInTableModalProps> = ({
@@ -24,140 +29,32 @@ const CardZoomedInTableModal: React.FC<CardZoomedInTableModalProps> = ({
   onClose,
   cardData,
   categoryName,
+  categoryIcon,
+  categoryColor,
   isSelected = false,
   onSelect,
-  phase,
-  co2Estimation = 0,
-  acceptanceLevel = null,
-  onCO2Estimate,
-  onAcceptanceChange,
+  isReadOnly = false,
+  hideCO2,
 }) => {
-  const admin = useAdmin();
-  const category = admin.getCategoryFromCard(cardData.cardCategoryId);
+  const admin = useAdmin()
+  const { user } = useAuth()
+  const category: Category | null = admin?.getCategoryFromCard?.(cardData.cardCategoryId)
+
+  // Determine if CO2 should be hidden - use prop if provided, otherwise check user role
+  const shouldHideCO2 = hideCO2 !== undefined ? hideCO2 : user?.role !== "admin"
+
   const getCardNumber = (cardId: number) => {
-    console.log("category", category);
-    const index = category.cards.findIndex(card => card.cardId === cardId);
-    return index !== -1 ? index + 1 : null;
-  };
-  if (!isOpen) return null;
-  const renderPhaseContent = () => {
-    switch (phase) {
-      case 1:
-        return (
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              if (onSelect) onSelect()
-            }}
-            className={`mt-4 w-full py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2
-              ${
-                isSelected 
-                  ? "bg-red-600 hover:bg-red-700 text-white" 
-                  : "bg-emerald-600 hover:bg-emerald-700 text-white"
-              }`}
-          >
-            {isSelected ? (
-              <>
-                <X size={18} />
-                Remove Selection
-              </>
-            ) : (
-              <>
-                <Check size={18} />
-                Select Card
-              </>
-            )}
-          </button>
-        )
+    if (!category?.cards) return 1
+    const index = category.cards.findIndex((card: { cardId: number }) => card.cardId === cardId)
+    return index !== -1 ? index + 1 : 1
+  }
 
-      case 2:
-        return (
-          <div className="mt-4 space-y-4">
-            <h3 className="text-white font-medium flex items-center gap-2">
-              <Sparkles size={18} className="text-yellow-400" />
-              CO2 Reduction Estimation
-            </h3>
-            <div className="grid grid-cols-5 gap-2">
-              {[1, 2, 3, 4, 5].map((value) => (
-                <button
-                  key={value}
-                  onClick={() => onCO2Estimate?.(value)}
-                  className={`p-2 rounded-lg border-2 transition-all ${
-                    co2Estimation === value
-                      ? "border-yellow-400 bg-yellow-400/20 text-yellow-400"
-                      : "border-white/20 hover:border-white/40 text-white/60 hover:text-white"
-                  }`}
-                >
-                  {value}
-                </button>
-              ))}
-            </div>
-            <p className="text-sm text-white/60">
-              Rate the potential CO2 reduction impact (1-5)
-            </p>
-          </div>
-        )
+  if (!isOpen) return null
 
-      case 3:
-        return (
-          <div className="mt-4 space-y-4">
-            <h3 className="text-white font-medium flex items-center gap-2">
-              <AlertTriangle size={18} className="text-yellow-400" />
-              Acceptance Level
-            </h3>
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { level: 'high', label: 'High', color: 'emerald' },
-                { level: 'medium', label: 'Medium', color: 'yellow' },
-                { level: 'low', label: 'Low', color: 'red' }
-              ].map(({ level, label, color }) => (
-                <button
-                  key={level}
-                  onClick={() => onAcceptanceChange?.(level as 'high' | 'medium' | 'low')}
-                  className={`p-2 rounded-lg border-2 transition-all ${
-                    acceptanceLevel === level
-                      ? `border-${color}-400 bg-${color}-400/20 text-${color}-400`
-                      : "border-white/20 hover:border-white/40 text-white/60 hover:text-white"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-            <p className="text-sm text-white/60">
-              Rate the social acceptance level of this measure
-            </p>
-          </div>
-        )
-
-      case 4:
-        return (
-          <div className="mt-4 space-y-4">
-            <div className="bg-white/10 rounded-lg p-4 space-y-3">
-              <div className="flex items-center justify-between text-white">
-                <span>CO2 Reduction Impact:</span>
-                <span className="flex items-center gap-1">
-                  <Sparkles size={16} className="text-yellow-400" />
-                  {co2Estimation}/5
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-white">
-                <span>Acceptance Level:</span>
-                <span className={`
-                  ${acceptanceLevel === 'high' ? 'text-emerald-400' : ''}
-                  ${acceptanceLevel === 'medium' ? 'text-yellow-400' : ''}
-                  ${acceptanceLevel === 'low' ? 'text-red-400' : ''}
-                `}>
-                  {acceptanceLevel ? acceptanceLevel.charAt(0).toUpperCase() + acceptanceLevel.slice(1) : 'Not rated'}
-                </span>
-              </div>
-            </div>
-          </div>
-        )
-
-      default:
-        return null
-    }
+  const handleSelect = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    console.log(`CardZoomedInTableModal: Select button clicked for card ${cardData.cardId}, isSelected: ${isSelected}`)
+    onSelect && onSelect()
   }
 
   return ReactDOM.createPortal(
@@ -166,48 +63,64 @@ const CardZoomedInTableModal: React.FC<CardZoomedInTableModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="relative bg-emerald-800 rounded-xl p-6 max-w-lg w-full h-auto max-h-[90vh] shadow-2xl flex flex-col items-center overflow-auto animate-scale-in"
+        className="relative bg-white dark:bg-slate-800 rounded-xl shadow-2xl p-6 max-w-lg w-full max-h-[90vh] flex flex-col items-center overflow-auto animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
         <button
-          className="absolute top-2 right-2 bg-white/20 hover:bg-white/40 rounded-full p-1.5 text-white transition-colors"
+          className="absolute top-2 right-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-full p-1.5 text-slate-600 dark:text-slate-300 transition-colors"
           onClick={onClose}
         >
           <X size={18} />
         </button>
-
         <div className="flex flex-col flex-grow justify-center items-center mb-4">
           <Card
-              cardData={{
-                cardId: cardData.cardId || 0,
-                deckId: cardData.deckId, 
-                selected : cardData.selected,
-                cardName: cardData.cardName || '...',
-                description: cardData.description || '...',
-                cardImageData: cardData.cardImageData || '',
-                cardImageType: cardData.cardImageType || '',
-                qrCodeColor: cardData.qrCodeColor || '#000000',
-                qrCodeLogoImage: cardData.qrCodeLogoImage || '',
-                backgroundColor: cardData.backgroundColor || '#FFFFFF',
-                textColor: cardData.textColor || '#000000',
-                cardCategoryId: cardData.cardCategoryId,
-                category: cardData.category,
-                cardValue: cardData.cardValue || 0,
-                cardActual: cardData.cardActual || [],
-                cardProposition: cardData.cardProposition || [],
-                deckName: admin.getDeck(cardData.deckId) || '...',
-                cardNumber: getCardNumber(cardData.cardId) || category.cards.length + 1,
-                totalCards: category.cards.length + 1 || 0,
-              }}
-            categoryName={categoryName}
+            cardData={{
+              cardId: cardData.cardId || 0,
+              deckId: cardData.deckId,
+              selected: cardData.selected,
+              cardName: cardData.cardName || "...",
+              description: cardData.description || "...",
+              cardImageData: cardData.cardImageData || "",
+              qrCodeColor: cardData.qrCodeColor || "#000000",
+              qrCodeLogoImageData: cardData.qrCodeLogoImageData || "",
+              backgroundColor: cardData.backgroundColor || "#FFFFFF",
+              cardCategoryId: cardData.cardCategoryId,
+              category: categoryName || "Inconnue",
+              cardValue: cardData.cardValue || 0,
+              cardActual: cardData.cardActual || [],
+              cardProposition: cardData.cardProposition || [],
+              deckName: admin?.getDeck ? admin.getDeck(cardData.deckId) || "..." : "...",
+              cardNumber: getCardNumber(cardData.cardId) || (category?.cards?.length || 0) + 1,
+              totalCards: category?.cards?.length || 0,
+            }}
+            categoryIcon={categoryIcon}
+            categoryColor={categoryColor}
             isFlipped={false}
             width={300}
             height={450}
-            hiddenCo2={false}
+            hiddenCo2={shouldHideCO2}
           />
         </div>
-
-        {renderPhaseContent()}
+        <div className="mt-4 w-full flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 transition-colors font-medium flex items-center justify-center"
+          >
+            <ArrowLeft size={18} className="mr-2" />
+            Back
+          </button>
+          {!isReadOnly && (
+            <button
+              onClick={handleSelect}
+              className={`flex-1 px-4 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center ${
+                isSelected ? "bg-red-500 hover:bg-red-600 text-white" : "bg-emerald-500 hover:bg-emerald-600 text-white"
+              }`}
+            >
+              <Check size={18} className="mr-2" />
+              {isSelected ? "Remove" : "Select"}
+            </button>
+          )}
+        </div>
       </div>
     </div>,
     document.body,
@@ -215,3 +128,4 @@ const CardZoomedInTableModal: React.FC<CardZoomedInTableModalProps> = ({
 }
 
 export default CardZoomedInTableModal
+

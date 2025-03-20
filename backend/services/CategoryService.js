@@ -45,6 +45,14 @@ class CategoryService {
             categoryData.categoryDescription.length > 255) {
             throw new Error('categoryDescription is too long');
         }
+        // Validate categoryColor as a hexadecimal color
+        if (categoryData.categoryColor !== "" && !/^#[0-9A-Fa-f]{6}$/i.test(categoryData.categoryColor)) {
+            throw new Error('Invalid categoryColor');
+        }
+        // Validate iconName as a non-empty string
+        if (categoryData.iconName !== undefined && categoryData.iconName !== null && typeof categoryData.iconName !== 'string') {
+            throw new Error('Invalid iconName');
+        }
     }
 }
 

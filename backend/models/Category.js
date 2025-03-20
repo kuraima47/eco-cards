@@ -18,6 +18,16 @@ const Category = sequelize.define('Category', {
         allowNull: true,
         field: 'categorydescription'
     },
+    categoryIcon: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        field: 'categoryicon'
+    },
+    categoryColor: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        field: 'categorycolor'
+    },
     deckId: {
         type: DataTypes.INTEGER,
         allowNull: true,

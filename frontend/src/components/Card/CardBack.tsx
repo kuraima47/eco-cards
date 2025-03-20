@@ -1,21 +1,19 @@
-import React, { useEffect } from 'react';
-import { Leaf } from 'lucide-react';
+import React, { use, useEffect } from 'react';
+import * as LucideIcons from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useQRCode } from "../../hooks/useQRCode";
+import { arrayBufferToBase64, formatImageName, toPascalCase } from '../../utils/formatting';
+import { ImageFormat } from '../../types';
 
 export interface CardData {
     deckName: string;
     category: string;
-    categoryColor: string;
     cardNumber: number;
     totalCards: number;
     cardName: string;
-    description: string;
     cardValue: number;
-    cardActual: string[];
-    cardProposition: string[];
     qrCodeColor: string;
-    qrCodeLogoImage: string;
+    qrCodeLogoImageData: ImageFormat;
     backgroundColor: string;
     width?: number;
     height?: number;
@@ -23,60 +21,44 @@ export interface CardData {
 
 interface CardBackProps {
     cardData: CardData;
+    categoryColor: string;
+    categoryIcon: string;
+    width?: number;
+    height?: number;
+    isForPdf?: boolean;
 }
 
-export function CardBack({ cardData }: CardBackProps) {
+export function CardBack({ cardData, categoryColor, categoryIcon, width = 416, height = 650, isForPdf = false }: CardBackProps) {
     const {
         deckName,
         category,
-        categoryColor,
         cardNumber,
         totalCards,
         cardName,
-        description,
         cardValue,
-        cardActual,
-        cardProposition,
         qrCodeColor,
-        qrCodeLogoImage,
+        qrCodeLogoImageData,
         backgroundColor,
-        width = 416,
-        height = 650,
     } = cardData;
 
-    const { url, qrColor, bgColor, logo, setUrl, setQrColor, setLogo } = useQRCode();
+    const qrCodeLogoImage = formatImageName(qrCodeLogoImageData.data ? arrayBufferToBase64(qrCodeLogoImageData.data) : '', qrCodeLogoImageData.type);
+
+    const { url, qrColor, bgColor, logo, setUrl, setQrColor, setLogo } = useQRCode({
+        initialUrl: JSON.stringify({ cardName, category, cardValue, deckName }),
+        initialQrColor: qrCodeColor,
+        initialLogo: qrCodeLogoImage
+    });
 
     useEffect(() => {
-        const cardDataUrl = JSON.stringify({
-            cardName,
-            description,
-            category,
-            cardValue,
-            cardActual,
-            cardProposition,
-            deckName,
-            cardNumber,
-            totalCards,
-        });
+        // ne se déclenche que quand les dépendances changent
+        const cardDataUrl = JSON.stringify({ cardName, category, cardValue, deckName });
         setUrl(cardDataUrl);
         setQrColor(qrCodeColor);
-        setLogo(qrCodeLogoImage);
-    }, [
-        cardName,
-        description,
-        category,
-        cardValue,
-        cardActual,
-        cardProposition,
-        deckName,
-        cardNumber,
-        totalCards,
-        qrCodeColor,
-        qrCodeLogoImage,
-        setUrl,
-        setQrColor,
-        setLogo,
-    ]);
+
+        if (qrCodeLogoImage && qrCodeLogoImage !== logo) {
+            setLogo(qrCodeLogoImage);
+        }
+    }, [cardName, category, cardValue, deckName, qrCodeColor, qrCodeLogoImage, logo]);
 
     // Calculs des dimensions relatives
     const scale = width / 416; // Base scale factor
@@ -107,7 +89,14 @@ export function CardBack({ cardData }: CardBackProps) {
             size: `${24 * scale}px`,
             marginRight: `${8 * scale}px`,
         },
+        adjustTextForPdf: {
+            marginTop: isForPdf ? "-30px" : undefined,
+            padding: isForPdf ? "2px" : undefined,
+        },
     };
+
+    const iconName = categoryIcon ? toPascalCase(categoryIcon) : 'Box';
+    const CategoryIcon = LucideIcons[iconName as keyof typeof LucideIcons] as React.ElementType || LucideIcons.Box;
 
     return (
         <div
@@ -119,35 +108,39 @@ export function CardBack({ cardData }: CardBackProps) {
                     className="w-full text-center text-white bg-gray-700 rounded-lg shadow-md"
                     style={styles.header}
                 >
-                    {deckName}
+                    <div style={styles.adjustTextForPdf}>
+                        {deckName}
+                    </div>
                 </div>
 
                 <div
                     className="flex-grow flex items-center justify-center"
                     style={styles.qrContainer}
                 >
-                    <QRCodeSVG
-                        value={url}
-                        size={styles.qrCode.size}
-                        fgColor={qrColor}
-                        bgColor={bgColor}
-                        level="H"
-                        imageSettings={{
-                            src: logo || undefined,
-                            height: styles.qrCode.logoSize,
-                            width: styles.qrCode.logoSize,
-                            excavate: true,
-                        }}
-                    />
+                    <div className="bg-white p-4 rounded-xl shadow-2xl border-4 border-black">
+                        <QRCodeSVG
+                            value={url}
+                            size={styles.qrCode.size}
+                            fgColor={qrColor}
+                            bgColor={bgColor}
+                            level="H"
+                            imageSettings={{
+                                src: logo || undefined,
+                                height: styles.qrCode.logoSize,
+                                width: styles.qrCode.logoSize,
+                                excavate: true,
+                            }}
+                        />
+                    </div>
                 </div>
 
                 <div
-                    className={`w-full ${categoryColor} text-white rounded-lg shadow-md`}
-                    style={styles.footer}
+                    className={`w-full text-white rounded-lg shadow-md uppercase font-bold`}
+                    style={{ ...styles.footer, backgroundColor: categoryColor }}
                 >
                     <div className="flex items-center justify-center">
-                        <Leaf style={{ width: styles.icon.size, height: styles.icon.size }} />
-                        <span>
+                        <CategoryIcon className="mr-1" style={{ width: styles.icon.size, height: styles.icon.size }} />
+                        <span style={styles.adjustTextForPdf}>
                             {category} ({cardNumber}/{totalCards})
                         </span>
                     </div>

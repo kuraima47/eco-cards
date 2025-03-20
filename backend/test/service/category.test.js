@@ -62,6 +62,8 @@ describe('Category Service', () => {
                 categoryId: 1, 
                 categoryName: 'Test Category',
                 categoryDescription: 'Test Description',
+                categoryColor: 'FFFFFF',
+                categoryIcon: 'a-arrow-down',
                 deckId: 1
             };
             sandbox.stub(Category, 'findByPk').resolves(mockCategory);
@@ -89,12 +91,16 @@ describe('Category Service', () => {
                     categoryId: 1, 
                     categoryName: 'Category 1',
                     categoryDescription: 'Description 1',
+                    categoryColor: 'FFFFFF',
+                    categoryIcon: 'a-arrow-down',
                     deckId: 1
                 },
                 { 
                     categoryId: 2, 
                     categoryName: 'Category 2',
                     categoryDescription: 'Description 2',
+                    categoryColor: 'FFFFFF',
+                    categoryIcon: 'air-vent',
                     deckId: 1
                 }
             ];
@@ -115,6 +121,8 @@ describe('Category Service', () => {
             const newCategoryData = {
                 categoryName: 'New Category',
                 categoryDescription: 'New Description',
+                categoryColor: 'FFFFFF',
+                categoryIcon: 'air-vent',
                 deckId: 1
             };
             
@@ -150,18 +158,24 @@ describe('Category Service', () => {
         it('should update a category successfully', async () => {
             const updateData = {
                 categoryName: 'Updated Category Name',
-                categoryDescription: 'Updated Description'
+                categoryDescription: 'Updated Description',
+                categoryColor: 'CCCCCC',
+                categoryIcon: 'arrow-left'
             };
             
             const mockCategory = {
                 categoryId: 1,
                 categoryName: 'Old Category Name',
                 categoryDescription: 'Old Description',
+                categoryColor: 'FFFFFF',
+                categoryIcon: 'arrow-right',
                 deckId: 1,
                 update: sandbox.stub().resolves({
                     categoryId: 1,
                     categoryName: 'Updated Category Name',
                     categoryDescription: 'Updated Description',
+                    categoryColor: 'CCCCCC',
+                    categoryIcon: 'arrow-left',
                     deckId: 1
                 })
             };
@@ -176,6 +190,8 @@ describe('Category Service', () => {
                 categoryId: 1,
                 categoryName: 'Updated Category Name',
                 categoryDescription: 'Updated Description',
+                categoryColor: 'CCCCCC',
+                categoryIcon: 'arrow-left',
                 deckId: 1
             });
         });
@@ -185,7 +201,9 @@ describe('Category Service', () => {
             
             const result = await categoryService.updateCategory(999, {
                 categoryName: 'Updated Name',
-                categoryDescription: 'Updated Description'
+                categoryDescription: 'Updated Description',
+                categoryColor: 'CCCCCC',
+                categoryIcon: 'arrow-left'
             });
             
             expect(Category.findByPk).to.have.been.calledWith(999);

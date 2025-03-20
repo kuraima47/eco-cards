@@ -9,7 +9,7 @@ import { CardBack, CardData } from "../Card/CardBack";
 import Card from "../Card/Card";
 import { useAdmin } from "../../hooks/useAdmin.ts";
 import { createRoot } from 'react-dom/client';
-
+import { ensureArray } from "../../utils/formatting.ts";
 interface ModalCards {
     initialData: Deck;
     isOpen: boolean;
@@ -40,23 +40,32 @@ export function ModalCards({ initialData, isOpen, onClose }: ModalCards) {
             const transformedCards = (category.cards || []).map((card) => ({
                 cardId: card.cardId || 0,
                 deckId: category.deckId,
-                title: card.cardName || '...',
+                cardName: card.cardName || '...',
                 description: card.cardDescription || '...',
-                cardImage: card.cardImage || '',
+                cardImageData: card.cardImageData || '',
                 qrCodeColor: card.qrCodeColor || '#000000',
-                qrCodeLogoImage: card.qrCodeLogoImage || '',
+                qrCodeLogoImageData: card.qrCodeLogoImageData || '',
                 backgroundColor: card.backgroundColor || '#FFFFFF',
-                textColor: card.textColor || '#000000',
                 category: category.categoryName,
-                co2Saved: card.cardValue || 0,
-                currentSituation: card.cardActual ? [card.cardActual] : [],
-                proposals: card.cardProposition ? [card.cardProposition] : [],
+                cardValue: card.cardValue || 0,
+                cardActual: ensureArray(card.cardActual),
+                cardProposition: ensureArray(card.cardProposition),
                 deckName: admin.getDeck(category.deckId) || '...',
                 cardNumber: getCardNumber(card.cardId) || category.cards.length + 1,
                 totalCards: category.cards.length + 1 || 0
             }));
             return acc.concat(transformedCards);
         }, []);
+    };
+
+    const flattenCategories = (deck: Deck) => {
+        if (!deck) return [];
+        return deck.categories
+            .map(category => category.cards.map(_ => ({
+                categoryIcon: category.categoryIcon || 'box', // Valeur par défaut 'box'
+                categoryColor: category.categoryColor || '#6B7280' // Valeur par défaut gris
+            })))
+            .flat();
     };
 
     const flattenCards = (deck: Deck) => {
@@ -84,17 +93,19 @@ export function ModalCards({ initialData, isOpen, onClose }: ModalCards) {
         await new Promise((resolve) => setTimeout(resolve, 100));
 
         const canvas = await html2canvas(container, {
-            scale: 1,
+            scale: 1.5,
             useCORS: true,
             allowTaint: true,
-            backgroundColor: null,
+            backgroundColor: "transparent",
             width: mmToPx(metrics.printWidth),
-            height: mmToPx(metrics.printHeight)
+            height: mmToPx(metrics.printHeight),
+            logging: false,
+            imageTimeout: 15000
         });
 
         root.unmount();
         document.body.removeChild(container);
-        return canvas.toDataURL("image/png");
+        return canvas.toDataURL("image/png", 0.4);
     }
 
     const generatePDF = async () => {
@@ -103,103 +114,117 @@ export function ModalCards({ initialData, isOpen, onClose }: ModalCards) {
         const pdf = new jsPDF({
             orientation: 'portrait',
             unit: 'mm',
-            format: 'a4'
+            format: 'a4',
+            // compress: true // ✅ Active la compression intégrée
         });
-
+    
         const pageWidth = pdf.internal.pageSize.getWidth();
         const pageHeight = pdf.internal.pageSize.getHeight();
         const margin = 10;
         const spacing = 2;
-
+    
+        const maxCardWidth = metrics.printWidth;
+        const maxCardHeight = metrics.printHeight;
+    
         const cards = flattenCards(initialData);
-        let currentX = margin;
-        let currentY = margin;
-        let pageCount = 1;
-        const totalSteps = cards.length * 2; // front et back pour chaque carte
+        const categories = flattenCategories(initialData);
+    
         let step = 0;
-
-        for (let i = 0; i < cards.length; i++) {
-            const card = cards[i];
-            // Passage à la ligne si besoin pour la face avant
-            if (currentX + metrics.printWidth > pageWidth - margin) {
-                currentX = margin;
-                currentY += metrics.printHeight + spacing;
-            }
-            if (currentY + metrics.printHeight > pageHeight - margin) {
+        const totalSteps = cards.length * 2; // recto + verso
+    
+        let pageIndex = 0;
+        let isFirstPage = true;
+        
+        while (pageIndex < cards.length) {
+            if (!isFirstPage) {
                 pdf.addPage();
-                pageCount++;
-                currentX = margin;
-                currentY = margin;
+            } else {
+                pdf.text(
+                    `Origine: (${margin}, ${margin}) | Dimensions: ${maxCardWidth}x${maxCardHeight} mm | Espacement: ${spacing} mm`,
+                    2, // x position (tout à gauche)
+                    5  // y position (tout en haut)
+                );
+                isFirstPage = false;
             }
-
-            // Capture de la face avant
-            const frontImgData = await captureComponentPreview(
-                <Card
-                    cardData={card}
-                    width={mmToPx(metrics.printWidth)}
-                    height={mmToPx(metrics.printHeight)}
-                    hiddenCo2={false}
-                />
-            );
-            pdf.addImage(
-                frontImgData,
-                'PNG',
-                currentX,
-                currentY,
-                metrics.printWidth,
-                metrics.printHeight
-            );
-            step++;
-            setProgress(Math.round((step / totalSteps) * 100));
-
-            // Passage à la position suivante pour la face arrière
-            currentX += metrics.printWidth + spacing;
-            if (currentX + metrics.printWidth > pageWidth - margin) {
-                currentX = margin;
-                currentY += metrics.printHeight + spacing;
-                if (currentY + metrics.printHeight > pageHeight - margin) {
-                    pdf.addPage();
-                    pageCount++;
-                    currentX = margin;
-                    currentY = margin;
+    
+            let currentX = margin;
+            let currentY = margin;
+            let cardsOnPage = [];
+    
+            // 1️⃣ Placement des rectos
+            while (pageIndex < cards.length) {
+                const card = cards[pageIndex];
+    
+                if (currentY + maxCardHeight > pageHeight - margin) {
+                    break;
                 }
+    
+                cardsOnPage.push({ card, x: currentX, y: currentY });
+    
+                currentX += maxCardWidth + spacing;
+                if (currentX + maxCardWidth > pageWidth - margin) {
+                    currentX = margin;
+                    currentY += maxCardHeight + spacing;
+                }
+    
+                pageIndex++;
             }
-
-            // Capture de la face arrière
-            const backImgData = await captureComponentPreview(
-                <CardBack cardData={{
-                    ...card,
-                    deckName: "Eco Actions",
-                    categoryColor: "bg-green-600",
-                    cardNumber: i + 1,
-                    totalCards: cards.length,
-                    qrCodeColor: "#000000",
-                    qrCodeLogoImage: "",
-                    backgroundColor: "#ffffff",
-                    width: mmToPx(metrics.printWidth),
-                    height: mmToPx(metrics.printHeight)
-                }} />
-            );
-            pdf.addImage(
-                backImgData,
-                'PNG',
-                currentX,
-                currentY,
-                metrics.printWidth,
-                metrics.printHeight
-            );
-            step++;
-            setProgress(Math.round((step / totalSteps) * 100));
-
-            // Passage à la position suivante pour la prochaine carte
-            currentX += metrics.printWidth + spacing;
+    
+            // Ajouter les cartes recto
+            for (const { card, x, y } of cardsOnPage) {
+                const frontImgData = await captureComponentPreview(
+                    <Card
+                        cardData={card}
+                        width={mmToPx(maxCardWidth)}
+                        height={mmToPx(maxCardHeight)}
+                        hiddenCo2={true}
+                        categoryIcon={categories[cards.indexOf(card)].categoryIcon}
+                        categoryColor={categories[cards.indexOf(card)].categoryColor}
+                        isForPdf={true}
+                    />
+                );
+                pdf.addImage(frontImgData, 'JPEG', x, y, maxCardWidth, maxCardHeight);
+                step++;
+                setProgress(Math.round((step / totalSteps) * 100));
+            }
+    
+            // 2️⃣ Nouvelle page pour les versos
+            pdf.addPage();
+    
+            for (const { card, x, y } of cardsOnPage) {
+                const backImgData = await captureComponentPreview(
+                    <CardBack
+                        cardData={{
+                            ...card,
+                            deckName: initialData.deckName,
+                            cardNumber: cards.indexOf(card) + 1,
+                            totalCards: cards.length,
+                            // qrCodeColor: "#000000",
+                            // qrCodeLogoImageData: "",
+                            // backgroundColor: "#ffffff"
+                        }}
+                        width={mmToPx(maxCardWidth)}
+                        height={mmToPx(maxCardHeight)}
+                        categoryIcon={categories[cards.indexOf(card)].categoryIcon}
+                        categoryColor={categories[cards.indexOf(card)].categoryColor}
+                        isForPdf={true}
+                    />
+                );
+    
+                // 🔄 Mirroring pour aligner le verso au recto
+                const flippedX = pageWidth - margin - maxCardWidth - (x - margin);
+                pdf.addImage(backImgData, 'JPEG', flippedX, y, maxCardWidth, maxCardHeight);
+                step++;
+                setProgress(Math.round((step / totalSteps) * 100));
+            }
         }
-
-        pdf.save('cartes-eco.pdf');
+    
+        pdf.save('cartes-eco_'+initialData.deckName+'.pdf');
         setLoading(false);
     };
+    
 
-    console.log(flattenCards(initialData));
+    if (!isOpen) return null;
 
     return (
         <Modal
@@ -246,7 +271,7 @@ export function ModalCards({ initialData, isOpen, onClose }: ModalCards) {
                     </div>
 
                     <div className="border rounded-lg p-4 bg-gray-50">
-                        <CardPreview ref={cardsRef} cards={flattenCards(initialData)} metrics={metrics} />
+                        <CardPreview ref={cardsRef} cards={flattenCards(initialData)} metrics={metrics} categories={flattenCategories(initialData)} />
                     </div>
 
                     <div className="flex justify-end">
@@ -262,10 +287,15 @@ export function ModalCards({ initialData, isOpen, onClose }: ModalCards) {
 
                 {/* Overlay de chargement */}
                 {loading && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50">
-                        <div className="p-4 bg-white rounded shadow">
-                            <p className="mb-2">Génération du PDF en cours... {progress}%</p>
-                            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500"></div>
+                    <div className="fixed inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50 z-50">
+                        <div className="p-6 bg-white rounded-lg shadow-xl">
+                            <div className="flex flex-col items-center">
+                                <p className="text-lg font-medium mb-4">Génération du PDF en cours...</p>
+                                <div className="mb-4 w-full bg-gray-200 rounded-full h-2.5">
+                                    <div className="bg-green-600 h-2.5 rounded-full" style={{ width: `${progress}%` }}></div>
+                                </div>
+                                <p className="text-gray-500">{progress}%</p>
+                            </div>
                         </div>
                     </div>
                 )}

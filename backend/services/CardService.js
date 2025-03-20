@@ -44,7 +44,7 @@ class CardService {
         if (!card) {
             return false;
         }
-        const requiredFields = ['cardName', 'cardActual', 'cardProposition', 'cardImage', 'cardCategoryId', 'cardValue'];
+        const requiredFields = ['cardName', 'cardActual', 'cardProposition', 'cardImage', 'cardCategoryId', 'cardValue', 'qrCodeColor', 'qrCodeLogoImage', 'backgroundColor'];
         return requiredFields.every(field => card[field] !== null && card[field] !== undefined && card[field] !== '');
     }
 
@@ -53,31 +53,50 @@ class CardService {
         if (cardData.cardName.length > 64) {
             throw new Error('Invalid cardName (size > 64)');
         }
+
+        if (cardData.description.length > 1000) { // Limite arbitraire pour TEXT
+            throw new Error('Invalid cardDescription (size > 1000)');
+        }
+
         if (cardData.cardActual.length > 500) {
             throw new Error('Invalid cardActual (size > 500)');
         }
+
         if (cardData.cardProposition.length > 500) {
             throw new Error('Invalid cardProposition (size > 500)');
         }
-        // if (cardData.cardCategory.length > 24 || !cardData.cardCategory && typeof cardData.cardCategoryId !== 'number') {
-        //     throw new Error('Invalid cardCategory (size > 24)');
-        // }
-        if (!cardData.cardValue && typeof cardData.cardValue !== 'number') {
+
+        if (cardData.cardImageData && !(cardData.cardImageData instanceof Buffer)) {
+            throw new Error('Invalid cardImageData (must be a Buffer or null)');
+        }
+
+        if (cardData.cardCategoryId !== null && (typeof cardData.cardCategoryId !== 'number' || cardData.cardCategoryId <= 0)) {
+            throw new Error('Invalid cardCategoryId (must be a positive integer or null)');
+        }
+
+        if (!cardData.cardValue && (typeof cardData.cardValue !== 'number' || cardData.cardValue < 0)) {
             throw new Error('Invalid cardValue (not a number)');
         }
-    }
 
-    isValidCardData(cardData) {
-        return !(cardData.cardName.length < 1 || cardData.cardName.length > 64 ||
-            cardData.cardActual.length < 1 || cardData.cardActual.length > 500 ||
-            cardData.cardProposition.length < 1 || cardData.cardProposition.length > 500 ||
-            cardData.cardCategory.length < 1 || cardData.cardCategory.length > 24 ||
-            typeof cardData.cardValue !== 'number' || cardData.cardValue < 0);
-    }
+        if (cardData.times_selected !== undefined && (typeof cardData.times_selected !== 'number' || cardData.times_selected < 0)) {
+            throw new Error('Invalid times_selected (must be a non-negative integer)');
+        }
 
-    // isValidImagePath(imagePath) {
-    //     return imagePath.startsWith('/assets/');
-    // }
+        if (cardData.qrCodeLogoImageData && !(cardData.qrCodeLogoImageData instanceof Buffer)) {
+            console.log("cardData.qrCodeLogoImageData", cardData.cardImageData, cardData.qrCodeLogoImageData);
+            throw new Error('Invalid qrCodeLogoImageData (must be a Buffer or null)', cardData.qrCodeLogoImageData);
+        }
+
+        // Validate qrCodeColor as a hexadecimal color
+        if (cardData.qrCodeColor !== "" && !/^#[0-9A-Fa-f]{6}$/i.test(cardData.qrCodeColor)) {
+            throw new Error('Invalid qrCodeColor');
+        }
+
+        // Validate qrCodeColor as a hexadecimal color
+        if (cardData.backgroundColor !== "" && !/^#[0-9A-Fa-f]{6}$/i.test(cardData.backgroundColor)) {
+            throw new Error('Invalid backgroundColor');
+        }
+    }
 }
 
 module.exports = new CardService();

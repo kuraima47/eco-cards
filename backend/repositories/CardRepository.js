@@ -21,6 +21,8 @@ class CardRepository {
         return null;
     }
 
+    
+
     async delete(id) {
         const card = await Card.findByPk(id);
         if (card) {

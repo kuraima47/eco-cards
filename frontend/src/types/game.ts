@@ -1,3 +1,5 @@
+import { ImageFormat } from ".";
+
 // types/game.ts
 export type UserRole = "admin" | "player";
 
@@ -13,7 +15,10 @@ export interface Category {
     categoryId: number;
     categoryName: string;
     categoryDescription: string;
+    categoryColor: string;
+    categoryIcon: string;
     deckId: number;
+    cards?: GameCard[];
 }
 
 export interface GameCard {
@@ -23,12 +28,10 @@ export interface GameCard {
     deckId: number;
     cardName: string; // anciennement cardName
     description: string; // anciennement cardDescription
-    cardImageType: string;
-    cardImageData: string;
+    cardImageData: ImageFormat;
     qrCodeColor: string; // anciennement qrColor
-    qrCodeLogoImage: string; // anciennement qrLogo
+    qrCodeLogoImageData: string; // anciennement qrLogo
     backgroundColor: string; // anciennement background_color
-    textColor: string; // anciennement font_color
     category: string; // nom de la catégorie (par exemple "Énergie")
     cardValue: number; // anciennement cardValue
     cardActual: string[]; // anciennement situations
@@ -37,7 +40,36 @@ export interface GameCard {
     cardNumber: number;
     totalCards: number;
     times_selected?: number;
+    co2Estimation?: number
+    acceptanceLevel?: "high" | "medium" | "low" | null
 }
+
+export const defaultCard: GameCard = {
+    cardId: -1,
+    cardCategoryId: -1,
+    deckId: -1,
+
+    cardName: "",
+    description: "",
+    cardValue: 0,
+    category: "",
+    deckName: "",
+
+    cardImageData: { data: new Uint8Array(), type: '' },
+    backgroundColor: "#FFFFFF",
+
+    qrCodeColor: "#000000",
+    qrCodeLogoImageData: "",
+
+    cardActual: [],
+    cardProposition: [],
+
+    selected: false,
+    cardNumber: 1,
+    totalCards: 1,
+    times_selected: 0
+};
+
 
 export interface SelectedCard {
     cardId: number;
@@ -67,8 +99,10 @@ export interface Session {
     sessionId: number;
     adminId: number;
     sessionName: string;
+    status: string;
     deckId: number;
     createdAt: string;
+    endedAt: string;
 }
 
 export interface Group {

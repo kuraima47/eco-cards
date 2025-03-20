@@ -11,6 +11,19 @@ const GroupAcceptedCard = sequelize.define('GroupAcceptedCard', {
         type: DataTypes.INTEGER,
         primaryKey: true,
         field: 'cardid'
+    },
+    co2estimation: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        field: "co2estimation",
+    },
+    acceptancelevel: {
+        type: DataTypes.STRING(10),
+        allowNull: true,
+        field: "acceptancelevel",
+        validate: {
+            isIn: [["high", "medium", "low", null]],
+        },
     }
 }, {
     tableName: 'groupacceptedcards',

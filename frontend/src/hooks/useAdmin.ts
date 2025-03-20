@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { adminApi } from '../services/admin';
-import type { Category, GameCard, GameDeck } from '../types/game';
+import type { Category, GameCard, GameDeck, User } from '../types/game';
 import { useAuth } from "./useAuth";
 
 class AdminService {
@@ -9,16 +9,16 @@ class AdminService {
     public cards: GameCard[] = [];
     public loading = true;
     public selectedDeck: string | null = null;
-    public user: { userId: number } | null = null;
+    public user: User | null = null;
     public refresh: () => void = () => {};
 
-    constructor(user?: { userId: number }) {
+    constructor(user?: User) {
         if (user) this.user = user;
         // Chargement initial des données
         this.loadAllData();
     }
 
-    public setAuthenticatedUser(user: { userId: number }): void {
+    public setAuthenticatedUser(user: User): void {
         this.user = user;
         this.loadAllData();
     }
@@ -47,7 +47,7 @@ class AdminService {
         try {
             const { decks, categories, cards } = await adminApi.loadAllData();
             // On s'assure de réassigner les tableaux de façon immuable
-            console.log("[AdminService] loadAllData - decks:", decks);
+            console.log("[AdminService] loadAllData - decks:", cards);
             this.decks = decks;
             this.categories = categories;
             this.cards = cards;
@@ -84,11 +84,13 @@ class AdminService {
             cards: categoryCards 
         } as Category & { cards: GameCard[] };
     }
-    public async addCategory(category: { categoryName: string; categoryDescription: string; deckId?: number }): Promise<void> {
+    public async addCategory(category: { categoryName: string; categoryDescription: string; categoryIcon: string; categoryColor: string; deckId?: number }): Promise<void> {
         try {
             const result = await adminApi.addCategory({
                 categoryName: category.categoryName,
                 categoryDescription: category.categoryDescription,
+                categoryIcon: category.categoryIcon,
+                categoryColor: category.categoryColor,
                 deckId: category.deckId || (this.selectedDeck ? Number(this.selectedDeck) : undefined)
             });
 
@@ -123,8 +125,6 @@ class AdminService {
     }
 
     public getDeck(deckId: number): string {
-        console.log('[useAdmin] => Getting deck name for deckId:', deckId);
-        console.log('[useAdmin] => Decks:', this.decks);
         const deck = this.decks.find(deck => deck.deckId === deckId);
         return deck ? deck.deckName : '';
     }
@@ -132,7 +132,7 @@ class AdminService {
     public async addDeck(deck: Partial<GameDeck>): Promise<void> {
         if (!this.user) throw new Error('User not authenticated');
         deck.adminId = this.user.userId;
-        await adminApi.addDeck(deck);
+        await adminApi.addDeck(deck as GameDeck);
         await this.loadAllData();
     }
 
@@ -199,7 +199,8 @@ export const useAdmin = () => {
 
     // Utilisation de useMemo pour créer l'instance de service.
     const adminService = useMemo(() => {
-        const service = new AdminService(user?.userId ? { userId: user.userId } : undefined);
+        // Pass the complete user object to the service
+        const service = new AdminService(user || undefined);
         
         // On surcharge loadAllData pour forcer le re-render après la mise à jour des données.
         const originalLoadAllData = service.loadAllData.bind(service);
@@ -221,7 +222,8 @@ export const useAdmin = () => {
     useEffect(() => {
         const loadData = async () => {
             if (user) {
-                adminService.setAuthenticatedUser({ userId: user.userId });
+                // Pass the complete user object
+                adminService.setAuthenticatedUser(user);
                 await adminService.loadAllData();
             }
         };

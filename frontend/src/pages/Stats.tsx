@@ -1,19 +1,34 @@
 import React, { useEffect, useState } from 'react';
-import { BarChart2, Users, PlaySquare, Clock } from 'lucide-react';
+import { BarChart2, Users, PlaySquare, Layers, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { sessionService } from '../services/sessionService';
+import { userService } from '../services/userService';
+import { deckService } from '../services/deckService';
+import { categoryService } from '../services/categoryService';
+import { cardService } from '../services/cardService';
 
 interface Stats {
   totalGames: number;
-  totalPlayers: number;
-  averageGameDuration: number;
-  totalPlayTime: number;
+  playedGames: number;
+  totalUsers: number;
+  totalDecks: number;
+  // totalCategories: number;
+  totalCards: number;
+  completeCards: number,
+  incompleteCards: number,
+  averageSessionDuration: { hours: number; minutes: number; seconds: number; },
 }
 
 const Stats = () => {
   const [stats, setStats] = useState<Stats>({
     totalGames: 0,
-    totalPlayers: 0,
-    averageGameDuration: 0,
-    totalPlayTime: 0
+    playedGames: 0,
+    totalUsers: 0,
+    totalDecks: 0,
+    // totalCategories: 0,
+    totalCards: 0,
+    completeCards: 0,
+    incompleteCards: 0,
+    averageSessionDuration: { hours: 0, minutes: 0, seconds: 0 },
   });
   const [loading, setLoading] = useState(true);
 
@@ -23,40 +38,54 @@ const Stats = () => {
 
   const loadStats = async () => {
     try {
-      // const [gamesCount, playersCount, gameStats] = await Promise.all([
-      //   supabase
-      //     .from('game_sessions')
-      //     .select('id', { count: 'exact' }),
-      //   supabase
-      //     .from('players')
-      //     .select('id', { count: 'exact' }),
-      //   supabase
-      //     .from('game_sessions')
-      //     .select('started_at, ended_at')
-      //     .not('ended_at', 'is', null)
-      // ]);
+      const allSessions = await sessionService.getAllSessions();
+      const closedSessions = await sessionService.getSessionByStatus('closed');
+      const allUsers = await userService.getAllUsers();
+      const allDecks = await deckService.getAllDecks()
+      // const allCategories = await categoryService.getAllCategories();
+      const allCards = await cardService.getAllCards();
 
-      const totalGames = gamesCount.count || 0;
-      const totalPlayers = playersCount.count || 0;
-      
-      let totalDuration = 0;
-      let completedGames = 0;
-
-      if (gameStats.data) {
-        gameStats.data.forEach(game => {
-          if (game.started_at && game.ended_at) {
-            const duration = new Date(game.ended_at).getTime() - new Date(game.started_at).getTime();
-            totalDuration += duration;
-            completedGames++;
-          }
-        });
+      let completeCards = 0;
+      let incompleteCards = 0;
+      for (const card of allCards) {
+        const isComplete = await cardService.isCardComplete(card.cardId.toString());
+        if (isComplete) {
+          completeCards++;
+        } else {
+          incompleteCards++;
+        }
       }
 
+      // Calcul de la durée moyenne des sessions
+      const durations = closedSessions
+        .filter(session => session.createdAt && session.endedAt) // Filtrer les sessions valides
+        .map(session => {
+          const createdAt = new Date(session.createdAt).getTime();
+          const endedAt = new Date(session.endedAt).getTime();
+          return endedAt - createdAt; // Durée en millisecondes
+        });
+
+      const averageDurationMs = durations.length > 0
+        ? durations.reduce((sum, duration) => sum + duration, 0) / durations.length
+        : 0;
+
+      // Convertir la durée moyenne en heures, minutes, secondes
+      const averageDuration = {
+        hours: Math.floor(averageDurationMs / (1000 * 60 * 60)),
+        minutes: Math.floor((averageDurationMs % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((averageDurationMs % (1000 * 60)) / 1000),
+      };
+
       setStats({
-        totalGames,
-        totalPlayers,
-        averageGameDuration: completedGames ? totalDuration / completedGames / (1000 * 60) : 0,
-        totalPlayTime: totalDuration / (1000 * 60)
+        totalGames: allSessions.length,
+        playedGames: closedSessions.length,
+        totalUsers: allUsers.length,
+        totalDecks: allDecks.length,
+        // totalCategories: allCategories.length,
+        totalCards: allCards.length,
+        completeCards,
+        incompleteCards,
+        averageSessionDuration: averageDuration,
       });
     } catch (error) {
       console.error('Error loading stats:', error);
@@ -91,26 +120,44 @@ const Stats = () => {
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
-            icon={PlaySquare}
-            title="Parties Jouées"
+            icon={BarChart2}
+            title="Nombre de parties"
             value={stats.totalGames}
           />
           <StatCard
+            icon={PlaySquare}
+            title="Parties Jouées"
+            value={stats.playedGames}
+          />
+          <StatCard
             icon={Users}
-            title="Joueurs Total"
-            value={stats.totalPlayers}
+            title="Nombre d'utilisateurs"
+            value={stats.totalUsers}
+          />
+          <StatCard
+            icon={Layers}
+            title="Nombre de decks"
+            value={stats.totalDecks}
+          />
+          {/* <StatCard
+            icon={Users}
+            title="Nombre de catégories"
+            value={stats.totalCategories}
+          /> */}
+          <StatCard
+            icon={CheckCircle}
+            title="Cartes complètes"
+            value={stats.completeCards}
+          />
+          <StatCard
+            icon={XCircle}
+            title="Cartes incomplètes"
+            value={stats.incompleteCards}
           />
           <StatCard
             icon={Clock}
-            title="Durée Moyenne"
-            value={Math.round(stats.averageGameDuration)}
-            unit="min"
-          />
-          <StatCard
-            icon={BarChart2}
-            title="Temps de Jeu Total"
-            value={Math.round(stats.totalPlayTime)}
-            unit="min"
+            title="Durée moyenne des sessions"
+            value={`${stats.averageSessionDuration.hours}h ${stats.averageSessionDuration.minutes}m ${stats.averageSessionDuration.seconds}s`}
           />
         </div>
       )}

@@ -11,6 +11,8 @@ import {
 interface CategoryType {
     categoryId: number;
     categoryName: string;
+    categoryColor: string;
+    categoryIcon: string;
     cards: {
         cardId: string;
         cardName: string;
@@ -38,14 +40,11 @@ export function Sidebar({
                             onSelectDeck,
                             onSelectCategory,
                         }: SidebarProps) {
-    console.log('[Sidebar] rendering with decks:', decks);
-    console.log('[Sidebar] selectedDeck:', selectedDeck, 'selectedCategory:', selectedCategory);
 
     const [expandedDecks, setExpandedDecks] = React.useState<Set<number>>(new Set());
     const [expandedCategories, setExpandedCategories] = React.useState<Set<number>>(new Set());
 
     const toggleDeck = (deckId: number) => {
-        console.log('[Sidebar] toggleDeck called with deckId:', deckId);
         setExpandedDecks((prev) => {
             const next = new Set(prev);
             if (next.has(deckId)) {
@@ -55,10 +54,11 @@ export function Sidebar({
             }
             return next;
         });
+
+
     };
 
     const toggleCategory = (categoryId: number) => {
-        console.log('[Sidebar] toggleCategory called with categoryId:', categoryId);
         setExpandedCategories((prev) => {
             const next = new Set(prev);
             if (next.has(categoryId)) {
@@ -68,6 +68,7 @@ export function Sidebar({
             }
             return next;
         });
+        decks.map((d, index) => console.log(index, d.categories));
     };
 
     return (
@@ -96,19 +97,19 @@ export function Sidebar({
                                     toggleDeck(deck.deckId);
                                 }}
                             >
-                                {expandedDecks.has(deck.deckId) ? (
+                                {selectedDeck === deck.deckId ? (
                                     <ChevronDown className="w-4 h-4 mr-1" />
                                 ) : (
                                     <ChevronRight className="w-4 h-4 mr-1" />
                                 )}
-                                {expandedDecks.has(deck.deckId) ? (
+                                {selectedDeck === deck.deckId ? (
                                     <FolderOpen className="w-4 h-4 mr-2" />
                                 ) : (
                                     <FolderClosed className="w-4 h-4 mr-2" />
                                 )}
                                 <span>{deck.deckName}</span>
                             </button>
-                            {expandedDecks.has(deck.deckId) && deck.categories && (
+                            {selectedDeck === deck.deckId && deck.categories && (
                                 <div className="ml-6 mt-1 space-y-1">
                                     {deck.categories.map((category) => (
                                         <div key={category.categoryId}>
@@ -124,7 +125,7 @@ export function Sidebar({
                                                     toggleCategory(category.categoryId);
                                                 }}
                                             >
-                                                {expandedCategories.has(category.categoryId) ? (
+                                                {selectedCategory === category.categoryId ? (
                                                     <ChevronDown className="w-4 h-4 mr-1" />
                                                 ) : (
                                                     <ChevronRight className="w-4 h-4 mr-1" />
@@ -132,7 +133,7 @@ export function Sidebar({
                                                 <FolderClosed className="w-4 h-4 mr-2" />
                                                 <span>{category.categoryName}</span>
                                             </button>
-                                            {expandedCategories.has(category.categoryId) && category.cards && (
+                                            {selectedCategory === category.categoryId && category.cards && (
                                                 <div className="ml-6 mt-1 space-y-1">
                                                     {category.cards.map((card) => (
                                                         <div

@@ -9,7 +9,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "jest"
+    "test": "jest --no-verify"
   },
   "dependencies": {
     "cssesc": "^3.0.0",

@@ -2,6 +2,7 @@ const cardService = require('../services/CardService');
 const { Category } = require('../models');
 
 class CardController {
+    
     async getAllCards(req, res) {
         try {
             const cards = await cardService.getAllCards();
@@ -20,7 +21,8 @@ class CardController {
             }
             const cardWithImage = {
                 ...card,
-                cardImageData: card.cardImageData ? card.cardImageData.toString('base64') : null
+                cardImageData: card.cardImageData ? card.cardImageData.toString('base64') : null,
+                qrCodeLogoImageData: card.qrCodeLogoImageData ? card.qrCodeLogoImageData.toString('base64') : null
             };
             res.json(cardWithImage);
         } catch (error) {
@@ -29,15 +31,29 @@ class CardController {
         }
     }
 
+    /**
+     * Convertit une image base64 en Buffer
+     * @param {string} image - Image encodée en base64
+     * @returns {Buffer} - Image décodée
+     */
+    async imageBase64ToBuffer(image) {
+        if (image) {
+            const base64Data = image.split(',')[1];
+            return Buffer.from(base64Data, 'base64');
+        } else return undefined;
+    }
+
     async createCard(req, res) {
         console.log("Received POST request with body:", req.body);
         try {
-            const { cardName, description, cardActual, cardProposition, category, cardValue, cardImage } = req.body;
+            const { cardName, description, cardActual, cardProposition, category, cardValue, cardImage, deckId, qrCodeColor, qrCodeLogoImage, backgroundColor } = req.body;
 
+            console.log("createCardcreateCardcreateCard :", category);
             // Récupérer cardCategoryID à partir des infos envoyées
             const categoryRecord = await Category.findOne({
                 where: {
-                    categoryName: category
+                    categoryName: category,
+                    deckId: deckId
                 }
             });
             if (!categoryRecord) {
@@ -45,13 +61,10 @@ class CardController {
             }
             const cardCategoryId = categoryRecord.categoryId;
 
-            let cardImageData;
-            if (cardImage) {
-                const base64Data = cardImage.split(',')[1];
-                cardImageData = Buffer.from(base64Data, 'base64');
-            }
+            let cardImageData = imageBase64ToBuffer(cardImage);
+            let qrCodeLogoImageData = imageBase64ToBuffer(qrCodeLogoImage);
 
-            const newCard = await cardService.createCard({ cardName, description, cardActual, cardProposition, cardCategoryId, cardImageData, cardValue });
+            const newCard = await cardService.createCard({ cardName, description, cardActual, cardProposition, cardCategoryId, cardImageData, cardValue, qrCodeColor, qrCodeLogoImageData, backgroundColor });
 
             res.status(201).json(newCard);
         } catch (error) {
@@ -63,12 +76,13 @@ class CardController {
     async updateCard(req, res) {
         try {
             console.log("[CardController] Received PUT request with body:", req.body);
-            const { cardName, description, cardActual, cardProposition, category, cardValue, cardImage } = req.body;
+            const { cardName, description, cardActual, cardProposition, category, cardValue, cardImage, deckId, qrCodeColor, qrCodeLogoImage, backgroundColor } = req.body;
 
             // Récupérer cardCategoryID à partir des infos envoyées
             const categoryRecord = await Category.findOne({
                 where: {
-                    categoryName: category
+                    categoryName: category,
+                    deckId: deckId
                 }
             });
             if (!categoryRecord) {
@@ -76,13 +90,10 @@ class CardController {
             }
             const cardCategoryId = categoryRecord.categoryId;
 
-            let cardImageData;
-            if (cardImage) {
-                const base64Data = cardImage.split(',')[1];
-                cardImageData = Buffer.from(base64Data, 'base64');
-            }
+            let cardImageData = imageBase64ToBuffer(cardImage);
+            let qrCodeLogoImageData = imageBase64ToBuffer(qrCodeLogoImage);
 
-            const updatedCard = await cardService.updateCard(req.params.id, { cardName, description, cardActual, cardProposition, cardCategoryId, cardImageData, cardValue });
+            const updatedCard = await cardService.updateCard(req.params.id, { cardName, description, cardActual, cardProposition, cardCategoryId, cardImageData, cardValue, qrCodeColor, qrCodeLogoImageData, backgroundColor });
 
             if (!updatedCard) {
                 return res.status(404).json({ message: "Card not found" });
@@ -113,6 +124,18 @@ class CardController {
         const isComplete = await cardService.isCardComplete(req.params.id);
         res.json({ isComplete });
     }
+}
+
+/**
+ * Convertit une image base64 en Buffer
+ * @param {string} image - Image encodée en base64
+ * @returns {Buffer} - Image décodée
+ */
+function imageBase64ToBuffer(image) {
+    if (image) {
+        const base64Data = image.split(',')[1];
+        return Buffer.from(base64Data, 'base64');
+    } else return undefined;
 }
 
 module.exports = new CardController();

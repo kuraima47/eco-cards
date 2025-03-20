@@ -1,8 +1,11 @@
-import { useEffect, useCallback, useState, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
 
 // Get the socket server URL from environment variables or use default
-const SOCKET_SERVER_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const SOCKET_SERVER_URL =
+  (typeof process !== 'undefined' && process.env?.VITE_API_URL) ||
+  (typeof window !== 'undefined' && (window as any).__ENV__?.VITE_API_URL) ||
+  'http://localhost:3000';
 
 interface UseSocketConnectionProps {
   onConnect?: () => void;

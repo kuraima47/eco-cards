@@ -1,21 +1,44 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { Camera, X, Check } from 'lucide-react';
+import { useSessionSocket } from "../../hooks/useSessionSocket.ts";
 
-const QRCodeReader: React.FC = () => {
+interface QRCodeReaderProps {
+    phase?: number;
+    onCO2Estimate?: (cardId: number, value: number) => void;
+    onAcceptanceChange?: (cardId: number, level: "high" | "medium" | "low" | null) => void;
+    onSelect?: (groupId: number, cardId: number) => void;
+}
+
+const QRCodeReader: React.FC<QRCodeReaderProps> = ({
+                                                       phase,
+                                                       onCO2Estimate,
+                                                       onAcceptanceChange,
+                                                       onSelect,
+                                                   }) => {
     const [showScanner, setShowScanner] = useState(false);
     const [isScanning, setIsScanning] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [showModal, setShowModal] = useState(false);
-    const [scannedText, setScannedText] = useState('');
     const scannerRef = useRef<Html5Qrcode | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const [card, setCard] = useState<any>(null);
+
+    // États pour la modale supplémentaire
+    const [showExtraModal, setShowExtraModal] = useState(false);
+    const [extraModalType, setExtraModalType] = useState<"phase2" | "phase3" | null>(null);
+
+    // Pour la phase 2 : estimation CO2
+    const [co2Estimate, setCo2Estimate] = useState<number>(0);
+
+    // Pour la phase 3 : choix d'acceptation
+    const [acceptanceOption, setAcceptanceOption] = useState<"confirmer" | "refuser">("confirmer");
 
     // Vérifie qu'on peut accéder à la caméra
     const checkCameraPermission = async (): Promise<boolean> => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'environment' }
+                video: { facingMode: 'environment' },
             });
             stream.getTracks().forEach(track => track.stop());
             return true;
@@ -70,7 +93,7 @@ const QRCodeReader: React.FC = () => {
             // Configuration minimale
             const config = {
                 fps: 10,
-                qrbox: 250
+                qrbox: 250,
             };
 
             await scanner.start(
@@ -78,7 +101,11 @@ const QRCodeReader: React.FC = () => {
                 config,
                 (decodedText) => {
                     stopScanner();
-                    setScannedText(decodedText);
+                    try {
+                        setCard(JSON.parse(decodedText));
+                    } catch (e) {
+                        console.error("Erreur lors du parsing du JSON :", e);
+                    }
                     setShowModal(true);
                 },
                 (errorMessage) => {
@@ -119,16 +146,33 @@ const QRCodeReader: React.FC = () => {
         setShowScanner(false);
     };
 
-    // Fonctions pour la gestion de la modal
+    // Gestion de la modale principale
     const handleClose = () => {
         setShowModal(false);
-        setScannedText('');
+        setCard(null);
     };
 
+    // Lorsque l'utilisateur clique sur "Valider" dans la modale principale
     const handleValidate = () => {
-        // Implémentez ici la logique de validation (redirection, appel d'API, etc.)
-        console.log("QR Code validé :", scannedText);
-        setShowModal(false);
+        if (phase === 2) {
+            // Pour la phase 2, on ouvre la modale d'estimation
+            setShowModal(false);
+            setExtraModalType("phase2");
+            setShowExtraModal(true);
+        } else if (phase === 3) {
+            // Pour la phase 3, on ouvre la modale de confirmation
+            setShowModal(false);
+            setExtraModalType("phase3");
+            setShowExtraModal(true);
+        } else {
+            // Autres phases : exécuter directement l'action
+            if (phase === 1) {
+                onSelect?.(1, 1);
+            } else if (phase === 4) {
+                onSelect?.(1, 1);
+            }
+            setShowModal(false);
+        }
     };
 
     return (
@@ -156,13 +200,16 @@ const QRCodeReader: React.FC = () => {
                     </div>
                 </div>
             )}
-            {/* Modal pour afficher le résultat */}
+            {/* Modale principale pour afficher le résultat du QR */}
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
-                        <h3 className="text-xl font-semibold mb-4">QR Code of card Détecté</h3>
+                        <h3 className="text-xl font-semibold mb-4">QR Code de la carte détectée</h3>
                         <div className="bg-gray-50 p-4 rounded-lg mb-6">
-                            <p className="text-gray-700 break-words">{scannedText}</p>
+                            <p className="text-gray-700"><strong>Nom de la carte :</strong> {card?.cardName}</p>
+                            <p className="text-gray-700"><strong>Catégorie :</strong> {card?.category}</p>
+                            <p className="text-gray-700"><strong>Valeur :</strong> {card?.cardValue}</p>
+                            <p className="text-gray-700"><strong>Nom du deck :</strong> {card?.deckName}</p>
                         </div>
                         <div className="flex justify-end gap-3">
                             <button
@@ -177,6 +224,94 @@ const QRCodeReader: React.FC = () => {
                             >
                                 <Check className="w-4 h-4" />
                                 Valider
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Modale supplémentaire pour la phase 2 : Estimation CO2 */}
+            {showExtraModal && extraModalType === "phase2" && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+                        <h3 className="text-xl font-semibold mb-4">Estimation CO2</h3>
+                        <div className="bg-gray-50 p-4 rounded-lg mb-6">
+                            <p className="text-gray-700 mb-2">Voulez-vous estimer le CO₂ ?</p>
+                            <input
+                                type="number"
+                                value={co2Estimate}
+                                onChange={(e) => setCo2Estimate(parseFloat(e.target.value))}
+                                className="w-full border border-gray-300 rounded p-2"
+                                placeholder="Entrez une valeur"
+                            />
+                        </div>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => {
+                                    // Action "Unselect"
+                                    onSelect?.(1, 1);
+                                    setShowExtraModal(false);
+                                }}
+                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                            >
+                                Unselect
+                            </button>
+                            <button
+                                onClick={() => {
+                                    // Action estimation
+                                    onCO2Estimate?.(1, co2Estimate);
+                                    // Vous pouvez également déselectionner la carte si nécessaire :
+                                    onSelect?.(1, 1);
+                                    setShowExtraModal(false);
+                                }}
+                                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+                            >
+                                <Check className="w-4 h-4" />
+                                Estimer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Modale supplémentaire pour la phase 3 : Confirmation */}
+            {showExtraModal && extraModalType === "phase3" && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+                        <h3 className="text-xl font-semibold mb-4">Confirmation de la carte</h3>
+                        <div className="bg-gray-50 p-4 rounded-lg mb-6">
+                            <p className="text-gray-700 mb-2">Veuillez choisir une option :</p>
+                            <select
+                                value={acceptanceOption}
+                                onChange={(e) => setAcceptanceOption(e.target.value as "confirmer" | "refuser")}
+                                className="w-full border border-gray-300 rounded p-2"
+                            >
+                                <option value="confirmer">Confirmer</option>
+                                <option value="refuser">Refuser</option>
+                            </select>
+                        </div>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => {
+                                    // Annuler : on ferme la modale sans action
+                                    setShowExtraModal(false);
+                                }}
+                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                            >
+                                Annuler
+                            </button>
+                            <button
+                                onClick={() => {
+                                    // En fonction du choix, on appelle onAcceptanceChange
+                                    if (acceptanceOption === "confirmer") {
+                                        onAcceptanceChange?.(1, "high"); // ou ajustez selon la logique métier
+                                    } else {
+                                        onAcceptanceChange?.(1, null);
+                                    }
+                                    setShowExtraModal(false);
+                                }}
+                                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+                            >
+                                <Check className="w-4 h-4" />
+                                Confirmer
                             </button>
                         </div>
                     </div>
