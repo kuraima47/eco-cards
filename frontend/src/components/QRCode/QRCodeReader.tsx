@@ -1,13 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { Camera, X, Check } from 'lucide-react';
-import { useSessionSocket } from "../../hooks/useSessionSocket.ts";
+import {useAdmin} from "../../hooks/useAdmin.ts";
+import {Group} from "../../types/game.ts";
 
 interface QRCodeReaderProps {
     phase?: number;
-    onCO2Estimate?: (cardId: number, value: number) => void;
-    onAcceptanceChange?: (cardId: number, level: "high" | "medium" | "low" | null) => void;
+    onCO2Estimate?: (groupId:number, cardId: number, value: number) => void;
+    onAcceptanceChange?: ((groupId: number, cardId: number, level: "high" | "medium" | "low" | null) => void) | undefined;
     onSelect?: (groupId: number, cardId: number) => void;
+    group? : Group | undefined;
 }
 
 const QRCodeReader: React.FC<QRCodeReaderProps> = ({
@@ -15,6 +17,7 @@ const QRCodeReader: React.FC<QRCodeReaderProps> = ({
                                                        onCO2Estimate,
                                                        onAcceptanceChange,
                                                        onSelect,
+                                                       group
                                                    }) => {
     const [showScanner, setShowScanner] = useState(false);
     const [isScanning, setIsScanning] = useState(false);
@@ -23,6 +26,7 @@ const QRCodeReader: React.FC<QRCodeReaderProps> = ({
     const scannerRef = useRef<Html5Qrcode | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [card, setCard] = useState<any>(null);
+    const [showChoiceModal, setShowChoiceModal] = useState(false);
 
     // États pour la modale supplémentaire
     const [showExtraModal, setShowExtraModal] = useState(false);
@@ -34,8 +38,15 @@ const QRCodeReader: React.FC<QRCodeReaderProps> = ({
     // Pour la phase 3 : choix d'acceptation
     const [acceptanceOption, setAcceptanceOption] = useState<"confirmer" | "refuser">("confirmer");
 
+    const admin = useAdmin();
+
     // Vérifie qu'on peut accéder à la caméra
     const checkCameraPermission = async (): Promise<boolean> => {
+        if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+            console.error("L'accès à la caméra nécessite une connexion sécurisée (HTTPS).");
+            setError("L'accès à la caméra nécessite une connexion sécurisée (HTTPS).");
+            return false;
+        }
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: 'environment' },
@@ -152,24 +163,16 @@ const QRCodeReader: React.FC<QRCodeReaderProps> = ({
         setCard(null);
     };
 
-    // Lorsque l'utilisateur clique sur "Valider" dans la modale principale
+    // Lorsqu'on clique sur "Valider" dans la modale principale,
+    // on ferme cette modale et on ouvre la modale intermédiaire de choix
     const handleValidate = () => {
-        if (phase === 2) {
-            // Pour la phase 2, on ouvre la modale d'estimation
+        const cardId = admin.getCardData(card?.cardName, card?.category, card?.deckName);
+        if (phase === 2 || phase === 3) {
             setShowModal(false);
-            setExtraModalType("phase2");
-            setShowExtraModal(true);
-        } else if (phase === 3) {
-            // Pour la phase 3, on ouvre la modale de confirmation
-            setShowModal(false);
-            setExtraModalType("phase3");
-            setShowExtraModal(true);
+            setShowChoiceModal(true);
         } else {
-            // Autres phases : exécuter directement l'action
-            if (phase === 1) {
-                onSelect?.(1, 1);
-            } else if (phase === 4) {
-                onSelect?.(1, 1);
+            if (phase === 1 || phase === 4) {
+                onSelect?.(group? group.groupId : -1,cardId);
             }
             setShowModal(false);
         }
@@ -200,6 +203,7 @@ const QRCodeReader: React.FC<QRCodeReaderProps> = ({
                     </div>
                 </div>
             )}
+
             {/* Modale principale pour afficher le résultat du QR */}
             {showModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -229,6 +233,43 @@ const QRCodeReader: React.FC<QRCodeReaderProps> = ({
                     </div>
                 </div>
             )}
+
+            {/* Modale intermédiaire pour choisir entre "Unselect" et "Continuer" */}
+            {showChoiceModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+                        <h3 className="text-xl font-semibold mb-4">Choix</h3>
+                        <p className="text-gray-700 mb-6">Voulez-vous déselectionner la carte ou continuer ?</p>
+                        <div className="flex justify-end gap-3">
+                            <button
+                                onClick={() => {
+                                    const cardId = admin.getCardData(card?.cardName, card?.category, card?.deckName);
+                                    onSelect?.(group? group.groupId : -1,cardId);
+                                    setShowChoiceModal(false);
+                                }}
+                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                            >
+                                Unselect
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (phase === 2) {
+                                        setExtraModalType("phase2");
+                                    } else if (phase === 3) {
+                                        setExtraModalType("phase3");
+                                    }
+                                    setShowChoiceModal(false);
+                                    setShowExtraModal(true);
+                                }}
+                                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+                            >
+                                Continuer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Modale supplémentaire pour la phase 2 : Estimation CO2 */}
             {showExtraModal && extraModalType === "phase2" && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -247,8 +288,6 @@ const QRCodeReader: React.FC<QRCodeReaderProps> = ({
                         <div className="flex justify-end gap-3">
                             <button
                                 onClick={() => {
-                                    // Action "Unselect"
-                                    onSelect?.(1, 1);
                                     setShowExtraModal(false);
                                 }}
                                 className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
@@ -257,10 +296,8 @@ const QRCodeReader: React.FC<QRCodeReaderProps> = ({
                             </button>
                             <button
                                 onClick={() => {
-                                    // Action estimation
-                                    onCO2Estimate?.(1, co2Estimate);
-                                    // Vous pouvez également déselectionner la carte si nécessaire :
-                                    onSelect?.(1, 1);
+                                    const cardId = admin.getCardData(card?.cardName, card?.category, card?.deckName);
+                                    onCO2Estimate?.(group? group.groupId : -1,cardId, co2Estimate);
                                     setShowExtraModal(false);
                                 }}
                                 className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
@@ -272,6 +309,7 @@ const QRCodeReader: React.FC<QRCodeReaderProps> = ({
                     </div>
                 </div>
             )}
+
             {/* Modale supplémentaire pour la phase 3 : Confirmation */}
             {showExtraModal && extraModalType === "phase3" && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -291,20 +329,19 @@ const QRCodeReader: React.FC<QRCodeReaderProps> = ({
                         <div className="flex justify-end gap-3">
                             <button
                                 onClick={() => {
-                                    // Annuler : on ferme la modale sans action
                                     setShowExtraModal(false);
                                 }}
                                 className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                             >
-                                Annuler
+                                Unselect
                             </button>
                             <button
                                 onClick={() => {
-                                    // En fonction du choix, on appelle onAcceptanceChange
+                                    const cardId = admin.getCardData(card?.cardName, card?.category, card?.deckName);
                                     if (acceptanceOption === "confirmer") {
-                                        onAcceptanceChange?.(1, "high"); // ou ajustez selon la logique métier
+                                        onAcceptanceChange?.(group? group.groupId : -1, cardId, "high");
                                     } else {
-                                        onAcceptanceChange?.(1, null);
+                                        onAcceptanceChange?.(group? group.groupId : -1, cardId, null);
                                     }
                                     setShowExtraModal(false);
                                 }}

@@ -1,5 +1,5 @@
-import { Edit, Eye, Plus, Trash2 } from 'lucide-react';
-import { useState } from "react";
+import {Edit, Eye, Plus, Trash2} from 'lucide-react';
+import React, { useState } from "react";
 import { useAdmin } from "../../hooks/useAdmin";
 import type { Category } from '../../types/game';
 import { GameCard } from '../../types/game';
@@ -16,17 +16,23 @@ interface CategoryViewProps {
     refreshParent: () => void;
 }
 
+// Définir en haut du fichier ou dans un fichier de types
+interface GameCardApiFormat extends Omit<GameCard, 'cardActual' | 'cardProposition'> {
+    cardActual: string;
+    cardProposition: string;
+}
+
 export function CategoryView({ category, onCreateCard, refreshParent }: CategoryViewProps) {
     const [isCardModalOpen, setIsCardModalOpen] = useState(false);
     const [isViewCardModalOpen, setIsViewCardModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
-    const [currentCard, setCurrentCard] = useState<GameCard | null>(null);
+    const [currentCard, setCurrentCard] = useState<GameCard | undefined>(undefined);
     const [itemToDelete, setItemToDelete] = useState<{ type: 'card'; id: string; name: string } | null>(null);
     const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
     const admin = useAdmin();
-
+    const isAdmin = admin.getDeckAdmin(category.deckId) === admin.user?.userId;
     const iconName = toPascalCase(category.categoryIcon);
     const CategoryIcon = LucideIcons[iconName as keyof typeof LucideIcons] as React.ElementType || LucideIcons.Box;
 
@@ -37,7 +43,7 @@ export function CategoryView({ category, onCreateCard, refreshParent }: Category
             deckId: category.deckId,
             cardName: '...',
             description: '...',
-            cardImageData: '',
+            cardImageData: { data: new Uint8Array(), type: '' },
             qrCodeColor: '#000000',
             qrCodeLogoImageData: '',
             backgroundColor: '#FFFFFF',
@@ -46,15 +52,17 @@ export function CategoryView({ category, onCreateCard, refreshParent }: Category
             cardActual: [],
             cardProposition: [],
             deckName: admin.getDeck(category.deckId) || '...',
-            cardNumber: category.cards.length,
-            totalCards: modalMode === "edit" ? category.cards.length : category.cards.length || 0,
+            cardNumber: (category.cards?.length ?? 0) + 1,
+            totalCards: modalMode === "edit" ? (category.cards?.length ?? 0) : (category.cards?.length ?? 0) + 1,
+            cardCategoryId: -1,
+            selected: false,
         });
         setIsCardModalOpen(true);
     };
 
     const getCardNumber = (cardId: number) => {
         // Utilisation de findIndex
-        const index = category.cards.findIndex(card => card.cardId === cardId);
+        const index = (category.cards ?? []).findIndex(card => card.cardId === cardId);
         return index !== -1 ? index + 1 : null;
     };
 
@@ -77,8 +85,12 @@ export function CategoryView({ category, onCreateCard, refreshParent }: Category
             cardActual: ensureArray(card.cardActual),
             cardProposition: ensureArray(card.cardProposition),
             deckName: admin.getDeck(category.deckId) || '...',
-            cardNumber: getCardNumber(card.cardId) || category.cards.length,
-            totalCards: modalMode === "edit" ? category.cards.length : category.cards.length || 0,
+            // cardNumber: getCardNumber(card.cardId) || category.cards.length,
+            // totalCards: modalMode === "edit" ? category.cards.length : category.cards.length || 0,
+            cardNumber: getCardNumber(card.cardId) || (category.cards?.length ?? 0) + 1,
+            totalCards: modalMode === "edit" ? (category.cards?.length ?? 0) : (category.cards?.length ?? 0) + 1,
+            cardCategoryId: card.cardCategoryId || -1,
+            selected: card.selected || false,
         });
         setIsCardModalOpen(true);
     };
@@ -100,8 +112,10 @@ export function CategoryView({ category, onCreateCard, refreshParent }: Category
             cardActual: ensureArray(card.cardActual),
             cardProposition: ensureArray(card.cardProposition),
             deckName: admin.getDeck(category.deckId) || '...',
-            cardNumber: getCardNumber(card.cardId) || category.cards.length,
-            totalCards: modalMode === "edit" ? category.cards.length : category.cards.length || 0,
+            cardNumber: getCardNumber(card.cardId) || (category.cards?.length ?? 0) + 1,
+            totalCards: modalMode === "edit" ? (category.cards?.length ?? 0) : (category.cards?.length ?? 0) + 1,
+            cardCategoryId: card.cardCategoryId || -1,
+            selected: card.selected || false
         });
         setIsViewCardModalOpen(true);
     };
@@ -117,16 +131,16 @@ export function CategoryView({ category, onCreateCard, refreshParent }: Category
             // Convertir les tableaux en chaînes de caractères JSON
             const formattedData = {
                 ...data,
-                cardActual: Array.isArray(data.cardActual) ? JSON.stringify(data.cardActual) : data.cardActual,
-                cardProposition: Array.isArray(data.cardProposition) ? JSON.stringify(data.cardProposition) : data.cardProposition,
-            };
+                cardActual: Array.isArray(data.cardActual) ? JSON.stringify(data.cardActual) : JSON.stringify([]),
+                cardProposition: Array.isArray(data.cardProposition) ? JSON.stringify(data.cardProposition) : JSON.stringify([]),
+            } as unknown as Partial<GameCard>;
 
             if (modalMode === 'add') {
                 await admin.addCard(formattedData);
                 setNotification({ message: "Carte créée avec succès !", type: "success" });
                 refreshParent();
             } else if (modalMode === 'edit' && currentCard) {
-                console.log("[CategoryView] handleCardSubmit - edit", data);
+                console.log("[CategoryView] handleCardSubmit - edit", formattedData);
                 await admin.updateCard(currentCard.cardId, formattedData);
                 setNotification({ message: "Carte modifiée avec succès !", type: "success" });
                 refreshParent();
@@ -174,40 +188,52 @@ export function CategoryView({ category, onCreateCard, refreshParent }: Category
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {category.cards && category.cards.map((card: GameCard) => (
-                    <div key={card.cardId} className="p-4 bg-white rounded-lg shadow border border-gray-200">
-                        <h3 className="font-semibold text-lg mb-2">{card.cardName}</h3>
-                        <p className="text-gray-600">{card.description}</p>
-                        <div className="flex space-x-1 justify-end">
+                    <div
+                        key={card.cardId}
+                        className="p-4 bg-white rounded-lg shadow border border-gray-200 flex flex-col h-full"
+                    >
+                        {/* Contenu de la carte qui prendra l'espace disponible */}
+                        <div className="flex-grow">
+                            <h3 className="font-semibold text-lg mb-2">{card.cardName}</h3>
+                            <p className="text-gray-600">{card.description}</p>
+                        </div>
+
+                        {/* Les boutons seront toujours en bas */}
+                        <div className="flex space-x-1 justify-end mt-auto pt-3">
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     openViewCardModal(card);
                                 }}
                                 className="text-green-600 hover:text-green-800"
-                                title="Modifier la carte"
+                                title="Voir la carte"
                             >
                                 <Eye size={18} />
                             </button>
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    openEditCardModal(card);
-                                }}
-                                className="text-blue-600 hover:text-blue-800"
-                                title="Modifier la carte"
-                            >
-                                <Edit size={18} />
-                            </button>
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    openDeleteModal(String(card.cardId), card.cardName || '');
-                                }}
-                                className="text-red-600 hover:text-red-800"
-                                title="Supprimer la carte"
-                            >
-                                <Trash2 size={18} />
-                            </button>
+                            {isAdmin && (
+                            <>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        openEditCardModal(card);
+                                    }}
+                                    className="text-blue-600 hover:text-blue-800"
+                                    title="Modifier la carte"
+                                >
+                                    <Edit size={18} />
+                                </button>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        openDeleteModal(String(card.cardId), card.cardName || '');
+                                    }}
+                                    className="text-red-600 hover:text-red-800"
+                                    title="Supprimer la carte"
+                                >
+                                    <Trash2 size={18} />
+                                </button>
+                            </>
+                            )}
                         </div>
                     </div>
                 ))}

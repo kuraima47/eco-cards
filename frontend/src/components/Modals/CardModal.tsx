@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 import { CreateCardForm } from '../CreateCardForm';
 import Card from '../Card/Card';
@@ -6,7 +6,7 @@ import CardBack from '../Card/CardBack';
 import { defaultCard, GameCard } from '../../types/game';
 
 interface CardModalProps {
-    initialData?: GameCard;
+    initialData?: GameCard | null;
     isOpen: boolean;
     onClose: () => void;
     mode: 'add' | 'edit';
@@ -16,40 +16,28 @@ interface CardModalProps {
     categoryColor: string;
 }
 
-// ✅ On évite de rendre le composant si isOpen est false AVANT les hooks
-export function CardModal({ initialData, isOpen, onClose, mode, currentDeckId, onSubmit, categoryIcon, categoryColor }: CardModalProps) {
-
-    const [cardData, setCardData] = useState<GameCard>(defaultCard);
-    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-
-    useEffect(() => {
-        if (initialData) {
-            setCardData(initialData);
-        }
-    }, [initialData]);
-
-    useEffect(() => {
-        const handleResize = () => setWindowWidth(window.innerWidth);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    const handleSubmit = async () => {
-        try {
-            console.log("[CardModal] handleSubmit:", cardData);
-            onSubmit(cardData);
-            onClose();
-        } catch (error) {
-            console.error("Erreur lors de la création de la carte :", error);
-        }
-    };
-
-    const isLargeScreen = windowWidth >= 1024;
-    const cardWidth = isLargeScreen ? 400 : 250;
-    const cardHeight = isLargeScreen ? 550 : 400;
-
-    if (!isOpen) return null;
-
+function CardModalContent({ 
+    cardData, 
+    setCardData,
+    onClose,
+    mode,
+    handleSubmit,
+    categoryIcon,
+    categoryColor,
+    cardWidth,
+    cardHeight
+}: {
+    cardData: GameCard;
+    setCardData: React.Dispatch<React.SetStateAction<GameCard>>;
+    onClose: () => void;
+    mode: 'add' | 'edit';
+    handleSubmit: () => void;
+    categoryIcon: string;
+    categoryColor: string;
+    cardWidth: number;
+    cardHeight: number;
+}) {
+    // Ce composant ne contient pas de hooks, juste le rendu
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center pt-16 px-4 pb-4">
             <div className="bg-[#ebf7eb] rounded-xl shadow-2xl w-full max-w-[90rem] h-[calc(90vh-64px)] flex">
@@ -94,4 +82,82 @@ export function CardModal({ initialData, isOpen, onClose, mode, currentDeckId, o
     );
 }
 
-export default CardModal;
+// Séparation du contenu et de la logique pour éviter les problèmes de hooks
+export function CardModal(props: CardModalProps) {
+    const { initialData, isOpen, onClose, mode, onSubmit, categoryIcon, categoryColor } = props;
+
+    // Tous les hooks sont maintenant déclarés sans condition
+    const [cardData, setCardData] = useState<GameCard>(initialData || defaultCard);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+    const handleResize = useCallback(() => {
+        setWindowWidth(window.innerWidth);
+    }, []);
+
+    // Effet pour synchroniser cardData avec initialData
+    useEffect(() => {
+        if (initialData) {
+            setCardData(initialData);
+        }
+    }, [initialData]);
+
+    // Effet pour gérer les écouteurs d'événements
+    useEffect(() => {
+        if (isOpen) {
+            window.addEventListener('resize', handleResize);
+            return () => {
+                window.removeEventListener('resize', handleResize);
+            };
+        }
+    }, [handleResize, isOpen]);
+
+    // Fonction de soumission
+    const handleSubmit = useCallback(() => {
+        try {
+            onSubmit(cardData);
+            onClose();
+        } catch (error) {
+            console.error("Erreur lors de la création/modification de la carte :", error);
+        }
+    }, [cardData, onSubmit, onClose]);
+
+    // Calculs mémorisés
+    const { isLargeScreen, cardWidth, cardHeight } = useMemo(() => {
+        const isLargeScreen = windowWidth >= 1024;
+        return {
+            isLargeScreen,
+            cardWidth: isLargeScreen ? 400 : 250,
+            cardHeight: isLargeScreen ? 550 : 400
+        };
+    }, [windowWidth]);
+
+    // Utilisation d'une condition pour le rendu, mais tous les hooks sont déjà appelés
+    return isOpen ? (
+        <CardModalContent
+            cardData={cardData}
+            setCardData={setCardData}
+            onClose={onClose}
+            mode={mode}
+            handleSubmit={handleSubmit}
+            categoryIcon={categoryIcon}
+            categoryColor={categoryColor}
+            cardWidth={cardWidth}
+            cardHeight={cardHeight}
+        />
+    ) : null;
+}
+
+// Optimisation avec React.memo
+export default React.memo(CardModal, (prevProps, nextProps) => {
+    // Vérification sécurisée pour éviter les erreurs de null/undefined
+    const prevCardId = prevProps.initialData?.cardId;
+    const nextCardId = nextProps.initialData?.cardId;
+    
+    return (
+        prevProps.isOpen === nextProps.isOpen &&
+        prevProps.mode === nextProps.mode &&
+        prevProps.categoryIcon === nextProps.categoryIcon &&
+        prevProps.categoryColor === nextProps.categoryColor &&
+        prevCardId === nextCardId
+    );
+});

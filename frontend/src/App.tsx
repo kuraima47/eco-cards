@@ -1,15 +1,12 @@
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
-import { QRCodeGenerator } from './components/QRCode/QRCodeGenerator.tsx';
 import Sidebar from './layouts/Sidebar';
 import RGPDFooter from './layouts/RGPDFooter';
-import Admin from './pages/Admin';
 import RGPD from './pages/RGPD'
 import Auth from './pages/Auth';
 import Games from './pages/session/Games.tsx';
 import Home from './pages/Home';
 import DeckPage from './pages/deckPage.tsx'
-import PDFpoc from "./pages/PDFPoc.tsx";
 import Players from './pages/Players';
 import Rules from './pages/Rules';
 import Stats from './pages/Stats';
@@ -28,9 +25,9 @@ function App() {
                         <Routes>
                             <Route path="/" element={<Home />} />
                             <Route path="/games" element={<Games />} />
-                            <Route path="/games/new" element={<GameSetup />} />
-                            <Route path="/games/:id" element={<GameSetup />} />
-                            <Route path="/games/:sessionId/phase/:phase" element={<SessionPhases />} />
+                            <Route path="/games/new" element={<ProtectedRoute><GameSetup /></ProtectedRoute>} />
+                            <Route path="/games/:id" element={<ProtectedRoute><GameSetup /></ProtectedRoute>} />
+                            <Route path="/games/:sessionId/phase/:phase" element={<ProtectedRoute><SessionPhases /></ProtectedRoute>} />
                             <Route path="/auth" element={<Auth />} />
                             <Route path="/mentions-legales" element={<RGPD />} />
                             <Route
@@ -41,8 +38,6 @@ function App() {
                                     </ProtectedRoute>
                                 }
                             />
-                            <Route path="/qrcode" element={<QRCodeGenerator />} />
-                            <Route path="/pdf" element={<PDFpoc />} />
                             <Route path="/rules" element={<Rules />} />
                             <Route path="/deckpage" element={<DeckPage />} />
                             <Route

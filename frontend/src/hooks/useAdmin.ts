@@ -43,6 +43,15 @@ class AdminService {
         this.loading = loading;
     }
 
+    public getCardData(cardName : string, categoryName:string, deckName: string) : number{
+        for (let i = 0; i < this.cards.length; i++) {
+            if (this.cards[i].cardName === cardName && this.cards[i].cardCategoryId === this.categories.find(category => category.categoryName === categoryName)?.categoryId && this.decks.find(deck => deck.deckName === deckName)?.deckId === this.cards[i].deckId) {
+                return this.cards[i].cardId;
+            }
+        }
+        return 0;
+    }
+
     public async loadAllData(): Promise<void> {
         try {
             const { decks, categories, cards } = await adminApi.loadAllData();
@@ -129,6 +138,11 @@ class AdminService {
         return deck ? deck.deckName : '';
     }
 
+    public getDeckAdmin(deckId: number): number {
+        const deck = this.decks.find(deck => deck.deckId === deckId);
+        return deck ? deck.adminId : 0;
+    }
+
     public async addDeck(deck: Partial<GameDeck>): Promise<void> {
         if (!this.user) throw new Error('User not authenticated');
         deck.adminId = this.user.userId;
@@ -205,9 +219,7 @@ export const useAdmin = () => {
         // On surcharge loadAllData pour forcer le re-render après la mise à jour des données.
         const originalLoadAllData = service.loadAllData.bind(service);
         service.loadAllData = async () => {
-            console.log("[useAdmin] loadAllData called - before");
             await originalLoadAllData();
-            console.log("[useAdmin] loadAllData called - after - forcing update");
             forceUpdate((prev) => prev + 1);
         };
 

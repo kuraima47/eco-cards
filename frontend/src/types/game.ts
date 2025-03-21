@@ -42,6 +42,7 @@ export interface GameCard {
     times_selected?: number;
     co2Estimation?: number
     acceptanceLevel?: "high" | "medium" | "low" | null
+    categoryColor?: string
 }
 
 export const defaultCard: GameCard = {
@@ -70,6 +71,9 @@ export const defaultCard: GameCard = {
     times_selected: 0
 };
 
+export interface DeckWithCategories extends GameDeck {
+    categories: CategoryType[];
+}
 
 export interface SelectedCard {
     cardId: number;
@@ -83,11 +87,21 @@ export interface TableData {
     cards: GameCard[];
 }
 
-
 export interface GameDeck {
     deckId: number;
     deckName: string;
-    adminId: number;
+    categories?: CategoryType[]; // Add categories as an optional property
+}
+
+export interface CategoryType {
+    categoryId: number;
+    categoryName: string;
+    categoryColor: string;
+    categoryIcon: string;
+    cards: {
+        cardId: string;
+        cardName: string;
+    }[];
 }
 
 export interface DeckContent {

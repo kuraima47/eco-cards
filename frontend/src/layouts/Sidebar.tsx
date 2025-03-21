@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Leaf, Users, PlaySquare, BarChart2, Settings, LogOut, LogIn, BookOpen, QrCode, FileText, Menu, X, UserPlus } from 'lucide-react';
+import { Leaf, Users, PlaySquare, BarChart2, Settings, LogOut, LogIn, BookOpen, QrCode, FileText, Menu, X, UserPlus, Wallet } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 const Sidebar = () => {
@@ -25,11 +25,9 @@ const Sidebar = () => {
 
     const menuItems = [
         { path: '/games', icon: PlaySquare, label: 'Sessions' },
-        { path: '/players', icon: Users, label: 'Joueurs' },
         { path: '/stats', icon: BarChart2, label: 'Statistiques' },
         { path: '/rules', icon: BookOpen, label: 'Règles' },
-        { path: '/qrcode', icon: QrCode, label: 'QR Code' },
-        { path: '/pdf', icon: FileText, label: 'PDF' },
+        { path: '/admin', icon: Wallet, label: 'Decks', adminAccess: true },
     ];
 
     const closeMobileMenu = () => {
@@ -57,6 +55,10 @@ const Sidebar = () => {
             <nav className="flex-1 p-4 overflow-y-auto">
                 <div className="space-y-2">
                     {menuItems.map((item) => {
+                        if (item.adminAccess && !(userRole === 'admin' || (user && user.role === 'admin'))) {
+                            return null; // Ne pas afficher cet élément si l'utilisateur n'est pas admin
+                        }
+                        
                         const Icon = item.icon;
                         return (
                             <Link
@@ -70,7 +72,7 @@ const Sidebar = () => {
                                 }`}
                             >
                                 <Icon className="h-5 w-5" />
-                                <span>{item.label}</span>
+                                <span>{item.label}zaz</span>
                             </Link>
                         );
                     })}
@@ -139,6 +141,10 @@ const Sidebar = () => {
                     <nav className="flex-grow flex items-center">
                         <div className="flex space-x-6">
                             {menuItems.map((item) => {
+                                if (item.adminAccess && !(userRole === 'admin' || (user && user.role === 'admin'))) {
+                                    return null; // Ne pas afficher cet élément si l'utilisateur n'est pas admin
+                                }
+                                
                                 const Icon = item.icon;
                                 return (
                                     <Link
@@ -178,20 +184,12 @@ const Sidebar = () => {
                                             {(userRole === 'admin' || (user && user.role === 'admin')) && (
                                                 <>
                                                     <Link
-                                                        to="/admin"
-                                                        onClick={() => setDesktopMenuOpen(false)}
-                                                        className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:bg-green-50 hover:text-green-600 w-full text-left"
-                                                    >
-                                                        <Settings className="h-5 w-5" />
-                                                        <span>Admin</span>
-                                                    </Link>
-                                                    <Link
                                                         to="/create-admin"
                                                         onClick={() => setDesktopMenuOpen(false)}
                                                         className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:bg-green-50 hover:text-green-600 w-full text-left"
                                                     >
                                                         <UserPlus className="h-5 w-5" />
-                                                        <span>Créer admin</span>
+                                                        <span>Créer un compte admin</span>
                                                     </Link>
                                                     <div className="border-t border-gray-100 my-1"></div>
                                                 </>

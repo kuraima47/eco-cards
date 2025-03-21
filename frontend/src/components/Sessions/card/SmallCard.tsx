@@ -1,5 +1,5 @@
-import type React from "react"
-import { useState } from "react"
+import React, { useCallback } from "react"
+import { useMemo, useState } from "react"
 import { Sparkles, ThumbsUp, Search, Check } from "lucide-react"
 import type { GameCard } from "../../../types/game"
 import { generateCodeFromCO2 } from "../../../utils/formatting"
@@ -8,7 +8,7 @@ interface SmallCardProps {
     cardData: GameCard
     width?: number
     height?: number
-    hiddenCo2?: boolean
+    isAdmin?: boolean
     isFlipped: boolean
     categoryName?: string
     categoryIcon?: string
@@ -25,7 +25,7 @@ interface SmallCardProps {
 
 const SmallCard: React.FC<SmallCardProps> = ({
     cardData,
-    hiddenCo2,
+    isAdmin=false,
     isFlipped = false,
     phase = 1,
     co2Estimation,
@@ -38,43 +38,41 @@ const SmallCard: React.FC<SmallCardProps> = ({
 }) => {
     const [showPhaseControls, setShowPhaseControls] = useState(false)
 
-    const encodedCo2Value = generateCodeFromCO2(cardData.cardValue)
+    const encodedCo2Value = useMemo(() => generateCodeFromCO2(cardData.cardValue), [cardData.cardValue]);
 
-    const handleCardClick = (e: React.MouseEvent) => {
+    const handleCardClick = useCallback((e: React.MouseEvent) => {
         e.stopPropagation()
         if (phase > 1) {
-            setShowPhaseControls(!showPhaseControls)
+            // setShowPhaseControls(prev => !prev)
         } else if (onSelect) {
             onSelect()
         }
-    }
+    }, [phase, onSelect])
 
-    const handleSelectClick = (e: React.MouseEvent) => {
+    const handleSelectClick = useCallback((e: React.MouseEvent) => {
         e.stopPropagation()
         onSelect && onSelect()
-    }
+    }, [onSelect])
 
     const handleOpenModal = (e: React.MouseEvent) => {
         e.stopPropagation()
         onOpenModal && onOpenModal()
     }
 
-    const handleCO2Estimate = (value: number, e: React.MouseEvent) => {
+    const handleCO2Estimate = useCallback((value: number, e: React.MouseEvent) => {
         e.stopPropagation()
-        console.log(`SmallCard: CO2 estimation for card ${cardData.cardId}: ${value}`)
         onCO2Estimate && onCO2Estimate(value, e)
         setShowPhaseControls(false)
-    }
+    }, [cardData.cardId, onCO2Estimate])
 
-    const handleAcceptanceChange = (level: "high" | "medium" | "low" | null, e: React.MouseEvent) => {
+    const handleAcceptanceChange = useCallback((level: "high" | "medium" | "low" | null, e: React.MouseEvent) => {
         e.stopPropagation()
-        console.log(`SmallCard: Acceptance level for card ${cardData.cardId}: ${level}`)
         onAcceptanceChange && onAcceptanceChange(level, e)
         setShowPhaseControls(false)
-    }
+    }, [cardData.cardId, onAcceptanceChange])
 
     // Render header with indicators (non-overlapping)
-    const renderHeader = () => {
+    const renderHeader = useMemo(() => {
         return (
             <div className="flex items-center justify-between bg-gray-800 p-2 text-white">
                 {/* Left section: selection indicator */}
@@ -94,10 +92,10 @@ const SmallCard: React.FC<SmallCardProps> = ({
                     )}
                     {(phase === 3 || phase === 4) && acceptanceLevel && (
                         <div className={`rounded-full px-2 py-0.5 text-xs font-bold shadow-lg border ${acceptanceLevel === "high"
-                                ? "bg-emerald-400/90 border-emerald-500 text-emerald-900"
-                                : acceptanceLevel === "medium"
-                                    ? "bg-yellow-400/90 border-yellow-500 text-yellow-900"
-                                    : "bg-red-400/90 border-red-500 text-red-900"
+                            ? "bg-emerald-400/90 border-emerald-500 text-emerald-900"
+                            : acceptanceLevel === "medium"
+                                ? "bg-yellow-400/90 border-yellow-500 text-yellow-900"
+                                : "bg-red-400/90 border-red-500 text-red-900"
                             }`}>
                             {acceptanceLevel.charAt(0).toUpperCase()}
                         </div>
@@ -119,7 +117,7 @@ const SmallCard: React.FC<SmallCardProps> = ({
                 </div>
             </div>
         )
-    }
+    }, [isSelected, phase, co2Estimation, acceptanceLevel, handleOpenModal])
 
     const renderPhaseControls = () => {
         if (!showPhaseControls) return null
@@ -137,8 +135,8 @@ const SmallCard: React.FC<SmallCardProps> = ({
                                 key={value}
                                 onClick={(e) => handleCO2Estimate(value, e)}
                                 className={`p-2 rounded-lg border-2 transition-all ${co2Estimation === value
-                                        ? "border-yellow-400 bg-yellow-400/20 text-yellow-400"
-                                        : "border-white/20 hover:border-white/40 text-white/60 hover:text-white"
+                                    ? "border-yellow-400 bg-yellow-400/20 text-yellow-400"
+                                    : "border-white/20 hover:border-white/40 text-white/60 hover:text-white"
                                     }`}
                             >
                                 {value}
@@ -162,8 +160,8 @@ const SmallCard: React.FC<SmallCardProps> = ({
                         <button
                             onClick={(e) => handleAcceptanceChange("high", e)}
                             className={`p-2 rounded-lg border-2 transition-all ${acceptanceLevel === "high"
-                                    ? "border-emerald-400 bg-emerald-400/20 text-emerald-400"
-                                    : "border-white/20 hover:border-white/40 text-white/60 hover:text-white"
+                                ? "border-emerald-400 bg-emerald-400/20 text-emerald-400"
+                                : "border-white/20 hover:border-white/40 text-white/60 hover:text-white"
                                 }`}
                         >
                             Haut
@@ -171,8 +169,8 @@ const SmallCard: React.FC<SmallCardProps> = ({
                         <button
                             onClick={(e) => handleAcceptanceChange("medium", e)}
                             className={`p-2 rounded-lg border-2 transition-all ${acceptanceLevel === "medium"
-                                    ? "border-yellow-400 bg-yellow-400/20 text-yellow-400"
-                                    : "border-white/20 hover:border-white/40 text-white/60 hover:text-white"
+                                ? "border-yellow-400 bg-yellow-400/20 text-yellow-400"
+                                : "border-white/20 hover:border-white/40 text-white/60 hover:text-white"
                                 }`}
                         >
                             Mid
@@ -180,8 +178,8 @@ const SmallCard: React.FC<SmallCardProps> = ({
                         <button
                             onClick={(e) => handleAcceptanceChange("low", e)}
                             className={`p-2 rounded-lg border-2 transition-all ${acceptanceLevel === "low"
-                                    ? "border-red-400 bg-red-400/20 text-red-400"
-                                    : "border-white/20 hover:border-white/40 text-white/60 hover:text-white"
+                                ? "border-red-400 bg-red-400/20 text-red-400"
+                                : "border-white/20 hover:border-white/40 text-white/60 hover:text-white"
                                 }`}
                         >
                             Bas
@@ -203,7 +201,7 @@ const SmallCard: React.FC<SmallCardProps> = ({
                 <div className="flex justify-between items-center mb-2 bg-gray-700 text-white p-1 rounded">
                     <div className="text-xs font-bold truncate max-w-[70%]">{cardData.cardName}</div>
                     <div className="flex items-center px-1 py-0.5 bg-green-700 text-white text-xs rounded font-bold">
-                        <span className="mr-1">{hiddenCo2 ? encodedCo2Value : cardData.cardValue}</span>
+                        <span className="mr-1">{!isAdmin && phase < 4 ? encodedCo2Value : cardData.cardValue}</span>
                         <Sparkles className="w-3 h-3" />
                     </div>
                 </div>
@@ -221,14 +219,14 @@ const SmallCard: React.FC<SmallCardProps> = ({
                 {/* Phase-specific information section */}
                 {phase > 1 && (
                     <div className="mt-auto pt-1 border-t border-gray-200">
-                        <div className="bg-gray-100 rounded p-1 text-xs">
+                        <div className="bg-gray-100 rounded p-1 text-xs hover:bg-gray-300" onClick={() => isAdmin && setShowPhaseControls(true)}>
                             {phase === 2 && (
-                                <div className="flex justify-between items-center">
+                                <div className="flex justify-between items-center" >
                                     <span className="text-gray-600">Impact en CO2 :</span>
                                     {co2Estimation ? (
                                         <span className="font-bold text-green-600">{co2Estimation}/5</span>
                                     ) : (
-                                        <span className="italic text-gray-500 text-[10px]">Cliquez pour évaluer</span>
+                                        <span className="italic text-gray-500 text-[10px]">Cliquez pour évaluezr</span>
                                     )}
                                 </div>
                             )}
@@ -237,10 +235,10 @@ const SmallCard: React.FC<SmallCardProps> = ({
                                     <span className="text-gray-600">Acceptation :</span>
                                     {acceptanceLevel ? (
                                         <span className={`font-bold ${acceptanceLevel === "high"
-                                                ? "text-green-600"
-                                                : acceptanceLevel === "medium"
-                                                    ? "text-yellow-600"
-                                                    : "text-red-600"
+                                            ? "text-green-600"
+                                            : acceptanceLevel === "medium"
+                                                ? "text-yellow-600"
+                                                : "text-red-600"
                                             }`}>
                                             {acceptanceLevel.charAt(0).toUpperCase() + acceptanceLevel.slice(1)}
                                         </span>
@@ -263,10 +261,10 @@ const SmallCard: React.FC<SmallCardProps> = ({
                                         <span className="text-gray-600 text-[10px]">Acceptation :</span>
                                         {acceptanceLevel ? (
                                             <span className={`font-bold text-[10px] ${acceptanceLevel === "high"
-                                                    ? "text-green-600"
-                                                    : acceptanceLevel === "medium"
-                                                        ? "text-yellow-600"
-                                                        : "text-red-600"
+                                                ? "text-green-600"
+                                                : acceptanceLevel === "medium"
+                                                    ? "text-yellow-600"
+                                                    : "text-red-600"
                                                 }`}>
                                                 {acceptanceLevel.charAt(0).toUpperCase()}
                                             </span>
@@ -280,7 +278,7 @@ const SmallCard: React.FC<SmallCardProps> = ({
                     </div>
                 )}
                 {/* Selection button */}
-                {phase > 1 && (
+                {phase > 1 && isAdmin &&(
                     <button
                         onClick={handleSelectClick}
                         className={`mt-1 w-full py-1 text-xs font-medium rounded transition-colors ${isSelected ? "bg-red-100 text-red-700 hover:bg-red-200" : "bg-blue-100 text-blue-700 hover:bg-blue-200"
@@ -299,11 +297,11 @@ const SmallCard: React.FC<SmallCardProps> = ({
             style={{ transformStyle: "preserve-3d", transform: isFlipped ? "rotateY(180deg)" : "" }}
             onClick={handleCardClick}
         >
-            {renderHeader()}
+            {renderHeader}
             {renderCardContent()}
             {renderPhaseControls()}
         </div>
     )
 }
 
-export default SmallCard
+export default React.memo(SmallCard)

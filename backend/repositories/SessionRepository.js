@@ -104,21 +104,6 @@ class SessionRepository {
             return false;
         }
     }
-
-    async joinSession(id, userId) {
-        const session = await Session.findByPk(id);
-        if (!session) {
-            return false;
-        }
-
-        const users = session.users ? JSON.parse(session.users) : [];
-        if (users.includes(userId)) {
-            return false;
-        }
-
-        users.push(userId);
-        return await session.update({ users: JSON.stringify(users) });
-    }
 }
 
 module.exports = new SessionRepository();

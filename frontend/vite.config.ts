@@ -8,15 +8,14 @@ export default defineConfig({
     exclude: ["lucide-react"],
   },
   server: {
-    open:"192.168.1.28:3001",
     proxy: {
       "/api": {
-        target: "http://192.168.1.28:8080",
+        target: "http://nginx:8080",
         changeOrigin: true,
         secure: false,
       },
       "/socket.io": {
-        target: "http://192.168.1.28:8080",
+        target: "http://nginx:8080",
         changeOrigin: true,
         secure: false,
         ws: true,

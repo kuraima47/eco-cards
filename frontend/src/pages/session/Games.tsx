@@ -132,14 +132,14 @@ const Games: React.FC = () => {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Game Sessions</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Sessions de jeu</h1>
           {isAdmin && (
             <Link
               to="/games/new"
               className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-700 transition-colors"
             >
               <Plus className="h-5 w-5" />
-              <span>New Session</span>
+              <span>Nouvelle session</span>
             </Link>
           )}
         </div>
@@ -164,16 +164,16 @@ const Games: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Game Sessions</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Sessions de jeu</h1>
         <div className="flex items-center gap-4">
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             className="rounded-md border-gray-300 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200"
           >
-            <option value="all">All Sessions</option>
+            <option value="all">Toutes les sessions</option>
             <option value={SESSION_STATUS.ACTIVE}>Active</option>
-            <option value={SESSION_STATUS.CLOSED}>Closed</option>
+            <option value={SESSION_STATUS.CLOSED}>Fermée</option>
           </select>
           {isAdmin && (
             <Link
@@ -181,7 +181,7 @@ const Games: React.FC = () => {
               className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-green-700 transition-colors"
             >
               <Plus className="h-5 w-5" />
-              <span>New Session</span>
+              <span>Nouvelle session</span>
             </Link>
           )}
         </div>
@@ -193,7 +193,7 @@ const Games: React.FC = () => {
             <div key={status} className="mb-8">
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <StatusIcon status={status} />
-                {status.charAt(0).toUpperCase() + status.slice(1)} Sessions
+                Sessions {status}s
               </h2>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {statusSessions.map((session) => (
@@ -210,7 +210,7 @@ const Games: React.FC = () => {
                         <div className="flex items-center text-gray-600">
                           <Calendar className="h-5 w-5 mr-2 flex-shrink-0" />
                           <span className="truncate">
-                            {new Date(session.createdAt).toLocaleDateString("en-US", {
+                            {new Date(session.createdAt).toLocaleDateString("fr-FR", {
                               weekday: "short",
                               year: "numeric",
                               month: "short",
@@ -220,11 +220,11 @@ const Games: React.FC = () => {
                         </div>
                         <div className="flex items-center text-gray-600">
                           <Users className="h-5 w-5 mr-2 flex-shrink-0" />
-                          <span>{session.groups.length} groups</span>
+                          <span>{session.groups.length} groupes</span>
                         </div>
                         <div className="flex items-center text-gray-600">
                           <MapPin className="h-5 w-5 mr-2 flex-shrink-0" />
-                          <span className="truncate">Deck: {session.deck?.deckName || "Unknown Deck"}</span>
+                          <span className="truncate">Deck : {session.deck?.deckName || "Unknown Deck"}</span>
                         </div>
                         <div className="text-sm text-gray-500 space-y-1 mt-2">
                           {session.groups.map((group) => {
@@ -254,7 +254,7 @@ const Games: React.FC = () => {
                             to={`/games/${session.sessionId}`}
                             className="px-3 py-1 text-sm bg-gray-100 rounded-md hover:bg-gray-200"
                           >
-                            Edit
+                            Modifier
                           </Link>
                         )}
                         <Link
@@ -262,7 +262,7 @@ const Games: React.FC = () => {
                           className="px-3 py-1 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center gap-1"
                         >
                           <Play className="h-4 w-4" />
-                          Launch
+                          Lancer
                         </Link>
                       </div>
                     )}

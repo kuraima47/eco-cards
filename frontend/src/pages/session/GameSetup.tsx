@@ -100,9 +100,10 @@ const GameSetup: React.FC = () => {
     const newGroup: Group & { players: GroupPlayer[] } = {
       groupId: tempIdCounter,
       sessionId: Number(id) || 0,
-      groupName: `Group ${groups.length + 1}`,
+      groupName: `Groupe ${groups.length + 1}`,
       players: [],
     };
+    console.log("handleAddGroup", tempIdCounter);
     setTempIdCounter(prev => prev - 1);
     setGroups(prev => [...prev, newGroup]);
     setGuestUsernames(prev => ({ ...prev, [newGroup.groupId]: '' }));
@@ -110,7 +111,7 @@ const GameSetup: React.FC = () => {
 
   const handleRemoveGroup = async (groupId: number) => {
     try {
-      setProcessingAction(`Deleting group ${groupId}`);
+      setProcessingAction(`Suppression du groupe ${groupId}`);
       
       if (groupId > 0 && id) {
         const groupToDelete = groups.find(g => g.groupId === groupId);
@@ -135,7 +136,7 @@ const GameSetup: React.FC = () => {
       console.error(`Error deleting group ${groupId}:`, error);
       setGroupErrors(prev => ({
         ...prev,
-        [groupId]: `Failed to delete group: ${error instanceof Error ? error.message : "Unknown error"}`
+        [groupId]: `Echec dans la suppression du groupe : ${error instanceof Error ? error.message : "Erreur inconnue"}`
       }));
     } finally {
       setProcessingAction(null);
@@ -172,6 +173,7 @@ const GameSetup: React.FC = () => {
   const handleAddGuestToGroup = (groupId: number) => {
     const username = guestUsernames[groupId]?.trim();
     if (!username) return;
+    console.log("handleAddGuestToGroup username", username, id);
     if (id) {
       sessionService.sendLink(id, username);
       groupPlayerService.createGroupPlayer({
@@ -210,7 +212,7 @@ const GameSetup: React.FC = () => {
       console.error(`Error removing ${username}:`, error);
       setGroupErrors(prev => ({
         ...prev,
-        [groupId]: `Failed to remove player: ${error instanceof Error ? error.message : "Unknown error"}`
+        [groupId]: `Echec de la suppression du joueur : ${error instanceof Error ? error.message : "Erreur inconnue"}`
       }));
     } finally {
       setProcessingAction(null);
@@ -228,7 +230,7 @@ const GameSetup: React.FC = () => {
       }
 
       let sessionId: number;
-      setProcessingAction("Saving session details");
+      setProcessingAction("Sauvegarde de la session");
       if (id) {
         await sessionService.updateSession(id, session as Session);
         sessionId = Number(id);
@@ -238,7 +240,7 @@ const GameSetup: React.FC = () => {
         sessionId = newSession.sessionId;
       }
 
-      setProcessingAction("Processing groups");
+      setProcessingAction("Traitement des groupes");
       const updatedGroups = await Promise.all(
         groups.map(async (group) => {
           let groupId = group.groupId;
@@ -292,7 +294,7 @@ const GameSetup: React.FC = () => {
       navigate(`/games/${sessionId}/phase/0`);
     } catch (error) {
       console.error("Error saving session:", error);
-      setError(`Failed to save session: ${error instanceof Error ? error.message : "Unknown error"}`);
+      setError(`Echec de la sauvegarde de la session : ${error instanceof Error ? error.message : "Erreur inconnue"}`);
     } finally {
       setLoading(false);
       setProcessingAction(null);
@@ -303,7 +305,7 @@ const GameSetup: React.FC = () => {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600" />
-        <p className="ml-4 text-gray-600">Loading...</p>
+        <p className="ml-4 text-gray-600">Chargement...</p>
       </div>
     );
   }
@@ -312,7 +314,7 @@ const GameSetup: React.FC = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="bg-white rounded-lg shadow-lg p-6">
         <h1 className="text-2xl font-bold mb-6">
-          {id ? `Edit Session: ${session.sessionName}` : "Create New Session"}
+          {id ? `Modifier la session: ${session.sessionName}` : "Créer une nouvelle session"}
         </h1>
 
         {error && (
@@ -330,11 +332,11 @@ const GameSetup: React.FC = () => {
 
         {step === 1 ? (
           <div>
-            <h2 className="text-xl font-semibold mb-4">Step 1: Session Details</h2>
+            <h2 className="text-xl font-semibold mb-4">Étape 1 : Détails de la session</h2>
             <div className="grid gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Session Name
+                  Nom de la session
                   <input
                     type="text"
                     name="sessionName"
@@ -347,7 +349,7 @@ const GameSetup: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Select Deck
+                  Sélection du deck
                   <select
                     name="deckId"
                     value={session.deckId ?? ""}
@@ -355,7 +357,7 @@ const GameSetup: React.FC = () => {
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-300 focus:ring focus:ring-green-200"
                     required
                   >
-                    <option value="">Select a deck</option>
+                    <option value="">Sélection du deck...</option>
                     {decks.map(deck => (
                       <option key={deck.deckId} value={deck.deckId}>
                         {deck.deckName}
@@ -370,23 +372,23 @@ const GameSetup: React.FC = () => {
               disabled={!session.sessionName || !session.deckId || !!processingAction}
               className="mt-6 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
             >
-              Next <ChevronRight className="inline-block ml-2" />
+              Suivant<ChevronRight className="inline-block ml-2" />
             </button>
           </div>
         ) : (
           <div>
-            <h2 className="text-xl font-semibold mb-4">Step 2: Group Setup</h2>
+            <h2 className="text-xl font-semibold mb-4">Étape 2 : Paramétrage du groupe</h2>
             <button
               onClick={handleAddGroup}
               disabled={!!processingAction}
               className="mb-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
             >
-              <Plus className="inline-block mr-2" /> Add Group
+              <Plus className="inline-block mr-2" />Ajouter un groupe (table)
             </button>
 
-            <div className="mb-6">
+            {groups.length > 0 && <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select Players to Add
+                Sélection des joueurs à ajouter aux groupes
                 <select
                   multiple
                   value={selectedUsers}
@@ -404,13 +406,13 @@ const GameSetup: React.FC = () => {
                 </select>
               </label>
               <p className="text-sm text-gray-500 mt-1">
-                Hold Ctrl/Cmd to select multiple players
+                Maintenez Ctrl/Cmd pour sélectionner plusieurs joueurs
               </p>
-            </div>
+            </div>}
 
             {groups.length === 0 && (
               <div className="text-center p-8 bg-gray-50 rounded-md">
-                <p className="text-gray-500">No groups added yet</p>
+                <p className="text-gray-500">Aucun groupe n'a encore été créé</p>
               </div>
             )}
 
@@ -435,7 +437,7 @@ const GameSetup: React.FC = () => {
                         )
                       )}
                       className="text-lg font-medium border-none focus:ring-0 w-full bg-transparent"
-                      placeholder="Group name"
+                      placeholder="Nom du groupe"
                       disabled={!!processingAction}
                     />
                     <button
@@ -453,7 +455,7 @@ const GameSetup: React.FC = () => {
                       disabled={!selectedUsers.length || !!processingAction}
                       className="w-full px-3 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:opacity-50"
                     >
-                      Add Selected Players
+                      Ajouter les joueurs sélectionnés
                     </button>
                     
                     <div className="flex gap-2">
@@ -465,20 +467,20 @@ const GameSetup: React.FC = () => {
                           [group.groupId]: e.target.value
                         }))}
                         className="flex-1 rounded-md border-gray-300 shadow-sm p-2"
-                        placeholder="Guest email"
+                        placeholder="Adresse email de l'invité"
                       />
                       <button
                         onClick={() => handleAddGuestToGroup(group.groupId)}
                         disabled={!guestUsernames[group.groupId]?.trim() || !!processingAction}
                         className="px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50"
                       >
-                        Add
+                        Ajouter
                       </button>
                     </div>
 
                     {group.players.length === 0 ? (
                       <p className="text-sm text-gray-500 italic text-center">
-                        No players in this group
+                        Aucun joueur dans ce groupe
                       </p>
                     ) : (
                       <ul className="space-y-2">
@@ -515,7 +517,7 @@ const GameSetup: React.FC = () => {
                 disabled={!!processingAction}
                 className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 disabled:opacity-50 order-2 sm:order-1"
               >
-                <ChevronLeft className="inline-block mr-2" /> Previous
+                <ChevronLeft className="inline-block mr-2" /> Précédent
               </button>
               <button
                 onClick={handleSubmit}
@@ -525,7 +527,7 @@ const GameSetup: React.FC = () => {
                 {processingAction ? (
                   <>
                     <Loader className="inline-block animate-spin mr-2 h-4 w-4" />
-                    Saving...
+                    Sauvegarde...
                   </>
                 ) : id ? "Update Session" : "Create Session"}
               </button>

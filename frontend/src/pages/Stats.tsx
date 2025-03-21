@@ -48,7 +48,9 @@ const Stats = () => {
       let completeCards = 0;
       let incompleteCards = 0;
       for (const card of allCards) {
-        const isComplete = await cardService.isCardComplete(card.cardId.toString());
+        const response = await cardService.isCardComplete(card.cardId.toString());
+        const isComplete = response.isComplete
+        console.log('Card', card.cardId, 'is complete:', isComplete);
         if (isComplete) {
           completeCards++;
         } else {

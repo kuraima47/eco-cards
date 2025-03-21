@@ -7,7 +7,7 @@ import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 import { CardBack, CardData } from "../Card/CardBack";
 import Card from "../Card/Card";
-import { useAdmin } from "../../hooks/useAdmin.ts";
+import { useAdmin } from "../../hooks/useAdmin";
 import { createRoot } from 'react-dom/client';
 import { ensureArray } from "../../utils/formatting.ts";
 interface ModalCards {
@@ -37,6 +37,7 @@ export function ModalCards({ initialData, isOpen, onClose }: ModalCards) {
                 const index = category.cards.findIndex(card => card.cardId === cardId);
                 return index !== -1 ? index + 1 : null;
             };
+            console.log("category.cards", category.cards);
             const transformedCards = (category.cards || []).map((card) => ({
                 cardId: card.cardId || 0,
                 deckId: category.deckId,

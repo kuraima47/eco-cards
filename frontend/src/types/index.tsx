@@ -1,8 +1,8 @@
 import { RefObject } from 'react';
 
 export interface ImageFormat {
-    data: Uint8Array;
-    type: string;
+    data?: Uint8Array;
+    type?: string;
 }
 export interface QRCodeFormProps {
     url: string;
@@ -52,12 +52,4 @@ export interface Card {
     categoryId: string;
     title: string;
     content: string;
-}
-
-
-export interface QRCodePreviewProps {
-    url: string;
-    qrColor: string;
-    bgColor: string;
-    logo: string | null;
 }

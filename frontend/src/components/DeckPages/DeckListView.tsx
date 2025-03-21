@@ -1,29 +1,12 @@
 import { Download, Edit, Library, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from "react";
-import { useAdmin } from "../../hooks/useAdmin.ts";
-import { Deck } from "../../types";
-import DeckModal from "../Modals/DeckModal.tsx";
-import DeleteConfirmationModal from "../Modals/DeleteConfirmationModal.tsx";
+import { useAdmin } from "../../hooks/useAdmin";
+// import { Deck } from "../../types";
+import DeckModal from "../Modals/DeckModal";
+import DeleteConfirmationModal from "../Modals/DeleteConfirmationModal";
 import Notification from "../Notification";
-import ModalCards from "../Pdf/ModalCards.tsx";
-
-interface CategoryType {
-    categoryId: number;
-    categoryName: string;
-    categoryColor: string;
-    categoryIcon: string;
-    cards: {
-        cardId: string;
-        cardName: string;
-    }[];
-
-}
-
-interface DeckWithCategories {
-    deckId: number;
-    deckName: string;
-    categories: CategoryType[];
-}
+import ModalCards from "../Pdf/ModalCards";
+import { DeckWithCategories, GameDeck } from '../../types/game';
 
 interface DeckListViewProps {
     decks: DeckWithCategories[];
@@ -50,24 +33,19 @@ export function DeckListView({ decks, onSelectDeck, refreshParent }: DeckListVie
 
     const admin = useAdmin();
 
-    useEffect(() => {
-        decks = admin.decks
-    }, [admin]);
-
-
     const openAddDeckModal = () => {
         setModalMode('add');
         setCurrentDeck(null);
         setIsDeckModalOpen(true);
     };
 
-    const openEditDeckModal = (deck: DeckWithCategories) => {
+    const openEditDeckModal = (deck: GameDeck) => {
         setModalMode('edit');
         setCurrentDeck(deck);
         setIsDeckModalOpen(true);
     };
 
-    const openDownloadModal = (deck: DeckWithCategories) => {
+    const openDownloadModal = (deck: GameDeck) => {
         setCurrentDeck(deck);
         setIsDownloadModalOpen(true);
     }
@@ -77,7 +55,7 @@ export function DeckListView({ decks, onSelectDeck, refreshParent }: DeckListVie
         setIsDeleteModalOpen(true);
     };
 
-    const handleDeckSubmit = async (data: Partial<Deck>) => {
+    const handleDeckSubmit = async (data: Partial<GameDeck>) => {
         try {
             if (modalMode === 'add') {
                 await admin.addDeck(data);
@@ -140,67 +118,74 @@ export function DeckListView({ decks, onSelectDeck, refreshParent }: DeckListVie
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {decks.map((deck) => (
-                    <div
-                        key={deck.deckId}
-                        onClick={() => onSelectDeck(deck.deckId)}
-                        role="button"
-                        tabIndex={0}
-                        className="group p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-all border border-gray-200 text-left cursor-pointer"
-                    >
-                        <div className="flex items-center space-x-3 mb-4">
-                            <div className="p-2 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-colors">
-                                <Library className="w-6 h-6 text-green-600" />
+                {decks.map((deck) => {
+                    console.log("aaaazzaa", deck);
+                    const categoryCount = deck.categories.length;
+                    const cardCount = deck.categories.reduce((sum, category) => sum + (category.cards?.length || 0), 0);
+                    return (
+                        <div
+                            key={deck.deckId}
+                            onClick={() => onSelectDeck(deck.deckId)}
+                            role="button"
+                            tabIndex={0}
+                            className="group p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-all border border-gray-200 text-left cursor-pointer"
+                        >
+                            <div className="flex items-center space-x-3 mb-4">
+                                <div className="p-2 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-colors">
+                                    <Library className="w-6 h-6 text-green-600" />
+                                </div>
+                                <h2 className="text-xl font-semibold">{deck.deckName}</h2>
                             </div>
-                            <h2 className="text-xl font-semibold">{deck.deckName}</h2>
-                        </div>
-                        <div className="space-y-1">
-                            <p className="text-gray-600">{deck.categories.length} catégories</p>
-                            <p className="text-gray-600">
-                                {deck.categories.reduce((sum, category) => sum + (category.cards ? category.cards.length : 0), 0)} cartes
-                            </p>
-                        </div>
-                        <div className="flex space-x-1 justify-end">
-                            {deck.categories &&
-                                deck.categories.length > 0 &&
-                                deck.categories.some(category => category.cards && category.cards.length > 0) && (
+                            <div className="space-y-1">
+                                <p className="text-gray-600">
+                                    {categoryCount} catégorie{categoryCount !== 1 ? 's' : ''}
+                                </p>
+                                <p className="text-gray-600">
+                                    {cardCount} carte{cardCount !== 1 ? 's' : ''}
+                                </p>
+                            </div>
+                            <div className="flex space-x-1 justify-end">
+                                {deck.categories &&
+                                    deck.categories.length > 0 &&
+                                    deck.categories.some(category => category.cards && category.cards.length > 0) && (
 
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            // download deck
-                                            openDownloadModal(deck);
-                                        }}
-                                        className="text-green-600 hover:text-green-800"
-                                        title="Download deck"
-                                    >
-                                        <Download size={18} />
-                                    </button>
-                                )}
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                // download deck
+                                                openDownloadModal(deck);
+                                            }}
+                                            className="text-green-600 hover:text-green-800"
+                                            title="Download deck"
+                                        >
+                                            <Download size={18} />
+                                        </button>
+                                    )}
 
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    openEditDeckModal(deck);
-                                }}
-                                className="text-blue-600 hover:text-blue-800"
-                                title="Modifier le deck"
-                            >
-                                <Edit size={18} />
-                            </button>
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    openDeleteModal('deck', deck.deckId, deck.deckName);
-                                }}
-                                className="text-red-600 hover:text-red-800"
-                                title="Supprimer le deck"
-                            >
-                                <Trash2 size={18} />
-                            </button>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        openEditDeckModal(deck);
+                                    }}
+                                    className="text-blue-600 hover:text-blue-800"
+                                    title="Modifier le deck"
+                                >
+                                    <Edit size={18} />
+                                </button>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        openDeleteModal('deck', deck.deckId, deck.deckName);
+                                    }}
+                                    className="text-red-600 hover:text-red-800"
+                                    title="Supprimer le deck"
+                                >
+                                    <Trash2 size={18} />
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             <ModalCards

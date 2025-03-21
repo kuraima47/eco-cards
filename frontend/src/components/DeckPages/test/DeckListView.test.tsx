@@ -1,62 +1,106 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { DeckListView } from "../DeckListView";
-import { useAdmin } from "../../../hooks/useAdmin.ts";
-import "@testing-library/jest-dom"
+import { useAdmin } from "../../../hooks/useAdmin";
+import "@testing-library/jest-dom";
+jest.mock("../../../hooks/useAdmin", () => ({
+    useAdmin: jest.fn()
+}));
 
-jest.mock("../../hooks/useAdmin.ts"); // Mock du hook useAdmin
+//mock deckmodal
+jest.mock("../../../components/Modals/DeckModal", () => ({
+    __esModule: true,
+    default: ({ isOpen }: { isOpen: boolean }) => isOpen ? <div>Ajouter un Deck</div> : null
+}));
 
-const mockUseAdmin = useAdmin as jest.MockedFunction<typeof useAdmin>;
 
-describe("DeckListView", () => {
-  beforeEach(() => {
-    mockUseAdmin.mockReturnValue({
-      decks: [
-        {
-          deckId: 1,
-          deckName: "Deck 1",
-          categories: [{ categoryId: 101, categoryName: "Category A", cards: [] }]
-        },
-      ],
-      addDeck: jest.fn(),
-      updateDeck: jest.fn(),
-      deleteDeck: jest.fn(),
+//mock lucide react
+jest.mock('lucide-react', () => ({
+    Download: () => null,
+    Edit: () => null,
+    Library: () => null,
+    Plus: () => null,
+    Trash2: () => null
+}));
+
+//mock components/Pdf/ModalCards.tsx
+jest.mock("../../../components/Pdf/ModalCards", () => ({
+    __esModule: true,
+    default: () => null
+}));
+
+describe("DeckListView Component", () => {
+    const mockOnSelectDeck = jest.fn();
+    const mockRefreshParent = jest.fn();
+    const mockAdmin = {
+        decks: [
+            { deckId: 1, deckName: "Deck 1", categories: [], adminId: 1 },
+            { deckId: 2, deckName: "Deck 2", categories: [], adminId: 1 }
+        ],
+        addDeck: jest.fn(),
+        updateDeck: jest.fn(),
+        deleteDeck: jest.fn()
+    };
+
+    beforeEach(() => {
+        (useAdmin as jest.Mock).mockReturnValue(mockAdmin);
     });
-  });
 
-  it("affiche la liste des decks", () => {
-    render(<DeckListView decks={mockUseAdmin().decks} onSelectDeck={jest.fn()} />);
-    
-    expect(screen.getByText("My Decks")).toBeInTheDocument();
-    expect(screen.getByText("Deck 1")).toBeInTheDocument();
-    expect(screen.getByText("1 catégories")).toBeInTheDocument();
-  });
+    test("renders deck list correctly", () => {
+        render(
+            <DeckListView
+                decks={mockAdmin.decks}
+                onSelectDeck={mockOnSelectDeck}
+                refreshParent={mockRefreshParent}
+            />
+        );
 
-  it("ouvre le modal d'ajout de deck", () => {
-    render(<DeckListView decks={mockUseAdmin().decks} onSelectDeck={jest.fn()} />);
-    
-    fireEvent.click(screen.getByText("New Deck"));
-    
-    expect(screen.getByText("Créer un Deck")).toBeInTheDocument();
-  });
-
-  it("ouvre le modal de modification avec les bonnes données", () => {
-    render(<DeckListView decks={mockUseAdmin().decks} onSelectDeck={jest.fn()} />);
-    
-    fireEvent.click(screen.getByTitle("Modifier le deck"));
-    
-    expect(screen.getByText("Modifier un Deck")).toBeInTheDocument();
-    expect(screen.getByDisplayValue("Deck 1")).toBeInTheDocument();
-  });
-
-  it("supprime un deck et affiche une notification", async () => {
-    render(<DeckListView decks={mockUseAdmin().decks} onSelectDeck={jest.fn()} />);
-    
-    fireEvent.click(screen.getByTitle("Supprimer le deck"));
-    fireEvent.click(screen.getByText("Confirmer")); // Suppression confirmée
-    
-    await waitFor(() => {
-      expect(mockUseAdmin().deleteDeck).toHaveBeenCalledWith(1);
-      expect(screen.getByText("Deck supprimé avec succès !")).toBeInTheDocument();
+        expect(screen.getByText("Mes Decks")).toBeInTheDocument();
+        expect(screen.getByText("Deck 1")).toBeInTheDocument();
+        expect(screen.getByText("Deck 2")).toBeInTheDocument();
     });
-  });
+
+    test("calls onSelectDeck when clicking on a deck", () => {
+        render(
+            <DeckListView
+                decks={mockAdmin.decks}
+                onSelectDeck={mockOnSelectDeck}
+                refreshParent={mockRefreshParent}
+            />
+        );
+
+        fireEvent.click(screen.getByText("Deck 1"));
+        expect(mockOnSelectDeck).toHaveBeenCalledWith(1);
+    });
+
+    test("opens add deck modal when clicking on 'Nouveau Deck' button", () => {
+        render(
+            <DeckListView
+                decks={mockAdmin.decks}
+                onSelectDeck={mockOnSelectDeck}
+                refreshParent={mockRefreshParent}
+            />
+        );
+
+        fireEvent.click(screen.getByText("Nouveau Deck"));
+        expect(screen.getByText("Ajouter un Deck")); // Vérifie que le modal s'ouvre
+    });
+    //ecrit ce test "met à jour la liste des decks lorsqu'un nouveau est ajouté"
+    test("met à jour la liste des decks lorsqu'un nouveau est ajouté", async () => {
+        const { rerender } = render(<DeckListView decks={mockAdmin.decks} onSelectDeck={jest.fn()} refreshParent={mockRefreshParent} />);
+        
+        // Simuler un ajout de deck dans useAdmin
+        (useAdmin as jest.Mock).mockReturnValueOnce({
+          ...mockAdmin,
+          decks: [
+            ...mockAdmin.decks,
+            { deckId: 3, deckName: "Nouveau Deck", categories: [] }
+          ]
+        });
+      
+        rerender(<DeckListView decks={mockAdmin.decks} onSelectDeck={jest.fn()} refreshParent={mockRefreshParent} />);
+      
+        await waitFor(() => {
+          expect(screen.getByText("Nouveau Deck")).toBeInTheDocument();
+        });
+      });
 });

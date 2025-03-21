@@ -1,4 +1,4 @@
-import React, { use, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import * as LucideIcons from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useQRCode } from "../../hooks/useQRCode";
@@ -13,7 +13,7 @@ export interface CardData {
     cardName: string;
     cardValue: number;
     qrCodeColor: string;
-    qrCodeLogoImageData: ImageFormat;
+    qrCodeLogoImageData?: ImageFormat;
     backgroundColor: string;
     width?: number;
     height?: number;
@@ -21,8 +21,8 @@ export interface CardData {
 
 interface CardBackProps {
     cardData: CardData;
-    categoryColor: string;
-    categoryIcon: string;
+    categoryColor?: string;
+    categoryIcon?: string;
     width?: number;
     height?: number;
     isForPdf?: boolean;
@@ -41,16 +41,29 @@ export function CardBack({ cardData, categoryColor, categoryIcon, width = 416, h
         backgroundColor,
     } = cardData;
 
-    const qrCodeLogoImage = formatImageName(qrCodeLogoImageData.data ? arrayBufferToBase64(qrCodeLogoImageData.data) : '', qrCodeLogoImageData.type);
+    const qrCodeLogoImage = useMemo(() => 
+        qrCodeLogoImageData 
+            ? formatImageName(
+                qrCodeLogoImageData.data 
+                    ? arrayBufferToBase64(qrCodeLogoImageData.data)
+                    : '',
+                qrCodeLogoImageData.type
+            ) 
+            : "",
+    [qrCodeLogoImageData]);
+
+    const initialUrl = useMemo(() => 
+        JSON.stringify({ cardName, category, cardValue, deckName }),
+    [cardName, category, cardValue, deckName]);
 
     const { url, qrColor, bgColor, logo, setUrl, setQrColor, setLogo } = useQRCode({
-        initialUrl: JSON.stringify({ cardName, category, cardValue, deckName }),
+        initialUrl,
         initialQrColor: qrCodeColor,
         initialLogo: qrCodeLogoImage
     });
 
-    useEffect(() => {
-        // ne se déclenche que quand les dépendances changent
+    // Utiliser useCallback pour créer une fonction mémorisée qui met à jour les données QR
+    const updateQRData = useCallback(() => {
         const cardDataUrl = JSON.stringify({ cardName, category, cardValue, deckName });
         setUrl(cardDataUrl);
         setQrColor(qrCodeColor);
@@ -58,45 +71,81 @@ export function CardBack({ cardData, categoryColor, categoryIcon, width = 416, h
         if (qrCodeLogoImage && qrCodeLogoImage !== logo) {
             setLogo(qrCodeLogoImage);
         }
-    }, [cardName, category, cardValue, deckName, qrCodeColor, qrCodeLogoImage, logo]);
+    }, [cardName, category, cardValue, deckName, qrCodeColor, qrCodeLogoImage, logo, setUrl, setQrColor, setLogo]);
 
-    // Calculs des dimensions relatives
-    const scale = width / 416; // Base scale factor
-    const styles = {
-        card: {
-            width: `${width}px`,
-            height: `${height}px`,
-            padding: `${16 * scale}px`,
-            backgroundColor,
-        },
-        header: {
-            fontSize: `${24 * scale}px`,
-            padding: `${12 * scale}px`,
-            marginBottom: `${20 * scale}px`,
-        },
-        qrContainer: {
-            marginBottom: `${20 * scale}px`,
-        },
-        qrCode: {
-            size: Math.min(width * 0.6, height * 0.4),
-            logoSize: Math.min(width * 0.12, height * 0.08),
-        },
-        footer: {
-            padding: `${12 * scale}px`,
-            fontSize: `${18 * scale}px`,
-        },
-        icon: {
-            size: `${24 * scale}px`,
-            marginRight: `${8 * scale}px`,
-        },
-        adjustTextForPdf: {
-            marginTop: isForPdf ? "-30px" : undefined,
-            padding: isForPdf ? "2px" : undefined,
-        },
-    };
+    useEffect(() => {
+        updateQRData();
+    }, [updateQRData]);
 
-    const iconName = categoryIcon ? toPascalCase(categoryIcon) : 'Box';
-    const CategoryIcon = LucideIcons[iconName as keyof typeof LucideIcons] as React.ElementType || LucideIcons.Box;
+    // Mémoriser les styles pour éviter des recalculs à chaque rendu
+    const styles = useMemo(() => {
+        const scale = width / 416; // Base scale factor
+        return {
+            card: {
+                width: `${width}px`,
+                height: `${height}px`,
+                padding: `${16 * scale}px`,
+                backgroundColor,
+            },
+            header: {
+                fontSize: `${24 * scale}px`,
+                padding: `${12 * scale}px`,
+                marginBottom: `${20 * scale}px`,
+            },
+            qrContainer: {
+                marginBottom: `${20 * scale}px`,
+            },
+            qrCode: {
+                size: Math.min(width * 0.6, height * 0.4),
+                logoSize: Math.min(width * 0.12, height * 0.08),
+            },
+            footer: {
+                padding: `${12 * scale}px`,
+                fontSize: `${18 * scale}px`,
+            },
+            icon: {
+                size: `${24 * scale}px`,
+                marginRight: `${8 * scale}px`,
+            },
+            adjustTextForPdf: {
+                marginTop: isForPdf ? "-30px" : undefined,
+                padding: isForPdf ? "2px" : undefined,
+            },
+        };
+    }, [width, height, backgroundColor, isForPdf]);
+
+    // Mémoriser l'icône de catégorie pour éviter des recherches inutiles
+    const CategoryIcon = useMemo(() => {
+        const iconName = categoryIcon ? toPascalCase(categoryIcon) : 'Box';
+        return (LucideIcons[iconName as keyof typeof LucideIcons] as React.ElementType) || LucideIcons.Box;
+    }, [categoryIcon]);
+
+    // Mémoriser le contenu du QR Code
+    const qrCodeContent = useMemo(() => (
+        <QRCodeSVG
+            value={url}
+            size={styles.qrCode.size}
+            fgColor={qrColor}
+            bgColor={bgColor}
+            level="H"
+            imageSettings={{
+                src: logo || undefined,
+                height: styles.qrCode.logoSize,
+                width: styles.qrCode.logoSize,
+                excavate: true,
+            }}
+        />
+    ), [url, qrColor, bgColor, logo, styles.qrCode.size, styles.qrCode.logoSize]);
+
+    // Mémoriser le contenu du footer
+    const footerContent = useMemo(() => (
+        <div className="flex items-center justify-center">
+            <CategoryIcon className="mr-1" style={{ width: styles.icon.size, height: styles.icon.size }} />
+            <span style={styles.adjustTextForPdf}>
+                {category} ({cardNumber}/{totalCards})
+            </span>
+        </div>
+    ), [CategoryIcon, category, cardNumber, totalCards, styles.icon.size, styles.adjustTextForPdf]);
 
     return (
         <div
@@ -118,19 +167,7 @@ export function CardBack({ cardData, categoryColor, categoryIcon, width = 416, h
                     style={styles.qrContainer}
                 >
                     <div className="bg-white p-4 rounded-xl shadow-2xl border-4 border-black">
-                        <QRCodeSVG
-                            value={url}
-                            size={styles.qrCode.size}
-                            fgColor={qrColor}
-                            bgColor={bgColor}
-                            level="H"
-                            imageSettings={{
-                                src: logo || undefined,
-                                height: styles.qrCode.logoSize,
-                                width: styles.qrCode.logoSize,
-                                excavate: true,
-                            }}
-                        />
+                        {qrCodeContent}
                     </div>
                 </div>
 
@@ -138,16 +175,12 @@ export function CardBack({ cardData, categoryColor, categoryIcon, width = 416, h
                     className={`w-full text-white rounded-lg shadow-md uppercase font-bold`}
                     style={{ ...styles.footer, backgroundColor: categoryColor }}
                 >
-                    <div className="flex items-center justify-center">
-                        <CategoryIcon className="mr-1" style={{ width: styles.icon.size, height: styles.icon.size }} />
-                        <span style={styles.adjustTextForPdf}>
-                            {category} ({cardNumber}/{totalCards})
-                        </span>
-                    </div>
+                    {footerContent}
                 </div>
             </div>
         </div>
     );
 }
 
-export default CardBack;
+// Utiliser React.memo pour éviter les rendus inutiles si les props n'ont pas changé
+export default React.memo(CardBack);

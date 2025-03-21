@@ -19,11 +19,11 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
     const getItemTypeText = () => {
         switch (itemType) {
             case 'deck':
-                return 'ce deck';
+                return 'le deck';
             case 'category':
-                return 'cette catégorie';
+                return 'la catégorie';
             case 'card':
-                return 'cette carte';
+                return 'la carte';
             default:
                 return 'cet élément';
         }

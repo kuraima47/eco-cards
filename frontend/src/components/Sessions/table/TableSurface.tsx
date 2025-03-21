@@ -55,6 +55,8 @@ export const TableSurface: React.FC<TableSurfaceProps> = ({
   const [selectedModalCard, setSelectedModalCard] = useState<GameCard | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
+  console.log("TableSurface: Rendering TableSurface", groups)
+
   const iconName = category?.categoryIcon ? toPascalCase(category?.categoryIcon) : "Box"
   const IconComponent = (LucideIcons[iconName as keyof typeof LucideIcons] || LucideIcons.Box) as React.ElementType
 

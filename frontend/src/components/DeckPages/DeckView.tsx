@@ -1,24 +1,22 @@
 import { Download, Edit, FolderClosed, Plus, Trash2 } from 'lucide-react';
 import { useState } from "react";
 import { useAdmin } from "../../hooks/useAdmin.ts";
-import type { Deck } from '../../types';
 import CategoryModal from "../Modals/CategoryModal.tsx";
 import DeleteConfirmationModal from "../Modals/DeleteConfirmationModal.tsx";
 import Notification from "../Notification";
 import ModalCards from "../Pdf/ModalCards.tsx";
 import { toPascalCase } from '../../utils/formatting';
 import * as LucideIcons from 'lucide-react';
-import { Category } from '../../types/game.ts';
-import CategoryPreview from '../Card/CategoryPreview.tsx';
+import { Category, DeckWithCategories } from '../../types/game.ts';
 
 interface DeckViewProps {
-    deck: Deck;  // deck contient déjà deck.categories filtrées par le parent
+    deck: DeckWithCategories;  // deck contient déjà deck.categories filtrées par le parent
     onSelectCategory: (categoryId: number) => void;
     onCreateCategory: () => void;
     refreshParent?: () => void;
 }
 
-export function DeckView({ deck, onSelectCategory, onCreateCategory, refreshParent }: DeckViewProps) {
+export function DeckView({ deck, onSelectCategory, refreshParent }: DeckViewProps) {
     console.log('[DeckView] rendering with deck:', deck);
 
     // États pour gérer les modales
@@ -36,6 +34,8 @@ export function DeckView({ deck, onSelectCategory, onCreateCategory, refreshPare
 
     // Méthodes du hook useAdmin
     const admin = useAdmin();
+
+    const isAdmin = admin.user?.userId === deck.adminId;
 
     /**
      * Ouvre la modale d'ajout de catégorie
@@ -83,7 +83,7 @@ export function DeckView({ deck, onSelectCategory, onCreateCategory, refreshPare
                     categoryDescription: data.categoryDescription || '',
                     categoryColor: data.categoryColor || '',
                     categoryIcon: data.categoryIcon || '',
-                    deckId: currentCategory?.deckId ? Number(currentCategory.deckId) : Number(deck.deckId)
+                    deckId: currentCategory?.deckId ? Number(currentCategory.deckId) : Number(deck.id)
                 });
                 setNotification({ message: "Catégorie créée avec succès !", type: "success" });
             } else if (modalMode === 'edit' && currentCategory) {
@@ -203,7 +203,7 @@ export function DeckView({ deck, onSelectCategory, onCreateCategory, refreshPare
                             </button>
                         )}
                     <button
-                        onClick={() => openAddCategoryModal(String(deck.deckId))}
+                        onClick={() => openAddCategoryModal(String(deck.id))}
                         className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center gap-2"
                     >
                         <Plus className="w-4 h-4 mr-2" />
@@ -220,7 +220,7 @@ export function DeckView({ deck, onSelectCategory, onCreateCategory, refreshPare
                         className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200"
                         onClick={() => {
                             console.log('[DeckView] onClick category -> onSelectCategory called with:', category.categoryId);
-                            onSelectCategory(category.categoryId);
+                            onSelectCategory(parseInt(category.categoryId));
                         }}
                     >
                         <div className="flex items-center space-x-3">
@@ -231,32 +231,34 @@ export function DeckView({ deck, onSelectCategory, onCreateCategory, refreshPare
                         <p className="text-sm text-gray-500 mt-2">
                             {category.cards?.length || 0} carte{(category.cards?.length > 1) ? 's' : ''}
                         </p>
-                        <div className="flex space-x-1 justify-end">
-                            <div
-                                role="button"
-                                tabIndex={0}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    openEditCategoryModal(category);
-                                }}
-                                className="text-blue-600 hover:text-blue-800 cursor-pointer"
-                                title="Modifier la catégorie"
-                            >
-                                <Edit size={18} />
+                        {isAdmin && (
+                            <div className="flex space-x-1 justify-end">
+                                <div
+                                    role="button"
+                                    tabIndex={0}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        openEditCategoryModal(category);
+                                    }}
+                                    className="text-blue-600 hover:text-blue-800 cursor-pointer"
+                                    title="Modifier la catégorie"
+                                >
+                                    <Edit size={18} />
+                                </div>
+                                <div
+                                    role="button"
+                                    tabIndex={0}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        openDeleteModal('category', String(category.categoryId), category.categoryName);
+                                    }}
+                                    className="text-red-600 hover:text-red-800 cursor-pointer"
+                                    title="Supprimer la catégorie"
+                                >
+                                    <Trash2 size={18} />
+                                </div>
                             </div>
-                            <div
-                                role="button"
-                                tabIndex={0}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    openDeleteModal('category', String(category.categoryId), category.categoryName);
-                                }}
-                                className="text-red-600 hover:text-red-800 cursor-pointer"
-                                title="Supprimer la catégorie"
-                            >
-                                <Trash2 size={18} />
-                            </div>
-                        </div>
+                        )}
                     </button>
 
                 ))}

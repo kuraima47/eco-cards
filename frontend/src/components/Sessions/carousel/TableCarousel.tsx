@@ -213,7 +213,7 @@ export const TableCarousel: React.FC<TableCarouselProps> = ({
             disabled={isReadOnly}
             aria-label="Scan QR code"
           >
-            <QrCode size={22} className={isReadOnly ? "opacity-50" : ""} />
+            {!isReadOnly && (<QrCode size={22} className={isReadOnly ? "opacity-50" : ""} />)}
           </button>
         </div>
       </div>
@@ -344,6 +344,20 @@ export const TableCarousel: React.FC<TableCarouselProps> = ({
               </button>
             </div>
             <div className="space-y-6">
+              {/* Nouvelle section: Explication des tours et phases */}
+              <div className="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-xl border border-blue-100 dark:border-blue-800">
+                <h4 className="text-xs uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-2 font-semibold">
+                  Comment fonctionne le jeu
+                </h4>
+                <div className="space-y-3 text-sm text-slate-700 dark:text-slate-300">
+                  <p>
+                    <span className="font-medium text-blue-700 dark:text-blue-400">Tour :</span> Un tour correspond à une catégorie de cartes. Pendant chaque tour, vous travaillez avec les cartes d'une même catégorie.
+                  </p>
+                  <p>
+                    <span className="font-medium text-blue-700 dark:text-blue-400">Phase :</span> Une phase comprend tous les tours (toutes les catégories). Quand une phase se termine, vous changez de table et la nature des activités évolue.
+                  </p>
+                </div>
+              </div>
               <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl">
                 <h4 className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
                   Catégorie actuelle
@@ -387,15 +401,14 @@ export const TableCarousel: React.FC<TableCarouselProps> = ({
                             {cardInfo?.cardName || `Card ${card.cardId}`}
                           </span>
                           <span
-                            className={`text-sm font-medium px-2 py-0.5 rounded ${
-                              aLevel === "high"
+                            className={`text-sm font-medium px-2 py-0.5 rounded ${aLevel === "high"
                                 ? "bg-green-100 text-green-800"
                                 : aLevel === "medium"
                                   ? "bg-yellow-100 text-yellow-800"
                                   : aLevel === "low"
                                     ? "bg-red-100 text-red-800"
                                     : "bg-slate-100 text-slate-800"
-                            }`}
+                              }`}
                           >
                             {aLevel ? aLevel.charAt(0).toUpperCase() + aLevel.slice(1) : "Not rated"}
                           </span>
@@ -408,7 +421,7 @@ export const TableCarousel: React.FC<TableCarouselProps> = ({
 
               <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl">
                 <h4 className="text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
-                  Selected Cards
+                  Cartes sélectionnées
                 </h4>
                 <div className="space-y-2">
                   <div className="w-full bg-slate-200 dark:bg-slate-600 rounded-full h-2.5">
@@ -466,7 +479,13 @@ export const TableCarousel: React.FC<TableCarouselProps> = ({
               </button>
             </div>
             <div className="bg-slate-100 dark:bg-slate-700 aspect-square rounded-xl flex items-center justify-center overflow-hidden border-2 border-dashed border-slate-300 dark:border-slate-600">
-              <QRCodeReader />
+              <QRCodeReader
+                phase={phase}
+                onCO2Estimate={onCO2Estimate}
+                onSelect={onCardSelect}
+                onAcceptanceChange={onAcceptanceChange}
+                group = {currentGroup}
+              />
             </div>
             <p className="mt-4 text-sm text-slate-600 dark:text-slate-400 text-center">
               Positionnez le QR code dans le cadre pour scanner

@@ -5,8 +5,9 @@ import { TableCarousel } from "../../components/Sessions/carousel/TableCarousel"
 import { useSessionSocket } from "../../hooks/useSessionSocket"
 import { useSessionData } from "../../hooks/useSessionData"
 import { useAuth } from "../../hooks/useAuth"
-import type { SelectedCard} from "../../types/game"
-import { groupPlayerService } from "../../services/groupPlayerService" 
+import type { SelectedCard } from "../../types/game"
+import { groupPlayerService } from "../../services/groupPlayerService"
+import Notification from "../../components/Notification";
 
 const PHASE_DURATIONS = {
   1: 35 * 60, // Card selection phase
@@ -33,6 +34,7 @@ const SessionPhases: React.FC = () => {
   const initialLoadRef = useRef(true)
   const userGroupIdRef = useRef<number | null>(null)
   const userGroupIndexRef = useRef<number>(-1)
+  const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   // Track selected cards by group
   const [selectedCardsByGroup, setSelectedCardsByGroup] = useState<Record<number, SelectedCard[]>>({})
@@ -163,8 +165,6 @@ const SessionPhases: React.FC = () => {
     }
   }, [loading, groups])
 
- 
-
   // Filter cards based on phase
   const cards = React.useMemo(() => {
     if (phase === 1) return allCards
@@ -216,6 +216,9 @@ const SessionPhases: React.FC = () => {
   // Socket handlers
   const handleCardSelected = useCallback(
     (groupId: number, cardId: number, selected: boolean, selectedCards: SelectedCard[]) => {
+      if (selectedCardsByGroup && selectedCardsByGroup[groupId] && selectedCardsByGroup[groupId].length !== selectedCards.length && (userGroupIdRef.current === null || userGroupIdRef.current == groupId)) // Admin ou Joueurs sur la table N
+        setNotification({ message: "Une carte vient d'être cliquée. ", type: "success" });
+
       setSelectedCardsByGroup((prev) => ({
         ...prev,
         [groupId]: selectedCards,
@@ -302,8 +305,10 @@ const SessionPhases: React.FC = () => {
             return updated
           })
         }
+
         setPhase(parsedPhase)
         navigate(`/games/${sessionId}/phase/${parsedPhase}`)
+        setNotification({ message: "La phase " + parsedPhase + " vient de débuter.", type: "success" });
 
         // Update table for player when phase changes
         if (!isAdmin && userGroupIndexRef.current !== -1) {
@@ -316,6 +321,7 @@ const SessionPhases: React.FC = () => {
 
   const handleRoundChanged = useCallback(
     (newRound: number) => {
+      if (round !== newRound) setNotification({ message: "Le tour vient de se terminer. " + round + " → " + newRound, type: "success" });
       setRound(newRound)
     },
     [],
@@ -326,17 +332,27 @@ const SessionPhases: React.FC = () => {
   }, [])
 
   const handleCO2Estimation = useCallback((groupId: number, cardId: number, value: number) => {
-    setCO2Estimations((prev) => ({
-      ...prev,
-      [groupId]: {
-        ...prev[groupId],
-        [cardId]: value,
-      },
-    }))
+    if (co2Estimations && co2Estimations[groupId] && co2Estimations[groupId][cardId] !== value && (userGroupIdRef.current === null || userGroupIdRef.current == groupId)) // Admin ou Joueurs sur la table N
+      setNotification({ message: "Une estimation en CO2 vient d'être modifiée. " + co2Estimations[groupId][cardId] + " → " + value, type: "success" });
+
+    setCO2Estimations((prev) => {
+      return {
+        ...prev,
+        [groupId]: {
+          ...prev[groupId],
+          [cardId]: value,
+        },
+      }
+    })
+
   }, [])
 
   const handleAcceptanceLevel = useCallback(
     (groupId: number, cardId: number, level: "high" | "medium" | "low" | null) => {
+
+      if (acceptanceLevels && acceptanceLevels[groupId] && acceptanceLevels[groupId][cardId] !== level && (userGroupIdRef.current === null || userGroupIdRef.current == groupId)) // Admin ou Joueurs sur la table N
+        setNotification({ message: "Un niveau d'acceptation vient d'être modifié. " + acceptanceLevels[groupId][cardId] + " → " + level, type: "success" });
+
       setAcceptanceLevels((prev) => ({
         ...prev,
         [groupId]: {
@@ -394,18 +410,16 @@ const SessionPhases: React.FC = () => {
   // Handle card select event
   const handleCardSelect = useCallback(
     async (groupId: number, cardId: number) => {
-      if (!isAdmin) return // Only admins can select cards
+      if (!isAdmin) return // Uniquement les admins peuvent faire ça
 
       try {
-        console.log(`Selecting/unselecting card ${cardId} for group ${groupId}`)
         const groupSelectedCards = selectedCardsByGroup[groupId] || []
         const isCurrentlySelected = groupSelectedCards.some((card) => card.cardId === cardId)
         if (!isCurrentlySelected && groupSelectedCards.length > MAX_CARDS_PER_GROUP) {
-          console.warn(`Maximum de cartes (${MAX_CARDS_PER_GROUP}) deja selectionnees pour le group ${groupId}`)
+          console.warn(`Maximum de cartes (${MAX_CARDS_PER_GROUP}) deja selectionnees pour le groupe ${groupId}`)
           return
         }
         await emitSelectCard(groupId, cardId)
-        console.log(`Successfully emitted selectCard for card ${cardId} in group ${groupId}`)
       } catch (error) {
         console.error("Failed to select/unselect card:", error)
       }
@@ -449,7 +463,7 @@ const SessionPhases: React.FC = () => {
   const handleEndSession = useCallback(async () => {
     if (!isAdmin) return
 
-    if (window.confirm("etes-vous sur de vouloir terminer la session ?")) {
+    if (window.confirm("Êtes-vous sur de vouloir terminer la session ?")) {
       try {
         await emitEndSession()
         navigate("/games")
@@ -497,11 +511,11 @@ const SessionPhases: React.FC = () => {
     return (
       <div className="text-center py-12">
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          <p className="font-bold">Error</p>
+          <p className="font-bold">Erreur</p>
           <p>{error}</p>
         </div>
         <Link to="/games" className="mt-4 inline-block text-green-600 hover:text-green-700">
-          ← Back to sessions
+          ← Retour aux sessions
         </Link>
       </div>
     )
@@ -509,6 +523,14 @@ const SessionPhases: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          duration={3000}
+          onClose={() => setNotification(null)}
+        />
+      )}
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="flex items-center justify-between mb-8">
           <Link to="/games" className="flex items-center text-gray-600 hover:text-gray-800">
@@ -522,21 +544,21 @@ const SessionPhases: React.FC = () => {
                 <span className="text-sm font-medium">Mode spectateur</span>
               </div>
             )}
-            <button
+            {isAdmin && (<button
               onClick={() => handleNavigatePhase("prev")}
               disabled={phase === 1 || !isAdmin}
               className="px-4 py-2 bg-gray-100 rounded-md disabled:opacity-50 hover:bg-gray-200"
             >
               <ChevronLeft className="h-5 w-5" />
-            </button>
-            <span className="text-xl font-semibold">Phase {phase}</span>
-            <button
+            </button>)}
+            <span className="text-xl font-semibold">Phase {phase} / 4</span>
+            {isAdmin && (<button
               onClick={() => handleNavigatePhase("next")}
               disabled={phase === 4 || !isAdmin}
               className="px-4 py-2 bg-gray-100 rounded-md disabled:opacity-50 hover:bg-gray-200"
             >
               <ChevronRight className="h-5 w-5" />
-            </button>
+            </button>)}
           </div>
         </div>
 
@@ -546,13 +568,13 @@ const SessionPhases: React.FC = () => {
           <h3 className="text-lg font-semibold mb-2">État Actuel</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="text-green-800">
-              <strong>Phase:</strong> {phase === 1 && "Sélection des cartes"}
+              <strong>Phase :</strong> {phase === 1 && "Sélection des cartes"}
               {phase === 2 && "Estimation CO2"}
               {phase === 3 && "Vote d'acceptation"}
               {phase === 4 && "Résultats"}
             </div>
             <div className="text-green-800">
-              <strong>Tour :</strong> {round + 1} of {categories.length}
+              <strong>Tour :</strong> {round + 1}/{categories.length}
               {currentCategory && ` - ${currentCategory.categoryName}`}
             </div>
           </div>

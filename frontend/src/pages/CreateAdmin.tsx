@@ -35,9 +35,17 @@ const CreateAdmin = () => {
             }
 
             setSuccess('Compte admin créé avec succès');
+            resetForm();
         } catch (error) {
             setError(error instanceof Error ? error.message : 'Une erreur est survenue');
         }
+    };
+
+    const resetForm = () => {
+        setUsername('');
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
     };
 
     const togglePasswordVisibility = (field: 'password' | 'confirm') => {

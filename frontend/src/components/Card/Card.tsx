@@ -1,5 +1,4 @@
-// Card.tsx
-import { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useMemo } from 'react';
 import { ImageOff, Activity, Lightbulb, Sparkles } from 'lucide-react';
 import { GameCard } from '../../types/game';
 import { generateCodeFromCO2, formatImageName, arrayBufferToBase64 } from '../../utils/formatting';
@@ -19,9 +18,13 @@ interface CardProps {
 
 export function Card({ cardData, width = 416, height = 650, hiddenCo2 = true, isFlipped = false, categoryIcon, categoryColor, isForPdf = false }: CardProps) {
     const { cardName, cardValue, cardActual, cardProposition, cardImageData } = cardData;
-    const [encodedCo2Value, _] = useState<string>(hiddenCo2 ? generateCodeFromCO2(cardValue) : '');
     const [imageHeight, setImageHeight] = useState<number | null>(null);
     const textRef = useRef<HTMLDivElement>(null);
+
+    const encodedCo2Value = useMemo(() =>
+        hiddenCo2 ? generateCodeFromCO2(cardValue) : '',
+        [hiddenCo2, cardValue]
+    );
 
     useEffect(() => {
         if (textRef.current) {
@@ -29,18 +32,57 @@ export function Card({ cardData, width = 416, height = 650, hiddenCo2 = true, is
             const maxAvailableHeight = height * 0.65; // 65% de la carte max pour le contenu
             const newImageHeight = Math.max(100, maxAvailableHeight - textHeight); // Min 100px
 
-            setImageHeight(newImageHeight);
+            // N'appliquer un nouveau état que si l'imageHeight a changé
+            if (newImageHeight !== imageHeight) {
+                setImageHeight(newImageHeight);
+            }
         }
-    }, [cardActual, cardProposition, height]);
+    }, [cardActual, cardProposition, height, imageHeight]);
 
-    const cardImage = formatImageName(cardImageData.data ? arrayBufferToBase64(cardImageData.data) : '', cardImageData.type);
+    const cardImage = useMemo(() =>
+        formatImageName(
+            cardImageData?.data ? arrayBufferToBase64(cardImageData.data) : '',
+            cardImageData?.type
+        ),
+        [cardImageData]
+    );
 
-    const styles = getCardStyles({
-        width,
-        height,
-        isFlipped,
-        isForPdf
-    });
+    const styles = useMemo(() =>
+        getCardStyles({
+            width,
+            height,
+            isFlipped,
+            isForPdf
+        }),
+        [width, height, isFlipped, isForPdf]
+    );
+
+    // Mémoriser les sections de rendu pour éviter de recréer des éléments JSX à chaque rendu
+    const renderImage = useMemo(() => {
+        if (cardImage) {
+            return (
+                <div className="relative" style={{ ...styles.image, height: imageHeight ?? 'auto' }}>
+                    <img
+                        className="w-full h-full object-cover rounded-lg border-2 border-black"
+                        src={cardImage}
+                        alt={cardName}
+                    />
+                </div>
+            );
+        }
+
+        return (
+            <div
+                className="w-full h-full flex flex-col items-center justify-center text-white bg-gray-700 border-2 border-black rounded-lg"
+                style={styles.image}
+            >
+                <ImageOff
+                    className="text-white"
+                    style={{ width: styles.icon.size, height: styles.icon.size }}
+                />
+            </div>
+        );
+    }, [cardImage, cardName, imageHeight, styles.image, styles.icon.size]);
 
     return (
         <div
@@ -55,25 +97,7 @@ export function Card({ cardData, width = 416, height = 650, hiddenCo2 = true, is
             </div>
 
             <div className="flex flex-col flex-grow min-h-0" style={{ ...styles.paddingCard, minHeight: 0 }}>
-                {cardImage ? (
-                    <div className="relative" style={{ ...styles.image, height: imageHeight ?? 'auto' }}>
-                        <img
-                            className="w-full h-full object-cover rounded-lg border-2 border-black"
-                            src={cardImage}
-                            alt={cardName}
-                        />
-                    </div>
-                ) : (
-                    <div
-                        className="w-full h-full flex flex-col items-center justify-center text-white bg-gray-700 border-2 border-black rounded-lg"
-                        style={styles.image}
-                    >
-                        <ImageOff
-                            className="text-white"
-                            style={{ width: styles.icon.size, height: styles.icon.size }}
-                        />
-                    </div>
-                )}
+                {renderImage}
 
                 <div ref={textRef} className="flex flex-col">
                     <div className="flex items-start" style={styles.section}>
@@ -143,4 +167,4 @@ export function Card({ cardData, width = 416, height = 650, hiddenCo2 = true, is
     );
 }
 
-export default Card;
+export default React.memo(Card);

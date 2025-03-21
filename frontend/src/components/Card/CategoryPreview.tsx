@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import * as LucideIcons from 'lucide-react';
 import { Box } from 'lucide-react';
 import { toPascalCase } from '../../utils/formatting';
@@ -27,25 +27,40 @@ export function CategoryPreview({
     iconSizePx = "5px",
     isForPdf = false
 }: CategoryPreviewProps) {
-    // Déterminer l'icône à utiliser
-    const iconName = categoryIcon ? toPascalCase(categoryIcon) : 'Box';
-    // @ts-ignore - L'indexation dynamique n'est pas reconnue par TypeScript
-    const IconComponent = (LucideIcons[iconName as keyof typeof LucideIcons] || Box) as React.ElementType;
+    // Mémoriser l'icône pour éviter de la recalculer à chaque rendu
+    const IconComponent = useMemo(() => {
+        const iconName = categoryIcon ? toPascalCase(categoryIcon) : 'Box';
+        return (LucideIcons[iconName as keyof typeof LucideIcons] || Box) as React.ElementType;
+    }, [categoryIcon]);
+
+    // Mémoriser les styles combinés pour éviter de créer un nouvel objet à chaque rendu
+    const combinedStyles = useMemo(() => ({
+        backgroundColor: categoryColor,
+        ...style
+    }), [categoryColor, style]);
+
+    // Mémoriser les styles de l'icône
+    const iconStyles = useMemo(() => ({
+        width: iconSizePx,
+        height: iconSizePx
+    }), [iconSizePx]);
+
+    // Mémoriser les styles du texte
+    const textStyles = useMemo(() => ({
+        marginTop: isForPdf ? "-24px" : "0"
+    }), [isForPdf]);
 
     return (
         <div
             className={`px-3 text-white rounded-lg shadow-md uppercase flex items-center ${className}`}
-            style={{
-                backgroundColor: categoryColor,
-                ...style
-            }}
+            style={combinedStyles}
         >
-            <IconComponent className="mr-2" style={{ width: iconSizePx, height: iconSizePx}}/>
-            <span className="font-semibold" style={{ marginTop: isForPdf ? "-24px" : "0" }}>
+            <IconComponent className="mr-2" style={iconStyles} />
+            <span className="font-semibold" style={textStyles}>
                 {categoryName}
             </span>
         </div>
     );
 }
 
-export default CategoryPreview;
+export default React.memo(CategoryPreview);
