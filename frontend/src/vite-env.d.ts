@@ -4,5 +4,6 @@ interface ImportMetaEnv {
   }
   
   interface ImportMeta {
-    readonly env: ImportMetaEnv
+    readonly env: Record<string, string>
   }
+  

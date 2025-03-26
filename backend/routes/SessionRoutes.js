@@ -10,6 +10,5 @@ router.put('/:id/status', sessionController.updateSessionStatus);
 router.get('/status/:status', sessionController.getSessionsByStatus);
 router.delete('/:id', sessionController.deleteSession);
 router.post('/:id/sendLink', sessionController.sendLinkToUser);
-router.post('/:id/join', sessionController.joinSession);
 
 module.exports = router;

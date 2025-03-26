@@ -69,16 +69,29 @@ const QRCodeReader: React.FC<QRCodeReaderProps> = ({
                 if (hasPermission) {
                     initializeScanner();
                 } else {
-                    stopScanner();
+                    setShowScanner(false);
                 }
             }, 500);
         }
         return () => {
             clearTimeout(timer);
-            if (isScanning && scannerRef.current) {
-                scannerRef.current.stop().catch((error) => {
-                    console.debug("Erreur lors du nettoyage du scanner :", error);
-                });
+            if (scannerRef.current) {
+                try {
+                    // Utilisation d'une approche plus sécurisée avec un indicateur d'état
+                    if (isScanning) {
+                        scannerRef.current.stop()
+                            .then(() => {
+                                console.log("Scanner arrêté avec succès");
+                            })
+                            .catch((error) => {
+                                if (error instanceof Error && !error.message.includes("not running")) {
+                                    console.warn("Erreur non critique lors de l'arrêt du scanner:", error);
+                                }
+                            });
+                    }
+                } catch (e) {
+                    console.warn("Erreur lors du nettoyage du scanner:", e);
+                }
             }
         };
     }, [showScanner, showModal]);
@@ -167,6 +180,7 @@ const QRCodeReader: React.FC<QRCodeReaderProps> = ({
     // on ferme cette modale et on ouvre la modale intermédiaire de choix
     const handleValidate = () => {
         const cardId = admin.getCardData(card?.cardName, card?.category, card?.deckName);
+        console.log("Card ID : ", cardId);
         if (phase === 2 || phase === 3) {
             setShowModal(false);
             setShowChoiceModal(true);
@@ -234,7 +248,7 @@ const QRCodeReader: React.FC<QRCodeReaderProps> = ({
                 </div>
             )}
 
-            {/* Modale intermédiaire pour choisir entre "Unselect" et "Continuer" */}
+            {/* Modale intermédiaire pour choisir entre "Désélectionner" et "Continuer" */}
             {showChoiceModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
@@ -247,9 +261,9 @@ const QRCodeReader: React.FC<QRCodeReaderProps> = ({
                                     onSelect?.(group? group.groupId : -1,cardId);
                                     setShowChoiceModal(false);
                                 }}
-                                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                className="px-4 py-2 bg-red-100 text-red-700 hover:bg-red-200 rounded-lg transition-colors"
                             >
-                                Unselect
+                                Désélectionner
                             </button>
                             <button
                                 onClick={() => {
@@ -292,7 +306,7 @@ const QRCodeReader: React.FC<QRCodeReaderProps> = ({
                                 }}
                                 className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                             >
-                                Unselect
+                                Désélectionné
                             </button>
                             <button
                                 onClick={() => {
@@ -333,7 +347,7 @@ const QRCodeReader: React.FC<QRCodeReaderProps> = ({
                                 }}
                                 className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                             >
-                                Unselect
+                                Désélectionné
                             </button>
                             <button
                                 onClick={() => {

@@ -15,7 +15,3 @@ COPY . .
 
 # Exposer le port sur lequel l'application écoute
 EXPOSE 3000
-
-# Démarrer l'application
-# CMD ["npm", "start"]
-CMD ["npm", "run", "dev"]

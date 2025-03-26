@@ -161,7 +161,7 @@ const CardZoomedInTableModal: React.FC<CardZoomedInTableModalProps> = ({
             className="flex-1 px-4 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 transition-colors font-medium flex items-center justify-center"
           >
             <ArrowLeft size={18} className="mr-2" />
-            Back
+            Retour
           </button>
           {!isReadOnly && (
             <button
@@ -171,7 +171,7 @@ const CardZoomedInTableModal: React.FC<CardZoomedInTableModalProps> = ({
               }`}
             >
               <Check size={18} className="mr-2" />
-              {isSelected ? "Remove" : "Select"}
+              {isSelected ? "Déselectionner" : "Sélectionner"}
             </button>
           )}
         </div>

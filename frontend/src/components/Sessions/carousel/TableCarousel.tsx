@@ -351,7 +351,7 @@ export const TableCarousel: React.FC<TableCarouselProps> = ({
                 </h4>
                 <div className="space-y-3 text-sm text-slate-700 dark:text-slate-300">
                   <p>
-                    <span className="font-medium text-blue-700 dark:text-blue-400">Tour :</span> Un tour correspond à une catégorie de cartes. Pendant chaque tour, vous travaillez avec les cartes d'une même catégorie.
+                    <span className="font-medium text-blue-700 dark:text-blue-400">Tour :</span> Un tour correspond à une catégorie de cartes. Pendant chaque tour, vous travaillerez avec les cartes d'une même catégorie.
                   </p>
                   <p>
                     <span className="font-medium text-blue-700 dark:text-blue-400">Phase :</span> Une phase comprend tous les tours (toutes les catégories). Quand une phase se termine, vous changez de table et la nature des activités évolue.

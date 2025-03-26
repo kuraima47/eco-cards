@@ -16,13 +16,8 @@ interface CategoryViewProps {
     refreshParent: () => void;
 }
 
-// Définir en haut du fichier ou dans un fichier de types
-interface GameCardApiFormat extends Omit<GameCard, 'cardActual' | 'cardProposition'> {
-    cardActual: string;
-    cardProposition: string;
-}
 
-export function CategoryView({ category, onCreateCard, refreshParent }: CategoryViewProps) {
+export function CategoryView({ category, refreshParent }: CategoryViewProps) {
     const [isCardModalOpen, setIsCardModalOpen] = useState(false);
     const [isViewCardModalOpen, setIsViewCardModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -153,9 +148,10 @@ export function CategoryView({ category, onCreateCard, refreshParent }: Category
 
     const handleCardSubmit = async (data: Partial<GameCard>) => {
         try {
-            // Convertir les tableaux en chaînes de caractères JSON
+            // Convertir les tableaux en chaînes de caractères JSON et passer la value en number
             const formattedData = {
                 ...data,
+                cardValue: data.cardValue ? Number(data.cardValue) : undefined,
                 cardActual: Array.isArray(data.cardActual) ? JSON.stringify(data.cardActual) : JSON.stringify([]),
                 cardProposition: Array.isArray(data.cardProposition) ? JSON.stringify(data.cardProposition) : JSON.stringify([]),
             } as unknown as Partial<GameCard>;

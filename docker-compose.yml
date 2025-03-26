@@ -26,12 +26,15 @@ services:
       DB_USER: postgres
       DB_PASSWORD: postgres
       FRONTEND_URL: http://localhost:3001
+      NODE_ENV: ${NODE_ENV:-development}
     volumes:
       - ./backend:/app
       - backend_node_modules:/app/node_modules
     depends_on:
       - postgres
     restart: unless-stopped
+    command: >
+      sh -c "if [ ${NODE_ENV} = production ]; then npm run start; else npm run dev; fi"
   frontend:
     build:
       context: ./frontend
@@ -46,9 +49,13 @@ services:
     environment:
       - NODE_OPTIONS=--max-old-space-size=8192
       - CHOKIDAR_USEPOLLING=true
+      - NODE_ENV=${NODE_ENV:-development}
     depends_on:
       - backend
     restart: unless-stopped
+    command: >
+      sh -c "if [ ${NODE_ENV} = production ]; then npm run build && npm run start; else npm run dev-exposed; fi"
+
   nginx:
     container_name: ecocards-nginx
     build:

@@ -17,6 +17,12 @@ docker exec -it ecocards-postgres psql -U postgres -d ecocards-db
 ## Documentation de l'API (Swagger)
 http://localhost:3000/api-docs
 
+## Choix de l'environnement (dev/prod)
+- Créer un fichier .env à la racine, puis choisir :
+NODE_ENV=development
+ou
+NODE_ENV=production
+
 ## Getting started
 
 To make it easy for you to get started with GitLab, here's a list of recommended next steps.

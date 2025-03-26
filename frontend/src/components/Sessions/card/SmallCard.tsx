@@ -162,20 +162,11 @@ const SmallCard: React.FC<SmallCardProps> = ({
             </div>
             
             <div className="flex mt-4 space-x-2">
-                {/* Bouton pour confirmer la sélection */}
                 <button 
                     onClick={() => setShowPhaseControls(false)} 
-                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg"
+                    className="px-4 py-2 bg-white/20 hover:bg-white/20 text-white rounded-lg"
                 >
-                    Confirmer
-                </button>
-                
-                {/* Bouton pour annuler */}
-                <button 
-                    onClick={() => setShowPhaseControls(false)} 
-                    className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg"
-                >
-                    Annuler
+                    Retour
                 </button>
             </div>
         </div>
@@ -316,7 +307,7 @@ const SmallCard: React.FC<SmallCardProps> = ({
                                     {co2Estimation ? (
                                         <span className="font-bold text-green-600">{co2Estimation}</span>
                                     ) : (
-                                        <span className="italic text-gray-500 text-[10px]">Cliquez pour évaluezr</span>
+                                        <span className="italic text-gray-500 text-[10px]">{isAdmin ? "Cliquez pour évaluer" : "En attente"}</span>
                                     )}
                                 </div>
                             )}
@@ -333,7 +324,7 @@ const SmallCard: React.FC<SmallCardProps> = ({
                                             {acceptanceLevel.charAt(0).toUpperCase() + acceptanceLevel.slice(1)}
                                         </span>
                                     ) : (
-                                        <span className="italic text-gray-500 text-[10px]">Cliquez pour évaluer</span>
+                                        <span className="italic text-gray-500 text-[10px]">{isAdmin ? "Cliquez pour évaluer" : "En attente"}</span>
                                     )}
                                 </div>
                             )}

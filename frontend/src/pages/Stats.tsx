@@ -49,7 +49,7 @@ const Stats = () => {
       let incompleteCards = 0;
       for (const card of allCards) {
         const response = await cardService.isCardComplete(card.cardId.toString());
-        const isComplete = response.isComplete
+        const isComplete = response;
         if (isComplete) {
           completeCards++;
         } else {
@@ -95,7 +95,14 @@ const Stats = () => {
     }
   };
 
-  const StatCard = ({ icon: Icon, title, value, unit = '' }) => (
+  interface StatCardProps {
+    icon: React.ComponentType<{ className?: string }>;
+    title: string;
+    value: number | string;
+    unit?: string;
+  }
+
+  const StatCard: React.FC<StatCardProps> = ({ icon: Icon, title, value, unit = '' }) => (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex items-center mb-4">
         <div className="bg-green-100 rounded-full p-3">

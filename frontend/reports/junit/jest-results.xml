@@ -1,177 +1,135 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="73" failures="0" errors="0" time="15.768">
-  <testsuite name="Home" errors="0" failures="0" skipped="0" timestamp="2025-03-19T23:28:33" time="4.128" tests="4">
-    <testcase classname="Home affiche un message si un message est passé dans location.state" name="Home affiche un message si un message est passé dans location.state" time="0.205">
+<testsuites name="jest tests" tests="57" failures="0" errors="0" time="91.798">
+  <testsuite name="QRCodeForm" errors="0" failures="0" skipped="0" timestamp="2025-03-25T15:43:45" time="21.176" tests="4">
+    <testcase classname="QRCodeForm affiche les champs URL, couleur, upload logo et le bouton de téléchargement" name="QRCodeForm affiche les champs URL, couleur, upload logo et le bouton de téléchargement" time="0.457">
     </testcase>
-    <testcase classname="Home n&apos;affiche pas de message si aucun message n&apos;est passé dans location.state" name="Home n&apos;affiche pas de message si aucun message n&apos;est passé dans location.state" time="0.023">
+    <testcase classname="QRCodeForm permet de modifier l&apos;URL" name="QRCodeForm permet de modifier l&apos;URL" time="0.03">
     </testcase>
-    <testcase classname="Home affiche correctement toutes les features avec des icônes mockées" name="Home affiche correctement toutes les features avec des icônes mockées" time="0.044">
+    <testcase classname="QRCodeForm permet de changer la couleur du QR Code" name="QRCodeForm permet de changer la couleur du QR Code" time="0.018">
     </testcase>
-    <testcase classname="Home redirige vers /games lorsqu&apos;on clique sur le bouton &quot;Commencer une Partie&quot;" name="Home redirige vers /games lorsqu&apos;on clique sur le bouton &quot;Commencer une Partie&quot;" time="0.04">
-    </testcase>
-  </testsuite>
-  <testsuite name="ProtectedRoute" errors="0" failures="0" skipped="0" timestamp="2025-03-19T23:28:33" time="4.103" tests="3">
-    <testcase classname="ProtectedRoute redirige vers /auth si l’utilisateur n’est pas authentifié" name="ProtectedRoute redirige vers /auth si l’utilisateur n’est pas authentifié" time="0.23">
-    </testcase>
-    <testcase classname="ProtectedRoute redirige vers / si l’utilisateur n’a pas le rôle requis" name="ProtectedRoute redirige vers / si l’utilisateur n’a pas le rôle requis" time="0.017">
-    </testcase>
-    <testcase classname="ProtectedRoute affiche le contenu si l’utilisateur est authentifié et a le bon rôle" name="ProtectedRoute affiche le contenu si l’utilisateur est authentifié et a le bon rôle" time="0.013">
+    <testcase classname="QRCodeForm déclenche la fonction de téléchargement quand on clique sur le bouton" name="QRCodeForm déclenche la fonction de téléchargement quand on clique sur le bouton" time="0.023">
     </testcase>
   </testsuite>
-  <testsuite name="QRCodeForm" errors="0" failures="0" skipped="0" timestamp="2025-03-19T23:28:33" time="4.371" tests="4">
-    <testcase classname="QRCodeForm affiche les champs URL, couleur, upload logo et le bouton de téléchargement" name="QRCodeForm affiche les champs URL, couleur, upload logo et le bouton de téléchargement" time="0.395">
+  <testsuite name="useAdmin" errors="0" failures="0" skipped="0" timestamp="2025-03-25T15:43:45" time="22.203" tests="14">
+    <testcase classname="useAdmin should initialize with user and load data" name="useAdmin should initialize with user and load data" time="0.418">
     </testcase>
-    <testcase classname="QRCodeForm permet de modifier l&apos;URL" name="QRCodeForm permet de modifier l&apos;URL" time="0.044">
+    <testcase classname="useAdmin should add category" name="useAdmin should add category" time="0.06">
     </testcase>
-    <testcase classname="QRCodeForm permet de changer la couleur du QR Code" name="QRCodeForm permet de changer la couleur du QR Code" time="0.04">
+    <testcase classname="useAdmin should update category" name="useAdmin should update category" time="0.059">
     </testcase>
-    <testcase classname="QRCodeForm déclenche la fonction de téléchargement quand on clique sur le bouton" name="QRCodeForm déclenche la fonction de téléchargement quand on clique sur le bouton" time="0.044">
+    <testcase classname="useAdmin should delete category" name="useAdmin should delete category" time="0.057">
     </testcase>
-  </testsuite>
-  <testsuite name="useSessionSocket" errors="0" failures="0" skipped="0" timestamp="2025-03-19T23:28:33" time="4.683" tests="16">
-    <testcase classname="useSessionSocket should join session when socket is connected" name="useSessionSocket should join session when socket is connected" time="0.385">
+    <testcase classname="useAdmin should add deck" name="useAdmin should add deck" time="0.055">
     </testcase>
-    <testcase classname="useSessionSocket should set up event listeners for session events" name="useSessionSocket should set up event listeners for session events" time="0.025">
+    <testcase classname="useAdmin should get deck name by id" name="useAdmin should get deck name by id" time="0.055">
     </testcase>
-    <testcase classname="useSessionSocket should clean up event listeners on unmount" name="useSessionSocket should clean up event listeners on unmount" time="0.026">
+    <testcase classname="useAdmin should refresh data when calling refresh" name="useAdmin should refresh data when calling refresh" time="0.057">
     </testcase>
-    <testcase classname="useSessionSocket should emit phase change with retry" name="useSessionSocket should emit phase change with retry" time="0.077">
+    <testcase classname="useAdmin should update deck" name="useAdmin should update deck" time="0.189">
     </testcase>
-    <testcase classname="useSessionSocket should emit card selection with retry" name="useSessionSocket should emit card selection with retry" time="0.089">
+    <testcase classname="useAdmin should delete deck" name="useAdmin should delete deck" time="0.059">
     </testcase>
-    <testcase classname="useSessionSocket should emit end phase with retry" name="useSessionSocket should emit end phase with retry" time="0.036">
+    <testcase classname="useAdmin should add card" name="useAdmin should add card" time="0.06">
     </testcase>
-    <testcase classname="useSessionSocket should emit end session with retry" name="useSessionSocket should emit end session with retry" time="0.024">
+    <testcase classname="useAdmin should update card" name="useAdmin should update card" time="0.061">
     </testcase>
-    <testcase classname="useSessionSocket should handle socket disconnection" name="useSessionSocket should handle socket disconnection" time="0.048">
+    <testcase classname="useAdmin should delete card" name="useAdmin should delete card" time="0.058">
     </testcase>
-    <testcase classname="useSessionSocket should handle socket errors during event emission" name="useSessionSocket should handle socket errors during event emission" time="0.023">
+    <testcase classname="useAdmin should handle error when adding category without selected deck" name="useAdmin should handle error when adding category without selected deck" time="0.058">
     </testcase>
-    <testcase classname="useSessionSocket should handle callbacks being called with session data" name="useSessionSocket should handle callbacks being called with session data" time="0.02">
-    </testcase>
-    <testcase classname="useSessionSocket should handle card selection event" name="useSessionSocket should handle card selection event" time="0.019">
-    </testcase>
-    <testcase classname="useSessionSocket should handle phase change event" name="useSessionSocket should handle phase change event" time="0.017">
-    </testcase>
-    <testcase classname="useSessionSocket should handle round change event" name="useSessionSocket should handle round change event" time="0.015">
-    </testcase>
-    <testcase classname="useSessionSocket should handle error event" name="useSessionSocket should handle error event" time="0.017">
-    </testcase>
-    <testcase classname="useSessionSocket should emit CO2 estimation" name="useSessionSocket should emit CO2 estimation" time="0.047">
-    </testcase>
-    <testcase classname="useSessionSocket should emit acceptance level" name="useSessionSocket should emit acceptance level" time="0.033">
+    <testcase classname="useAdmin should handle importing cards" name="useAdmin should handle importing cards" time="0.058">
     </testcase>
   </testsuite>
-  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2025-03-19T23:28:33" time="4.754" tests="3">
-    <testcase classname=" Affiche le formulaire de connexion par défaut" name=" Affiche le formulaire de connexion par défaut" time="0.434">
+  <testsuite name="useSessionSocket" errors="0" failures="0" skipped="0" timestamp="2025-03-25T15:43:47" time="21.953" tests="16">
+    <testcase classname="useSessionSocket should join session when socket is connected" name="useSessionSocket should join session when socket is connected" time="0.915">
     </testcase>
-    <testcase classname=" Peut basculer entre connexion et inscription" name=" Peut basculer entre connexion et inscription" time="0.166">
+    <testcase classname="useSessionSocket should set up event listeners for session events" name="useSessionSocket should set up event listeners for session events" time="0.011">
     </testcase>
-    <testcase classname=" Empêche l&apos;inscription si les mots de passe ne correspondent pas" name=" Empêche l&apos;inscription si les mots de passe ne correspondent pas" time="0.183">
+    <testcase classname="useSessionSocket should clean up event listeners on unmount" name="useSessionSocket should clean up event listeners on unmount" time="0.008">
     </testcase>
-  </testsuite>
-  <testsuite name="useSocketConnection" errors="0" failures="0" skipped="0" timestamp="2025-03-19T23:28:38" time="1.389" tests="5">
-    <testcase classname="useSocketConnection should initialize socket connection on mount" name="useSocketConnection should initialize socket connection on mount" time="0.087">
+    <testcase classname="useSessionSocket should emit phase change with retry" name="useSessionSocket should emit phase change with retry" time="0.023">
     </testcase>
-    <testcase classname="useSocketConnection should call onConnect callback when socket connects" name="useSocketConnection should call onConnect callback when socket connects" time="0.027">
+    <testcase classname="useSessionSocket should emit card selection with retry" name="useSessionSocket should emit card selection with retry" time="0.018">
     </testcase>
-    <testcase classname="useSocketConnection should call onDisconnect callback when socket disconnects" name="useSocketConnection should call onDisconnect callback when socket disconnects" time="0.02">
+    <testcase classname="useSessionSocket should emit end phase with retry" name="useSessionSocket should emit end phase with retry" time="0.012">
     </testcase>
-    <testcase classname="useSocketConnection should call onError callback when connection error occurs" name="useSocketConnection should call onError callback when connection error occurs" time="0.022">
+    <testcase classname="useSessionSocket should emit end session with retry" name="useSessionSocket should emit end session with retry" time="0.013">
     </testcase>
-    <testcase classname="useSocketConnection should disconnect socket when component unmounts" name="useSocketConnection should disconnect socket when component unmounts" time="0.018">
+    <testcase classname="useSessionSocket should handle socket disconnection" name="useSessionSocket should handle socket disconnection" time="0.008">
     </testcase>
-  </testsuite>
-  <testsuite name="QRCodePreview" errors="0" failures="0" skipped="0" timestamp="2025-03-19T23:28:38" time="1.272" tests="3">
-    <testcase classname="QRCodePreview affiche un QR Code avec l&apos;URL donnée" name="QRCodePreview affiche un QR Code avec l&apos;URL donnée" time="0.216">
+    <testcase classname="useSessionSocket should handle socket errors during event emission" name="useSessionSocket should handle socket errors during event emission" time="0.011">
     </testcase>
-    <testcase classname="QRCodePreview affiche le QR Code avec un logo si un logo est fourni" name="QRCodePreview affiche le QR Code avec un logo si un logo est fourni" time="0.084">
+    <testcase classname="useSessionSocket should handle callbacks being called with session data" name="useSessionSocket should handle callbacks being called with session data" time="0.019">
     </testcase>
-    <testcase classname="QRCodePreview fonctionne sans logo" name="QRCodePreview fonctionne sans logo" time="0.061">
+    <testcase classname="useSessionSocket should handle card selection event" name="useSessionSocket should handle card selection event" time="0.024">
     </testcase>
-  </testsuite>
-  <testsuite name="useSessionData" errors="0" failures="0" skipped="0" timestamp="2025-03-19T23:28:38" time="1.34" tests="3">
-    <testcase classname="useSessionData should load session data on initial render" name="useSessionData should load session data on initial render" time="0.115">
+    <testcase classname="useSessionSocket should handle phase change event" name="useSessionSocket should handle phase change event" time="0.009">
     </testcase>
-    <testcase classname="useSessionData should handle error when session is not found" name="useSessionData should handle error when session is not found" time="0.11">
+    <testcase classname="useSessionSocket should handle round change event" name="useSessionSocket should handle round change event" time="0.008">
     </testcase>
-    <testcase classname="useSessionData should handle service errors" name="useSessionData should handle service errors" time="0.085">
+    <testcase classname="useSessionSocket should handle error event" name="useSessionSocket should handle error event" time="0.007">
+    </testcase>
+    <testcase classname="useSessionSocket should emit CO2 estimation" name="useSessionSocket should emit CO2 estimation" time="0.01">
+    </testcase>
+    <testcase classname="useSessionSocket should emit acceptance level" name="useSessionSocket should emit acceptance level" time="0.011">
     </testcase>
   </testsuite>
-  <testsuite name="QRCodeGenerator" errors="0" failures="0" skipped="0" timestamp="2025-03-19T23:28:39" time="0.838" tests="2">
-    <testcase classname="QRCodeGenerator affiche les éléments principaux du générateur de QR Code" name="QRCodeGenerator affiche les éléments principaux du générateur de QR Code" time="0.036">
+  <testsuite name="useSocketConnection" errors="0" failures="0" skipped="0" timestamp="2025-03-25T15:43:47" time="27.327" tests="5">
+    <testcase classname="useSocketConnection should initialize socket connection on mount" name="useSocketConnection should initialize socket connection on mount" time="0.827">
     </testcase>
-    <testcase classname="QRCodeGenerator utilise correctement le hook useQRCode" name="QRCodeGenerator utilise correctement le hook useQRCode" time="0.012">
+    <testcase classname="useSocketConnection should call onConnect callback when socket connects" name="useSocketConnection should call onConnect callback when socket connects" time="0.011">
     </testcase>
-  </testsuite>
-  <testsuite name="ImageUpload" errors="0" failures="0" skipped="0" timestamp="2025-03-19T23:28:39" time="1.024" tests="4">
-    <testcase classname="ImageUpload affiche les éléments de base" name="ImageUpload affiche les éléments de base" time="0.126">
+    <testcase classname="useSocketConnection should call onDisconnect callback when socket disconnects" name="useSocketConnection should call onDisconnect callback when socket disconnects" time="0.013">
     </testcase>
-    <testcase classname="ImageUpload accepte un fichier valide et affiche l&apos;aperçu" name="ImageUpload accepte un fichier valide et affiche l&apos;aperçu" time="0.058">
+    <testcase classname="useSocketConnection should call onError callback when connection error occurs" name="useSocketConnection should call onError callback when connection error occurs" time="0.011">
     </testcase>
-    <testcase classname="ImageUpload rejette un fichier portrait" name="ImageUpload rejette un fichier portrait" time="0.02">
-    </testcase>
-    <testcase classname="ImageUpload supprime l&apos;image lorsqu&apos;on clique sur le bouton de suppression" name="ImageUpload supprime l&apos;image lorsqu&apos;on clique sur le bouton de suppression" time="0.023">
+    <testcase classname="useSocketConnection should disconnect socket when component unmounts" name="useSocketConnection should disconnect socket when component unmounts" time="0.008">
     </testcase>
   </testsuite>
-  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2025-03-19T23:28:39" time="0.567" tests="1">
-    <testcase classname=" should render correctly" name=" should render correctly" time="0.002">
+  <testsuite name="ProtectedRoute" errors="0" failures="0" skipped="0" timestamp="2025-03-25T15:44:07" time="10.647" tests="3">
+    <testcase classname="ProtectedRoute redirige vers /auth si l’utilisateur n’est pas authentifié" name="ProtectedRoute redirige vers /auth si l’utilisateur n’est pas authentifié" time="0.022">
+    </testcase>
+    <testcase classname="ProtectedRoute redirige vers / si l’utilisateur n’a pas le rôle requis" name="ProtectedRoute redirige vers / si l’utilisateur n’a pas le rôle requis" time="0.008">
+    </testcase>
+    <testcase classname="ProtectedRoute affiche le contenu si l’utilisateur est authentifié et a le bon rôle" name="ProtectedRoute affiche le contenu si l’utilisateur est authentifié et a le bon rôle" time="0.006">
     </testcase>
   </testsuite>
-  <testsuite name="useQRCode" errors="0" failures="0" skipped="0" timestamp="2025-03-19T23:28:39" time="0.629" tests="5">
-    <testcase classname="useQRCode should initialize with default values" name="useQRCode should initialize with default values" time="0.005">
+  <testsuite name="Home" errors="0" failures="0" skipped="0" timestamp="2025-03-25T15:44:08" time="10.094" tests="4">
+    <testcase classname="Home affiche un message si un message est passé dans location.state" name="Home affiche un message si un message est passé dans location.state" time="0.059">
     </testcase>
-    <testcase classname="useQRCode should update url when setUrl is called" name="useQRCode should update url when setUrl is called" time="0.002">
+    <testcase classname="Home n&apos;affiche pas de message si aucun message n&apos;est passé dans location.state" name="Home n&apos;affiche pas de message si aucun message n&apos;est passé dans location.state" time="0.015">
     </testcase>
-    <testcase classname="useQRCode should handle logo upload" name="useQRCode should handle logo upload" time="0.006">
+    <testcase classname="Home affiche correctement toutes les features avec des icônes mockées" name="Home affiche correctement toutes les features avec des icônes mockées" time="0.033">
     </testcase>
-    <testcase classname="useQRCode should handle logo deletion" name="useQRCode should handle logo deletion" time="0.002">
-    </testcase>
-    <testcase classname="useQRCode should download QR code" name="useQRCode should download QR code" time="0.002">
+    <testcase classname="Home redirige vers /games lorsqu&apos;on clique sur le bouton &quot;Commencer une Partie&quot;" name="Home redirige vers /games lorsqu&apos;on clique sur le bouton &quot;Commencer une Partie&quot;" time="0.02">
     </testcase>
   </testsuite>
-  <testsuite name="PDFpoc Component" errors="0" failures="0" skipped="0" timestamp="2025-03-19T23:28:33" time="7.205" tests="6">
-    <testcase classname="PDFpoc Component affiche l’état initial correctement" name="PDFpoc Component affiche l’état initial correctement" time="0.245">
+  <testsuite name="DeckListView Component" errors="0" failures="0" skipped="0" timestamp="2025-03-25T15:43:57" time="54.387" tests="4">
+    <testcase classname="DeckListView Component renders deck list correctly" name="DeckListView Component renders deck list correctly" time="0.297">
     </testcase>
-    <testcase classname="PDFpoc Component gère correctement l’upload des images" name="PDFpoc Component gère correctement l’upload des images" time="0.474">
+    <testcase classname="DeckListView Component calls onSelectDeck when clicking on a deck" name="DeckListView Component calls onSelectDeck when clicking on a deck" time="0.037">
     </testcase>
-    <testcase classname="PDFpoc Component met à jour les métriques quand les valeurs des inputs changent" name="PDFpoc Component met à jour les métriques quand les valeurs des inputs changent" time="0.983">
+    <testcase classname="DeckListView Component opens add deck modal when clicking on &apos;Nouveau Deck&apos; button" name="DeckListView Component opens add deck modal when clicking on &apos;Nouveau Deck&apos; button" time="0.027">
     </testcase>
-    <testcase classname="PDFpoc Component affiche correctement la prévisualisation après l’upload" name="PDFpoc Component affiche correctement la prévisualisation après l’upload" time="0.125">
-    </testcase>
-    <testcase classname="PDFpoc Component met à jour la prévisualisation après modification des métriques" name="PDFpoc Component met à jour la prévisualisation après modification des métriques" time="0.274">
-    </testcase>
-    <testcase classname="PDFpoc Component valide les valeurs des inputs de métriques" name="PDFpoc Component valide les valeurs des inputs de métriques" time="0.624">
+    <testcase classname="DeckListView Component met à jour la liste des decks lorsqu&apos;un nouveau est ajouté" name="DeckListView Component met à jour la liste des decks lorsqu&apos;un nouveau est ajouté" time="0.022">
     </testcase>
   </testsuite>
-  <testsuite name="useAdmin" errors="0" failures="0" skipped="0" timestamp="2025-03-19T23:28:33" time="10.816" tests="14">
-    <testcase classname="useAdmin should initialize with user and load data" name="useAdmin should initialize with user and load data" time="0.196">
+  <testsuite name="QRCodeGenerator" errors="0" failures="0" skipped="0" timestamp="2025-03-25T15:44:02" time="50.25" tests="2">
+    <testcase classname="QRCodeGenerator affiche les éléments principaux du générateur de QR Code" name="QRCodeGenerator affiche les éléments principaux du générateur de QR Code" time="0.192">
     </testcase>
-    <testcase classname="useAdmin should add category" name="useAdmin should add category" time="0.093">
+    <testcase classname="QRCodeGenerator utilise correctement le hook useQRCode" name="QRCodeGenerator utilise correctement le hook useQRCode" time="0.007">
     </testcase>
-    <testcase classname="useAdmin should update category" name="useAdmin should update category" time="0.088">
+  </testsuite>
+  <testsuite name="useQRCode" errors="0" failures="0" skipped="0" timestamp="2025-03-25T15:44:07" time="49.368" tests="5">
+    <testcase classname="useQRCode should initialize with default values" name="useQRCode should initialize with default values" time="0.106">
     </testcase>
-    <testcase classname="useAdmin should delete category" name="useAdmin should delete category" time="0.078">
+    <testcase classname="useQRCode should update url when setUrl is called" name="useQRCode should update url when setUrl is called" time="0.001">
     </testcase>
-    <testcase classname="useAdmin should add deck" name="useAdmin should add deck" time="0.092">
+    <testcase classname="useQRCode should handle logo upload" name="useQRCode should handle logo upload" time="0.002">
     </testcase>
-    <testcase classname="useAdmin should get deck name by id" name="useAdmin should get deck name by id" time="0.077">
+    <testcase classname="useQRCode should handle logo deletion" name="useQRCode should handle logo deletion" time="0.001">
     </testcase>
-    <testcase classname="useAdmin should refresh data when calling refresh" name="useAdmin should refresh data when calling refresh" time="0.077">
-    </testcase>
-    <testcase classname="useAdmin should update deck" name="useAdmin should update deck" time="0.079">
-    </testcase>
-    <testcase classname="useAdmin should delete deck" name="useAdmin should delete deck" time="0.093">
-    </testcase>
-    <testcase classname="useAdmin should add card" name="useAdmin should add card" time="0.091">
-    </testcase>
-    <testcase classname="useAdmin should update card" name="useAdmin should update card" time="0.102">
-    </testcase>
-    <testcase classname="useAdmin should delete card" name="useAdmin should delete card" time="0.085">
-    </testcase>
-    <testcase classname="useAdmin should handle error when adding category without selected deck" name="useAdmin should handle error when adding category without selected deck" time="0.092">
-    </testcase>
-    <testcase classname="useAdmin should handle importing cards" name="useAdmin should handle importing cards" time="0.064">
+    <testcase classname="useQRCode should download QR code" name="useQRCode should download QR code" time="0.001">
     </testcase>
   </testsuite>
 </testsuites>

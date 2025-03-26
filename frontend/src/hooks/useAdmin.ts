@@ -44,8 +44,12 @@ class AdminService {
     }
 
     public getCardData(cardName : string, categoryName:string, deckName: string) : number{
+        
+        const deckId = this.decks.find(deck => deck.deckName === deckName)?.deckId;
+        const categoryId = this.categories.find(category => category.categoryName === categoryName && category.deckId === deckId)?.categoryId;
+
         for (let i = 0; i < this.cards.length; i++) {
-            if (this.cards[i].cardName === cardName && this.cards[i].cardCategoryId === this.categories.find(category => category.categoryName === categoryName)?.categoryId && this.decks.find(deck => deck.deckName === deckName)?.deckId === this.cards[i].deckId) {
+            if (this.cards[i].cardName === cardName && this.cards[i].cardCategoryId === categoryId) {
                 return this.cards[i].cardId;
             }
         }

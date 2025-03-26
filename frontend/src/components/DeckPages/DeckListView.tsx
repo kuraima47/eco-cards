@@ -1,5 +1,5 @@
 import { Download, Edit, Library, Plus, Trash2 } from 'lucide-react';
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAdmin } from "../../hooks/useAdmin";
 // import { Deck } from "../../types";
 import DeckModal from "../Modals/DeckModal";

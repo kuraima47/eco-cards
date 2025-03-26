@@ -15,7 +15,7 @@ export function QRCodePreview({ url, qrColor, bgColor, logo }: QRCodePreviewProp
     const [card, setCard] = useState<any>(null);
 
     // Modifiez la valeur de phase selon vos besoins (ici phase2 ou phase3)
-    const phase = 3;
+    let phase = 3;
     const onCO2Estimate = () => {};
     const onAcceptanceChange = () => {};
     const onSelect = () => {};
@@ -195,7 +195,7 @@ export function QRCodePreview({ url, qrColor, bgColor, logo }: QRCodePreviewProp
                                 <button
                                     onClick={() => {
                                         // Option "Unselect" : rappel de la fonction onSelect
-                                        onSelect?.(1, 1);
+                                        //onSelect?.(1, 1);
                                         setShowChoiceModal(false);
                                     }}
                                     className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
@@ -240,7 +240,7 @@ export function QRCodePreview({ url, qrColor, bgColor, logo }: QRCodePreviewProp
                             <div className="flex justify-end gap-3">
                                 <button
                                     onClick={() => {
-                                        onSelect?.(1, 1);
+                                        //onSelect?.(1, 1);
                                         setShowExtraModal(false);
                                     }}
                                     className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
@@ -249,8 +249,8 @@ export function QRCodePreview({ url, qrColor, bgColor, logo }: QRCodePreviewProp
                                 </button>
                                 <button
                                     onClick={() => {
-                                        onCO2Estimate?.(1, co2Estimate);
-                                        onSelect?.(1, 1);
+                                        //onCO2Estimate?.(1, co2Estimate);
+                                        //onSelect?.(1, 1);
                                         setShowExtraModal(false);
                                     }}
                                     className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
@@ -282,7 +282,7 @@ export function QRCodePreview({ url, qrColor, bgColor, logo }: QRCodePreviewProp
                             <div className="flex justify-end gap-3">
                                 <button
                                     onClick={() => {
-                                        onSelect?.(1, 1);
+                                        //onSelect?.(1, 1);
                                         setShowExtraModal(false);
                                     }}
                                     className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
@@ -292,9 +292,9 @@ export function QRCodePreview({ url, qrColor, bgColor, logo }: QRCodePreviewProp
                                 <button
                                     onClick={() => {
                                         if (acceptanceOption === "confirmer") {
-                                            onAcceptanceChange?.(1, "high");
+                                            //onAcceptanceChange?.(1, "high");
                                         } else {
-                                            onAcceptanceChange?.(1, null);
+                                            //onAcceptanceChange?.(1, null);
                                         }
                                         setShowExtraModal(false);
                                     }}

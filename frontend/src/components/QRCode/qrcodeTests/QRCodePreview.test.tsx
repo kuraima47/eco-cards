@@ -1,9 +1,12 @@
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import { QRCodePreview } from '../QRCodePreview';
+import { Check } from 'lucide-react';
 
-
-
+//mock Check lucide react
+jest.mock('lucide-react', () => ({
+  Check: jest.fn(() => null),
+}));
 describe('QRCodePreview', () => {
   const defaultProps = {
     url: 'http://example.com',

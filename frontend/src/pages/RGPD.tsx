@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Notification from "../components/Notification";
 import GenericModalConfirm from "../components/Modals/GenericModalConfirm";
 import { userService } from "../services/userService";

@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from "react"
 import { useParams, useNavigate, Link } from "react-router-dom"
-import { ChevronLeft, ChevronRight, Clock, Users, Target, AlertTriangle, Eye } from "lucide-react"
+import { ChevronLeft, ChevronRight, Clock, Users, Target, AlertTriangle, Eye } from 'lucide-react'
 import { TableCarousel } from "../../components/Sessions/carousel/TableCarousel"
 import { useSessionSocket } from "../../hooks/useSessionSocket"
 import { useSessionData } from "../../hooks/useSessionData"
@@ -214,13 +214,16 @@ const SessionPhases: React.FC = () => {
   // Socket handlers
   const handleCardSelected = useCallback(
     (groupId: number, cardId: number, selected: boolean, selectedCards: SelectedCard[]) => {
-      if (selectedCardsByGroup && selectedCardsByGroup[groupId] && selectedCardsByGroup[groupId].length !== selectedCards.length && (userGroupIdRef.current === null || userGroupIdRef.current == groupId)) // Admin ou Joueurs sur la table N
+      const currentGroupCards = selectedCardsByGroup[groupId] || [];
 
-      console.log("selectedCardsByGroup[groupId]", selectedCardsByGroup[groupId], selectedCards)
-        if(selectedCardsByGroup[groupId].length < selectedCards.length)
+      if (currentGroupCards.length !== selectedCards.length &&
+        (userGroupIdRef.current === null || userGroupIdRef.current === groupId)) {
+        if (currentGroupCards.length < selectedCards.length) {
           setNotification({ message: "Une carte vient d'être sélectionnée. ", type: "success" });
-        else 
+        } else {
           setNotification({ message: "Une carte vient d'être désélectionnée. ", type: "success" });
+        }
+      }
 
       setSelectedCardsByGroup((prev) => ({
         ...prev,
@@ -251,7 +254,7 @@ const SessionPhases: React.FC = () => {
         }),
       )
     },
-    [setTables, phase],
+    [setTables, phase, selectedCardsByGroup],
   )
 
   const handleGroupCardsUpdated = useCallback(
@@ -309,7 +312,7 @@ const SessionPhases: React.FC = () => {
           })
         }
 
-        if(parsedPhase>phase)
+        if (parsedPhase > phase)
           setNotification({ message: "La phase " + parsedPhase + " vient de débuter.", type: "success" });
         setPhase(parsedPhase)
         navigate(`/games/${sessionId}/phase/${parsedPhase}`)
@@ -337,36 +340,55 @@ const SessionPhases: React.FC = () => {
 
   const handleCO2Estimation = useCallback((groupId: number, cardId: number, value: number) => {
     console.log("CO2 estimation", co2Estimations, groupId, cardId, value)
-    if (co2Estimations && co2Estimations[groupId] && co2Estimations[groupId][cardId] !== value && (userGroupIdRef.current === null || userGroupIdRef.current == groupId)) // Admin ou Joueurs sur la table N
+
+    let groupEstimations;
+    if (co2Estimations)
+      groupEstimations = co2Estimations[groupId] || {};
+
+    const index = (userGroupIndexRef.current + 1) % tables.length
+    const tableGroupId = groups.find((g) => g.groupId === tables[index]?.groupId)?.groupId
+
+    if (groupEstimations && groupEstimations[cardId] !== value &&
+      (userGroupIdRef.current === null || groupId === tableGroupId)) { // pour savoir si la valeur modifiée se trouve bien sur la table du joueur en question
       setNotification({ message: "Une estimation en CO2 vient d'être modifiée. ", type: "success" });
+    }
 
     setCO2Estimations((prev) => {
       return {
         ...prev,
         [groupId]: {
-          ...prev[groupId],
+          ...(prev[groupId] || {}),
           [cardId]: value,
         },
       }
     })
-
-  }, [])
+  }, [co2Estimations])
 
   const handleAcceptanceLevel = useCallback(
     (groupId: number, cardId: number, level: "high" | "medium" | "low" | null) => {
 
-      if (acceptanceLevels && acceptanceLevels[groupId] && acceptanceLevels[groupId][cardId] !== level && (userGroupIdRef.current === null || userGroupIdRef.current == groupId)) // Admin ou Joueurs sur la table N
+
+      let groupLevels;
+      if (acceptanceLevels)
+        groupLevels = acceptanceLevels[groupId] || {};
+
+      const index = (userGroupIndexRef.current + 2) % tables.length
+      const tableGroupId = groups.find((g) => g.groupId === tables[index]?.groupId)?.groupId
+
+      if (groupLevels && groupLevels[cardId] !== level &&
+        (userGroupIdRef.current === null || tableGroupId === groupId)) { // pour savoir si la valeur modifiée se trouve bien sur la table du joueur en question
         setNotification({ message: "Un niveau d'acceptation vient d'être modifié. ", type: "success" });
+      }
 
       setAcceptanceLevels((prev) => ({
         ...prev,
         [groupId]: {
-          ...prev[groupId],
+          ...(prev[groupId] || {}),
           [cardId]: level,
         },
       }))
     },
-    [],
+    [acceptanceLevels],
   )
 
   const {
@@ -415,7 +437,7 @@ const SessionPhases: React.FC = () => {
   // Handle card select event
   const handleCardSelect = useCallback(
     async (groupId: number, cardId: number) => {
-      if (!isAdmin) return // Uniquement les admins peuvent faire ça
+      if (!isAdmin) return // Only admin can do that
 
       try {
         const groupSelectedCards = selectedCardsByGroup[groupId] || []
@@ -712,4 +734,3 @@ const SessionPhases: React.FC = () => {
 }
 
 export default SessionPhases
-

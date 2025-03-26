@@ -19,6 +19,3 @@ RUN chmod -R 777 /app
 
 # Expose the port
 EXPOSE 3001
-
-# Start the application
-CMD ["npm", "run", "dev-exposed"]

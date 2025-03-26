@@ -1,4 +1,5 @@
 const sessionService = require('../services/SessionService');
+const userService = require('../services/UserService');
 
 class SessionController {
     async getAllSessions(req, res) {
@@ -79,24 +80,15 @@ class SessionController {
     //envoyer un lien par mail à un utilisateur pour rejoindre une session avec son mail
     async sendLinkToUser(req, res) {
         try {
+            const user = await userService.getUserByEmail(req.body.email);
+            if (user) {
+                return res.status(400).json({ error: 'Email Already exist' });
+            }
             const session = await sessionService.sendLinkToUser(req.params.id, req.body.email);
             if (!session) {
                 return res.status(404).json({ error: 'Session not found' });
             }
             res.json({ message: 'Link sent successfully' });
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    }
-
-    //rejoindre une session avec un lien
-    async joinSession(req, res) {
-        try {
-            const session = await sessionService.joinSession(req.params.id, req.body.userId);
-            if (!session) {
-                return res.status(404).json({ error: 'Session not found' });
-            }
-            res.json({ message: 'User joined successfully' });
         } catch (error) {
             res.status(500).json({ error: error.message });
         }

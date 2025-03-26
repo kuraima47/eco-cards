@@ -5,12 +5,23 @@
   "scripts": {
     "test": "mocha 'test/**/*.test.js' --recursive --reporter mocha-junit-reporter --reporter-options mochaFile=./reports/junit/test-results.xml --exit",
     "start": "node index.js",
-    "dev": "nodemon index.js -L"
+    "dev": "nodemon --exitcrash index.js -L"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
+  "nodemonConfig": {
+    "restartable": "rs",
+    "ignore": [".git", "node_modules/**/node_modules", "reports/"],
+    "verbose": true,
+    "events": {
+      "crash": "kill -15 $PID"
+    },
+    "watch": ["src/", "routes/", "models/", "controllers/", "services/", "repositories/", "index.js"],
+    "ext": "js,json",
+    "delay": 2000
+  },
   "dependencies": {
     "backend": "file:",
     "bcryptjs": "^3.0.2",

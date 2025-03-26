@@ -78,7 +78,7 @@ export function DeckView({ deck, onSelectCategory, refreshParent }: DeckViewProp
                     categoryDescription: data.categoryDescription || '',
                     categoryColor: data.categoryColor || '',
                     categoryIcon: data.categoryIcon || '',
-                    deckId: currentCategory?.deckId ? Number(currentCategory.deckId) : Number(deck.id)
+                    deckId: currentCategory?.deckId ? Number(currentCategory.deckId) : Number(deck.deckId)
                 });
                 setNotification({ message: "Catégorie créée avec succès !", type: "success" });
             } else if (modalMode === 'edit' && currentCategory) {
@@ -183,7 +183,7 @@ export function DeckView({ deck, onSelectCategory, refreshParent }: DeckViewProp
                         deck.categories.length > 0 &&
                         deck.categories.some(category => category.cards && category.cards.length > 0) && (
                             <button
-                                onClick={(e) => {
+                                onClick={() => {
                                     console.log("Download Deck");
                                     openDownloadModal();
                                 }}
@@ -195,7 +195,7 @@ export function DeckView({ deck, onSelectCategory, refreshParent }: DeckViewProp
                             </button>
                         )}
                     <button
-                        onClick={() => openAddCategoryModal(String(deck.id))}
+                        onClick={() => openAddCategoryModal(String(deck.deckId))}
                         className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 flex items-center gap-2"
                     >
                         <Plus className="w-4 h-4 mr-2" />
@@ -211,7 +211,7 @@ export function DeckView({ deck, onSelectCategory, refreshParent }: DeckViewProp
                         key={category.categoryId}
                         className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200"
                         onClick={() => {
-                            onSelectCategory(parseInt(category.categoryId));
+                            onSelectCategory(Number(category.categoryId));
                         }}
                     >
                         <div className="flex items-center space-x-3">
@@ -255,7 +255,7 @@ export function DeckView({ deck, onSelectCategory, refreshParent }: DeckViewProp
                 ))}
             </div>
             <ModalCards
-                key={deck.id}
+                key={deck.deckId}
                 initialData={deck}
                 isOpen={isDownloadModalOpen}
                 onClose={() => setIsDownloadModalOpen(false)}

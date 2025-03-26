@@ -92,8 +92,14 @@ const Auth = () => {
         });
 
         if (!response.ok) {
-            console.log(response);
-            throw new Error('Erreur lors de la connexion');
+            const errorData = await response.json();
+            if (errorData.message === 'User not found') {
+                throw new Error('Adresse mail inexistante.');
+            } else if (errorData.message === 'Invalid password') {
+                throw new Error('Mot de passe incorrect.');
+            } else {
+                throw new Error('Erreur lors de la connexion.');
+            }
         }
 
         const data = await response.json();
