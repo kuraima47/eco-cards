@@ -1,6 +1,10 @@
 # Cartes Dynamiques
 
 ## Lancement des Conteneurs Docker
+Pour build les conteneurs Docker en mode détaché :
+```sh
+docker-compose up -d --build
+```
 Pour démarrer les conteneurs Docker en mode détaché :
 ```sh
 docker-compose up -d
@@ -43,6 +47,7 @@ JWT_EXPIRATION_TIME=3600  # Recommandé
 
 # Compte Gmail obligatoire
 EMAIL="[EMAIL]"
+# Google exige que la vérification en deux étapes soit activée pour générer des mots de passe d’application, si vous obtenez un message du type : Le paramètre que vous recherchez n'est pas disponible pour votre compte. Rechercher sur google "Activer la validation en deux étapes" pour faire vérifier votre compte
 PASSWORD="[PASSWORD]"  # Générer un mot de passe d'application Gmail
 ```
 
