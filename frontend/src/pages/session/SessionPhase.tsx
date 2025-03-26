@@ -1,13 +1,13 @@
-import React, { useState, useCallback, useEffect, useRef } from "react"
-import { useParams, useNavigate, Link } from "react-router-dom"
-import { ChevronLeft, ChevronRight, Clock, Users, Target, AlertTriangle, Eye } from 'lucide-react'
+import { AlertTriangle, ChevronLeft, ChevronRight, Clock, Eye, Target, Users } from 'lucide-react'
+import React, { useCallback, useEffect, useRef, useState } from "react"
+import { Link, useNavigate, useParams } from "react-router-dom"
+import Notification from "../../components/Notification"
 import { TableCarousel } from "../../components/Sessions/carousel/TableCarousel"
-import { useSessionSocket } from "../../hooks/useSessionSocket"
-import { useSessionData } from "../../hooks/useSessionData"
 import { useAuth } from "../../hooks/useAuth"
-import type { SelectedCard } from "../../types/game"
+import { useSessionData } from "../../hooks/useSessionData"
+import { useSessionSocket } from "../../hooks/useSessionSocket"
 import { groupPlayerService } from "../../services/groupPlayerService"
-import Notification from "../../components/Notification";
+import type { SelectedCard } from "../../types/game"
 
 const PHASE_DURATIONS = {
   1: 35 * 60, // Card selection phase
@@ -67,6 +67,36 @@ const SessionPhases: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0)
   const currentGroupId = tables[currentIndex]?.groupId || 0
 
+  // Function to update the current table for players based on phase
+  const updateTableForPlayerBasedOnPhase = useCallback(
+    (userGroupIndex: number) => {
+      if (tables.length === 0 || userGroupIndex < 0) return
+
+      console.log(`Updating table for player based on phase ${phase}, user group index: ${userGroupIndex}`)
+
+      if (phase === 1) {
+        // In phase 1, show the player's own table
+        console.log(`Phase 1: Setting current index to ${userGroupIndex}`)
+        setCurrentIndex(userGroupIndex)
+      } else if (phase === 2) {
+        // In phase 2, show the next table (circular)
+        const nextIndex = (userGroupIndex + 1) % tables.length
+        console.log(`Phase 2: Setting current index to ${nextIndex}`)
+        setCurrentIndex(nextIndex)
+      } else if (phase === 3) {
+        // In phase 3, show the table after the next one (circular)
+        const nextNextIndex = (userGroupIndex + 2) % tables.length
+        console.log(`Phase 3: Setting current index to ${nextNextIndex}`)
+        setCurrentIndex(nextNextIndex)
+      } else if (phase === 4) {
+        // In phase 4, show the player's own table again
+        console.log(`Phase 4: Setting current index to ${userGroupIndex}`)
+        setCurrentIndex(userGroupIndex)
+      }
+    },
+    [phase, tables.length, setCurrentIndex],
+  )
+
   // Find the user's group ID and index if they are a player
   useEffect(() => {
     const findUserGroup = async () => {
@@ -117,37 +147,9 @@ const SessionPhases: React.FC = () => {
     }
 
     findUserGroup()
-  }, [isAdmin, user, groups, tables, phase])
+  }, [isAdmin, user, groups, tables, phase, updateTableForPlayerBasedOnPhase])
 
-  // Function to update the current table for players based on phase
-  const updateTableForPlayerBasedOnPhase = useCallback(
-    (userGroupIndex: number) => {
-      if (tables.length === 0 || userGroupIndex < 0) return
-
-      console.log(`Updating table for player based on phase ${phase}, user group index: ${userGroupIndex}`)
-
-      if (phase === 1) {
-        // In phase 1, show the player's own table
-        console.log(`Phase 1: Setting current index to ${userGroupIndex}`)
-        setCurrentIndex(userGroupIndex)
-      } else if (phase === 2) {
-        // In phase 2, show the next table (circular)
-        const nextIndex = (userGroupIndex + 1) % tables.length
-        console.log(`Phase 2: Setting current index to ${nextIndex}`)
-        setCurrentIndex(nextIndex)
-      } else if (phase === 3) {
-        // In phase 3, show the table after the next one (circular)
-        const nextNextIndex = (userGroupIndex + 2) % tables.length
-        console.log(`Phase 3: Setting current index to ${nextNextIndex}`)
-        setCurrentIndex(nextNextIndex)
-      } else if (phase === 4) {
-        // In phase 4, show the player's own table again
-        console.log(`Phase 4: Setting current index to ${userGroupIndex}`)
-        setCurrentIndex(userGroupIndex)
-      }
-    },
-    [phase, tables.length, setCurrentIndex],
-  )
+  
 
   // Update table when phase changes for players
   useEffect(() => {
@@ -296,7 +298,7 @@ const SessionPhases: React.FC = () => {
   )
 
   const handlePhaseChanged = useCallback(
-    (newPhase: number, status: string) => {
+    (newPhase: number) => {
       const parsedPhase = Number.parseInt(String(newPhase), 10)
       if (!isNaN(parsedPhase) && parsedPhase >= 1 && parsedPhase <= 4) {
         prevPhaseRef.current = phase
@@ -331,7 +333,7 @@ const SessionPhases: React.FC = () => {
       if (round !== newRound) setNotification({ message: "Le tour vient de se terminer. ", type: "success" });
       setRound(newRound)
     },
-    [],
+    [round],
   )
 
   const handleCO2Updated = useCallback((newTotalCO2: number) => {

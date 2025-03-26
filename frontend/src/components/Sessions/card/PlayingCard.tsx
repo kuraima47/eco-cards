@@ -1,25 +1,8 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react"
-import type { GameCard } from "../../../types/game"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
+import { useAuth } from "../../../hooks/useAuth"
+import type { PlayingCardProps } from "../../../types/props"
 import "./card-animation.css"
 import SmallCard from "./SmallCard"
-import { useAuth } from "../../../hooks/useAuth"
-
-interface PlayingCardProps {
-    card: GameCard
-    isSelected: boolean
-    onCardClick: (cardId: number) => void
-    isSelectable: boolean
-    phase: number
-    width?: number
-    height?: number
-    categoryName?: string
-    co2Estimation?: number
-    acceptanceLevel?: "high" | "medium" | "low" | null
-    onCO2Estimate?: (cardId: number, value: number) => void
-    onAcceptanceChange?: (cardId: number, level: "high" | "medium" | "low" | null) => void
-    onOpenModal?: (card: GameCard) => void
-    hideCO2?: boolean
-}
 
 export const PlayingCard: React.FC<PlayingCardProps> = ({
     card,

@@ -1,5 +1,5 @@
 // adminApi.tsx
-import type { Category, GameDeck, GameCard } from '../types/game';
+import type { Card, Category, Deck } from '../types/game';
 import { cardService } from "./cardService";
 import { categoryService } from './categoryService';
 import { deckContentService } from "./deckContentService";
@@ -42,11 +42,11 @@ export const adminApi = {
         return await deckService.getAllDecks();
     },
 
-    addDeck: async (deck: GameDeck) => {
+    addDeck: async (deck: Deck) => {
         return await deckService.createDeck(deck);
     },
 
-    updateDeck: async (deckId: string, updates: Partial<GameDeck>) => {
+    updateDeck: async (deckId: string, updates: Partial<Deck>) => {
         return await deckService.updateDeck(deckId, updates);
     },
 
@@ -56,7 +56,7 @@ export const adminApi = {
 
     // Cartes
     loadCards: async (deckId: string) => {
-        const data: GameCard[] = [];
+        const data: Card[] = [];
         const contents = await deckContentService.getDeckContentsByDeckId(deckId);
         for (const content of contents) {
             data.push(await cardService.getCardById(content.cardId));
@@ -64,11 +64,11 @@ export const adminApi = {
         return data;
     },
 
-    addCard: async (card: Partial<GameCard>) => {
+    addCard: async (card: Partial<Card>) => {
         await cardService.createCard(card);
     },
 
-    updateCard: async (cardId: string, updates: Partial<GameCard>) => {
+    updateCard: async (cardId: string, updates: Partial<Card>) => {
         return await cardService.updateCard(cardId, updates);
     },
 
@@ -76,7 +76,7 @@ export const adminApi = {
         return await cardService.deleteCard(cardId);
     },
 
-    importCards: async (deckId: number, cards: GameCard[]) => {
+    importCards: async (deckId: number, cards: Card[]) => {
         for (const card of cards) {
             await deckContentService.createDeckContent({ deckId, cardId: card.cardId });
         }

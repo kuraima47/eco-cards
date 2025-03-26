@@ -1,23 +1,13 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { X } from 'lucide-react';
-import { CreateCardForm } from '../CreateCardForm';
-import Card from '../Card/Card';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Card, defaultCard } from '../../types/game';
+import type { CardModalProps } from '../../types/props';
+import CardFunc from '../Card/Card';
 import CardBack from '../Card/CardBack';
-import { defaultCard, GameCard } from '../../types/game';
+import { CreateCardForm } from '../CreateCardForm';
 
-interface CardModalProps {
-    initialData?: GameCard | null;
-    isOpen: boolean;
-    onClose: () => void;
-    mode: 'add' | 'edit';
-    onSubmit: (data: Partial<GameCard>) => void;
-    currentDeckId: string;
-    categoryIcon: string;
-    categoryColor: string;
-}
-
-function CardModalContent({ 
-    cardData, 
+function CardModalContent({
+    cardData,
     setCardData,
     onClose,
     mode,
@@ -27,8 +17,8 @@ function CardModalContent({
     cardWidth,
     cardHeight
 }: {
-    cardData: GameCard;
-    setCardData: React.Dispatch<React.SetStateAction<GameCard>>;
+    cardData: Card;
+    setCardData: React.Dispatch<React.SetStateAction<Card>>;
     onClose: () => void;
     mode: 'add' | 'edit';
     handleSubmit: () => void;
@@ -58,7 +48,7 @@ function CardModalContent({
                 <div className="w-2/3 p-4 lg:p-8 overflow-y-auto justify-center scrollbar-custom">
                     <div className="flex flex-col lg:flex-row gap-6 items-center">
                         <div className="mb-6 lg:mb-0 transform scale-90 lg:scale-100">
-                            <Card
+                            <CardFunc
                                 cardData={cardData}
                                 categoryColor={categoryColor}
                                 categoryIcon={categoryIcon}
@@ -87,7 +77,7 @@ export function CardModal(props: CardModalProps) {
     const { initialData, isOpen, onClose, mode, onSubmit, categoryIcon, categoryColor } = props;
 
     // Tous les hooks sont maintenant déclarés sans condition
-    const [cardData, setCardData] = useState<GameCard>(initialData || defaultCard);
+    const [cardData, setCardData] = useState<Card>(initialData || defaultCard);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
     const handleResize = useCallback(() => {
@@ -122,7 +112,7 @@ export function CardModal(props: CardModalProps) {
     }, [cardData, onSubmit, onClose]);
 
     // Calculs mémorisés
-    const { isLargeScreen, cardWidth, cardHeight } = useMemo(() => {
+    const {cardWidth, cardHeight } = useMemo(() => {
         const isLargeScreen = windowWidth >= 1024;
         return {
             isLargeScreen,

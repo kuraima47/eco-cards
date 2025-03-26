@@ -1,12 +1,6 @@
-import { useState, useEffect } from "react";
 import { X } from "lucide-react";
-
-type NotificationProps = {
-    message: string;
-    type?: "success" | "error" | "warning" | "info";
-    duration?: number;
-    onClose?: () => void;
-};
+import { useEffect, useState } from "react";
+import type { NotificationProps } from "../types/props";
 
 const typeStyles: Record<NonNullable<NotificationProps["type"]>, string> = {
     success: "bg-green-500 text-white",

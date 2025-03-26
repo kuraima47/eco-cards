@@ -39,22 +39,12 @@ export const useSocketConnection = ({
 
   // Initialize socket connection
   const connect = useCallback(() => {
-    // If already connected, do nothing
-    if (socket?.connected) {
-      console.log('Socket already connected');
-      return;
-    }
-
-    // If we have a socket but it's not connected, try to reconnect
+    if (socket?.connected) return;
     if (socket) {
-      console.log('Attempting to reconnect existing socket...');
       socket.connect();
       return;
     }
-
-    console.log('Initializing new socket connection...');
     
-    // Create new socket instance
     const newSocket = io(SOCKET_SERVER_URL, {
       transports: ['websocket'],
       autoConnect: true,
@@ -63,9 +53,7 @@ export const useSocketConnection = ({
       timeout: 10000,
     });
 
-    // Set up event handlers
     newSocket.on('connect', () => {
-      console.log('Socket connected successfully');
       setIsConnected(true);
       setConnectionError(null);
       reconnectAttemptsRef.current = 0;
@@ -73,15 +61,10 @@ export const useSocketConnection = ({
     });
 
     newSocket.on('disconnect', (reason) => {
-      console.log('Socket disconnected:', reason);
       setIsConnected(false);
-      
-      // If server disconnected us, try to reconnect
       if (reason === 'io server disconnect') {
-        console.log('Server disconnected the socket, attempting to reconnect...');
         newSocket.connect();
       }
-      
       onDisconnectRef.current?.();
     });
 
@@ -94,19 +77,15 @@ export const useSocketConnection = ({
       setConnectionError(errorMessage);
       onErrorRef.current?.(errorMessage);
 
-      // If we've reached max reconnect attempts, stop trying
       if (reconnectAttemptsRef.current >= maxReconnectAttempts) {
-        console.error('Maximum reconnection attempts reached');
         setConnectionError('Maximum reconnection attempts reached. Please refresh the page.');
         newSocket.disconnect();
       }
     });
 
-    // Store the socket instance
     setSocket(newSocket);
     
     return () => {
-      console.log('Cleaning up socket connection...');
       newSocket.disconnect();
       setSocket(null);
       setIsConnected(false);
@@ -116,7 +95,6 @@ export const useSocketConnection = ({
   // Disconnect socket
   const disconnect = useCallback(() => {
     if (socket) {
-      console.log('Disconnecting socket...');
       socket.disconnect();
       setIsConnected(false);
       reconnectAttemptsRef.current = 0;

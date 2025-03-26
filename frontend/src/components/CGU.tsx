@@ -208,6 +208,5 @@ const CGU = () => {
       </div>
     );
   };
-  
+
   export default CGU;
-  

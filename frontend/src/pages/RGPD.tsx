@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
-import Notification from "../components/Notification";
-import GenericModalConfirm from "../components/Modals/GenericModalConfirm";
-import { userService } from "../services/userService";
 import { useNavigate } from "react-router-dom";
+import GenericModalConfirm from "../components/Modals/GenericModalConfirm";
+import Notification from "../components/Notification";
 import { useAuth } from "../hooks/useAuth";
+import { userService } from "../services/userService";
 
 const RGPD = () => {
-    const { isAuthenticated, setIsAuthenticated, user, setUser } = useAuth();
-    const [message, setMessage] = useState("");
+    const {setIsAuthenticated} = useAuth();
+    const [message, ] = useState("");
     const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -47,7 +47,7 @@ const RGPD = () => {
                     setNotification({ message: "Une erreur s'est produite. Veuillez réessayer.", type: "error" });
                 }
             }
-        } catch (error) {
+        } catch {
             setNotification({ message: "Impossible de supprimer les données. Vérifiez votre connexion.", type: "error" });
         }
         setIsModalOpen(false);

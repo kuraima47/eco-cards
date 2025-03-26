@@ -1,6 +1,6 @@
 /**
  * Convertit une chaîne en format PascalCase
- * @param str - La chaîne à convertir 
+ * @param str - La chaîne à convertir
  * @returns La chaîne au format PascalCase
  */
 export const toPascalCase = (str: string): string => {
@@ -26,7 +26,7 @@ export const generateCodeFromCO2 = (co2Value: number | null): string => {
 
     const co2Str = String(co2Value);
     if (co2Str.length === 1) {
-        let letter1 = getRandomLetter();
+        const letter1 = getRandomLetter();
         let letter2 = getRandomLetter();
         while (letter1 === letter2) {
             letter2 = getRandomLetter();
@@ -74,7 +74,7 @@ export const arrayBufferToBase64 = (buffer: Uint8Array) => {
  * - Si c'est une chaîne qui représente un tableau JSON, la parse
  * - Sinon, retourne un tableau avec la valeur ou un tableau vide
  */
-export function ensureArray<T>(value: any): T[] {
+export function ensureArray<T>(value: unknown): T[] {
     if (Array.isArray(value)) {
         return value;
     }
@@ -90,7 +90,7 @@ export function ensureArray<T>(value: any): T[] {
             }
             // Si ce n'est pas un tableau JSON valide, traiter comme valeur unique
             return value ? [value as unknown as T] : [];
-        } catch (e) {
+        } catch {
             // Si le parsing échoue, traiter comme valeur unique
             return value ? [value as unknown as T] : [];
         }

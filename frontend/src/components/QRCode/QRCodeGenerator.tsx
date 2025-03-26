@@ -1,7 +1,7 @@
 import { Link2 } from 'lucide-react';
+import { useQRCode } from '../../hooks/useQRCode';
 import { QRCodeForm } from './QRCodeForm';
 import { QRCodePreview } from './QRCodePreview';
-import { useQRCode } from '../../hooks/useQRCode';
 import QRCodeReader from "./QRCodeReader";
 
 export function QRCodeGenerator() {

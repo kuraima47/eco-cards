@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
-import { Camera, X, Check } from 'lucide-react';
-import {useAdmin} from "../../hooks/useAdmin.ts";
-import {Group} from "../../types/game.ts";
+import { Camera, Check, X } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useAdmin } from "../../hooks/useAdmin.ts";
+import { Group } from "../../types/game.ts";
 
 interface QRCodeReaderProps {
     phase?: number;
@@ -13,12 +13,12 @@ interface QRCodeReaderProps {
 }
 
 const QRCodeReader: React.FC<QRCodeReaderProps> = ({
-                                                       phase,
-                                                       onCO2Estimate,
-                                                       onAcceptanceChange,
-                                                       onSelect,
-                                                       group
-                                                   }) => {
+    phase,
+    onCO2Estimate,
+    onAcceptanceChange,
+    onSelect,
+    group
+    }) => {
     const [showScanner, setShowScanner] = useState(false);
     const [isScanning, setIsScanning] = useState(false);
     const [error, setError] = useState<string | null>(null);

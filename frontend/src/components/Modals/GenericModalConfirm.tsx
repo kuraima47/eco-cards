@@ -1,11 +1,5 @@
 import React from "react";
-
-interface GenericModalConfirmProps {
-  isOpen: boolean;
-  message: string;
-  onConfirm: () => void;
-  onCancel: () => void;
-}
+import type { GenericModalConfirmProps } from "../../types/props";
 
 const GenericModalConfirm: React.FC<GenericModalConfirmProps> = ({
   isOpen,
@@ -18,8 +12,8 @@ const GenericModalConfirm: React.FC<GenericModalConfirmProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Overlay */}
-      <div 
-        className="fixed inset-0 bg-black opacity-50" 
+      <div
+        className="fixed inset-0 bg-black opacity-50"
         onClick={onCancel}
       ></div>
       

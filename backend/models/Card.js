@@ -13,7 +13,7 @@ const Card = sequelize.define('Card', {
         allowNull: true,
         field: 'cardname'
     },
-    description: {
+    cardDescription: {
         type: DataTypes.TEXT,
         allowNull: true,
         field: 'carddescription'

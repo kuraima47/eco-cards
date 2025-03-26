@@ -1,18 +1,12 @@
 import { Download, Edit, Library, Plus, Trash2 } from 'lucide-react';
 import { useState } from "react";
 import { useAdmin } from "../../hooks/useAdmin";
-// import { Deck } from "../../types";
+import { Deck } from '../../types/game';
+import type { DeckListViewProps } from '../../types/props';
 import DeckModal from "../Modals/DeckModal";
 import DeleteConfirmationModal from "../Modals/DeleteConfirmationModal";
 import Notification from "../Notification";
 import ModalCards from "../Pdf/ModalCards";
-import { DeckWithCategories, GameDeck } from '../../types/game';
-
-interface DeckListViewProps {
-    decks: DeckWithCategories[];
-    onSelectDeck: (deckId: number) => void;
-    refreshParent: () => void;
-}
 
 export function DeckListView({ decks, onSelectDeck, refreshParent }: DeckListViewProps) {
     // États pour les modals utiles
@@ -39,13 +33,13 @@ export function DeckListView({ decks, onSelectDeck, refreshParent }: DeckListVie
         setIsDeckModalOpen(true);
     };
 
-    const openEditDeckModal = (deck: GameDeck) => {
+    const openEditDeckModal = (deck: Deck) => {
         setModalMode('edit');
         setCurrentDeck(deck);
         setIsDeckModalOpen(true);
     };
 
-    const openDownloadModal = (deck: GameDeck) => {
+    const openDownloadModal = (deck: Deck) => {
         setCurrentDeck(deck);
         setIsDownloadModalOpen(true);
     }
@@ -55,7 +49,7 @@ export function DeckListView({ decks, onSelectDeck, refreshParent }: DeckListVie
         setIsDeleteModalOpen(true);
     };
 
-    const handleDeckSubmit = async (data: Partial<GameDeck>) => {
+    const handleDeckSubmit = async (data: Partial<Deck>) => {
         try {
             if (modalMode === 'add') {
                 await admin.addDeck(data);

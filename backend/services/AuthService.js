@@ -17,9 +17,11 @@ class AuthService {
         return user;
     }
 
-    async login(email, password) {
-        const user = await User.findOne({ where: { email } });
-        if (!user) throw new Error('User not found');
+    async login(username, email, password) {
+        const user = await User.findOne({ where: { username, email } });
+        if (!user) {
+            throw new Error('User not found or invalid username');
+        }
 
         const isPasswordValid = await bcrypt.compare(password, user.userPassword);
         if (!isPasswordValid) throw new Error('Invalid password');

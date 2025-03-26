@@ -1,15 +1,8 @@
 import React, { useState } from "react";
+import type { TextAreaProps } from "../../types/props";
 
 const MAX_LINES = 8;
 const MAX_CHARACTERS_PER_LINE = 44;
-
-interface TextAreaProps {
-    value: string;
-    onChange: (value: string) => void;
-    placeholder?: string;
-    className?: string;
-    otherText?: string;
-}
 
 const handleTextChange = (text: string, setter: React.Dispatch<React.SetStateAction<string>>, otherText: string | undefined) => {
     const lines = text.split("\n");
@@ -56,4 +49,4 @@ const CardTextArea: React.FC<TextAreaProps> = ({ value, onChange, placeholder, c
     );
 };
 
-export default CardTextArea;  
+export default CardTextArea;

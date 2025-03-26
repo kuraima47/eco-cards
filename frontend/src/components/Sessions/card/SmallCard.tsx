@@ -1,27 +1,7 @@
-import React, { useCallback } from "react"
-import { useMemo, useState } from "react"
-import { Sparkles, ThumbsUp, Search, Check } from "lucide-react"
-import type { GameCard } from "../../../types/game"
+import { Check, Search, Sparkles, ThumbsUp } from "lucide-react"
+import React, { useCallback, useMemo, useState } from "react"
+import type { SmallCardProps } from "../../../types/props"
 import { generateCodeFromCO2 } from "../../../utils/formatting"
-
-interface SmallCardProps {
-    cardData: GameCard
-    width?: number
-    height?: number
-    isAdmin?: boolean
-    isFlipped: boolean
-    categoryName?: string
-    categoryIcon?: string
-    categoryColor?: string
-    phase?: number
-    co2Estimation?: number
-    acceptanceLevel?: "high" | "medium" | "low" | null
-    onCO2Estimate?: (value: number, e: React.MouseEvent) => void
-    onAcceptanceChange?: (level: "high" | "medium" | "low" | null, e: React.MouseEvent) => void
-    isSelected?: boolean
-    onSelect?: () => void
-    onOpenModal?: () => void
-}
 
 const SmallCard: React.FC<SmallCardProps> = ({
     cardData,
@@ -248,7 +228,7 @@ const SmallCard: React.FC<SmallCardProps> = ({
                             </div>
                         );
                     }
-                } catch (e) {
+                } catch {
                     // Si la conversion échoue, on traite comme une str simple
                     console.warn("Failed to parse JSON string:", content);
                 }

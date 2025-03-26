@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "mocha 'test/**/*.test.js' --recursive --reporter mocha-junit-reporter --reporter-options mochaFile=./reports/junit/test-results.xml --exit",
+    "test": "mocha test/**/*.test.js --recursive --reporter mocha-junit-reporter --reporter-options mochaFile=./reports/junit/test-results.xml --exit",
     "start": "node index.js",
     "dev": "nodemon --exitcrash index.js -L"
   },

@@ -1,18 +1,18 @@
-import type { GameCard } from '../types/game';
+import type { Card } from '../types/game';
 import { API_ENDPOINTS, handleResponse } from './config';
 
 export const cardService = {
-    getAllCards: async (): Promise<GameCard[]> => {
+    getAllCards: async (): Promise<Card[]> => {
         const response = await fetch(API_ENDPOINTS.CARDS);
         return handleResponse(response);
     },
 
-    getCardById: async (id: number): Promise<GameCard> => {
+    getCardById: async (id: number): Promise<Card> => {
         const response = await fetch(`${API_ENDPOINTS.CARDS}/${id}`);
         return handleResponse(response);
     },
 
-    createCard: async (card: Partial<GameCard>): Promise<GameCard> => {
+    createCard: async (card: Partial<Card>): Promise<Card> => {
         const response = await fetch(API_ENDPOINTS.CARDS, {
             method: 'POST',
             headers: {
@@ -23,7 +23,7 @@ export const cardService = {
         return handleResponse(response);
     },
 
-    updateCard: async (id: string, updates: Partial<GameCard>): Promise<GameCard> => {
+    updateCard: async (id: string, updates: Partial<Card>): Promise<Card> => {
         const response = await fetch(`${API_ENDPOINTS.CARDS}/${id}`, {
             method: 'PUT',
             headers: {

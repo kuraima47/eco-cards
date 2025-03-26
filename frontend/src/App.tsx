@@ -1,18 +1,18 @@
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
-import Sidebar from './layouts/Sidebar';
+import { AuthProvider } from './context/AuthContext';
 import RGPDFooter from './layouts/RGPDFooter';
-import RGPD from './pages/RGPD'
+import Sidebar from './layouts/Sidebar';
 import Auth from './pages/Auth';
-import Games from './pages/session/Games.tsx';
-import Home from './pages/Home';
-import DeckPage from './pages/deckPage.tsx'
-import Rules from './pages/Rules';
-import Stats from './pages/Stats';
 import CreateAdmin from './pages/CreateAdmin';
+import DeckPage from './pages/deckPage.tsx';
+import Home from './pages/Home';
+import RGPD from './pages/RGPD';
+import Rules from './pages/Rules';
+import Games from './pages/session/Games.tsx';
 import GameSetup from './pages/session/GameSetup.tsx';
 import SessionPhases from './pages/session/SessionPhase.tsx';
-import { AuthProvider } from './context/AuthContext';
+import Stats from './pages/Stats';
 
 function App() {
     return (
@@ -20,7 +20,7 @@ function App() {
             <Router>
                 <div className="min-h-screen bg-gradient-to-b from-green-50 to-green-100 flex flex-col">
                     <Sidebar />
-                    <main className="flex-1 p-2 lg:p-8 pt-20 lg:pt-20 pb-10"> {/* Increased top padding */}
+                    <main className="flex-1 p-2 lg:p-8 pt-20 lg:pt-20 pb-10">
                         <Routes>
                             <Route path="/" element={<Home />} />
                             <Route path="/games" element={<Games />} />

@@ -1,28 +1,11 @@
+import { ArrowLeft, Check, X } from "lucide-react"
 import type React from "react"
 import ReactDOM from "react-dom"
-import { X, Check, ArrowLeft } from "lucide-react"
-import type { Category, GameCard } from "../../../types/game"
-import { Card } from "../../Card/Card"
 import { useAdmin } from "../../../hooks/useAdmin"
 import { useAuth } from "../../../hooks/useAuth"
-
-interface CardZoomedInTableModalProps {
-  isOpen: boolean
-  onClose: () => void
-  cardData: GameCard
-  categoryName?: string
-  categoryIcon?: string
-  categoryColor?: string
-  isSelected?: boolean
-  onSelect?: () => void
-  phase: number
-  co2Estimation?: number
-  acceptanceLevel?: "high" | "medium" | "low" | null
-  onCO2Estimate?: (value: number) => void
-  onAcceptanceChange?: (level: "high" | "medium" | "low" | null) => void
-  isReadOnly?: boolean
-  hideCO2?: boolean
-}
+import type { Category } from "../../../types/game"
+import type { CardZoomedInTableModalProps } from "../../../types/props"
+import CardFunc from "../../Card/Card"
 
 const CardZoomedInTableModal: React.FC<CardZoomedInTableModalProps> = ({
   isOpen,
@@ -76,7 +59,7 @@ const CardZoomedInTableModal: React.FC<CardZoomedInTableModalProps> = ({
                         </div>
                     );
                 }
-            } catch (e) {
+            } catch {
                 // Si la conversion échoue, on traite comme une str simple
                 console.warn("Failed to parse JSON string:", content);
             }
@@ -127,13 +110,13 @@ const CardZoomedInTableModal: React.FC<CardZoomedInTableModalProps> = ({
           <X size={18} />
         </button>
         <div className="flex flex-col flex-grow justify-center items-center mb-4">
-          <Card
+          <CardFunc
             cardData={{
               cardId: cardData.cardId || 0,
               deckId: cardData.deckId,
               selected: cardData.selected,
               cardName: cardData.cardName || "...",
-              description: cardData.description || "...",
+              cardDescription: cardData.cardDescription || "...",
               cardImageData: cardData.cardImageData || "",
               qrCodeColor: cardData.qrCodeColor || "#000000",
               qrCodeLogoImageData: cardData.qrCodeLogoImageData || "",

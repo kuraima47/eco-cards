@@ -1,32 +1,9 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
 import * as LucideIcons from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useQRCode } from "../../hooks/useQRCode";
+import type { CardBackProps } from '../../types/props';
 import { arrayBufferToBase64, formatImageName, toPascalCase } from '../../utils/formatting';
-import { ImageFormat } from '../../types';
-
-export interface CardData {
-    deckName: string;
-    category: string;
-    cardNumber: number;
-    totalCards: number;
-    cardName: string;
-    cardValue: number;
-    qrCodeColor: string;
-    qrCodeLogoImageData?: ImageFormat;
-    backgroundColor: string;
-    width?: number;
-    height?: number;
-}
-
-interface CardBackProps {
-    cardData: CardData;
-    categoryColor?: string;
-    categoryIcon?: string;
-    width?: number;
-    height?: number;
-    isForPdf?: boolean;
-}
 
 export function CardBack({ cardData, categoryColor, categoryIcon, width = 416, height = 650, isForPdf = false }: CardBackProps) {
     const {
@@ -41,18 +18,18 @@ export function CardBack({ cardData, categoryColor, categoryIcon, width = 416, h
         backgroundColor,
     } = cardData;
 
-    const qrCodeLogoImage = useMemo(() => 
-        qrCodeLogoImageData 
+    const qrCodeLogoImage = useMemo(() =>
+        qrCodeLogoImageData
             ? formatImageName(
-                qrCodeLogoImageData.data 
-                    ? arrayBufferToBase64(qrCodeLogoImageData.data)
+                qrCodeLogoImageData
+                    ? arrayBufferToBase64(qrCodeLogoImageData)
                     : '',
-                qrCodeLogoImageData.type
-            ) 
+                qrCodeLogoImageData
+            )
             : "",
     [qrCodeLogoImageData]);
 
-    const initialUrl = useMemo(() => 
+    const initialUrl = useMemo(() =>
         JSON.stringify({ cardName, category, cardValue, deckName }),
     [cardName, category, cardValue, deckName]);
 
@@ -129,7 +106,7 @@ export function CardBack({ cardData, categoryColor, categoryIcon, width = 416, h
             bgColor={bgColor}
             level="H"
             imageSettings={{
-                src: logo || undefined,
+                src: logo || '',
                 height: styles.qrCode.logoSize,
                 width: styles.qrCode.logoSize,
                 excavate: true,

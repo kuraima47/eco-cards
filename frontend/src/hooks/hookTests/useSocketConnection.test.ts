@@ -5,11 +5,6 @@ import { useSocketConnection } from '../useSocketConnection';
 // Mock socket.io-client
 jest.mock('socket.io-client');
 
-// Mock import.meta.env
-jest.mock('../../../env', () => ({
-  VITE_API_URL: 'http://test-server.com'
-}), { virtual: true });
-
 describe('useSocketConnection', () => {
   const mockSocket = {
     connect: jest.fn(),

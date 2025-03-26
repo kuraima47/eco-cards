@@ -1,21 +1,14 @@
 import React from 'react';
+import type { DeleteConfirmationModalProps } from '../../types/props';
 import Modal from './Modal';
 
-interface DeleteConfirmationModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    onConfirm: () => void;
-    itemType: 'deck' | 'category' | 'card';
-    name?: string;
-}
-
 const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
-                                                                             isOpen,
-                                                                             onClose,
-                                                                             onConfirm,
-                                                                             itemType,
-                                                                             name = 'DeckName',
-                                                                         }) => {
+    isOpen,
+    onClose,
+    onConfirm,
+    itemType,
+    name = 'DeckName',
+    }) => {
     const getItemTypeText = () => {
         switch (itemType) {
             case 'deck':

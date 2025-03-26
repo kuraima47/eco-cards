@@ -1,10 +1,6 @@
-import React, { useState } from "react";
 import { X } from "lucide-react";
-
-interface ImageUploadProps {
-    onImageUpload: (file: File | null) => void;
-    onRemoveImage: () => void;
-}
+import React, { useState } from "react";
+import type { ImageUploadProps } from "../types/props";
 
 const ImageUpload: React.FC<ImageUploadProps> = ({ onImageUpload, onRemoveImage }) => {
     const [preview, setPreview] = useState<string | null>(null);

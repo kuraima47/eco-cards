@@ -107,12 +107,12 @@ describe('useQRCode', () => {
     expect(mockFileReaderInstance.readAsDataURL).toHaveBeenCalledWith(mockFile);
     
     // Simulate FileReader onload event
-    const onloadCallback = mockFileReaderInstance.onload;
+    const onloadCallback = mockFileReaderInstance.onload as unknown as EventListener;
     expect(onloadCallback).toBeTruthy();
     
     if (onloadCallback) {
-      onloadCallback.call(mockFileReaderInstance, { 
-        target: { result: 'data:image/png;base64,mockLogoData' } 
+      onloadCallback.call(mockFileReaderInstance, {
+        target: { result: 'data:image/png;base64,mockLogoData' }
       } as unknown as ProgressEvent<FileReader>);
     }
     
@@ -125,7 +125,7 @@ describe('useQRCode', () => {
     
     hook.handleLogoDelete();
     
-    expect(mockSetLogo).toHaveBeenCalledWith(null);
+    expect(mockSetLogo).toHaveBeenCalledWith(undefined);
     expect(mockFileInputRef.current.value).toBe('');
   });
 

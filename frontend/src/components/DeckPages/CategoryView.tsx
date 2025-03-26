@@ -1,28 +1,21 @@
-import {Edit, Eye, Plus, Trash2} from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
+import { Edit, Eye, Plus, Trash2 } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from "react";
 import { useAdmin } from "../../hooks/useAdmin";
-import type { Category } from '../../types/game';
-import { GameCard } from '../../types/game';
+import { Card } from '../../types/game';
+import type { CategoryViewProps } from '../../types/props';
+import { ensureArray, toPascalCase } from '../../utils/formatting';
 import { CardModal } from "../Modals/CardModal";
 import DeleteConfirmationModal from "../Modals/DeleteConfirmationModal";
 import ViewCardModal from "../Modals/ViewCardModal.tsx";
 import Notification from "../Notification";
-import * as LucideIcons from 'lucide-react';
-import { toPascalCase, ensureArray } from '../../utils/formatting';
-
-interface CategoryViewProps {
-    category: Category;
-    onCreateCard: () => void;
-    refreshParent: () => void;
-}
-
 
 export function CategoryView({ category, refreshParent }: CategoryViewProps) {
     const [isCardModalOpen, setIsCardModalOpen] = useState(false);
     const [isViewCardModalOpen, setIsViewCardModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
-    const [currentCard, setCurrentCard] = useState<GameCard | undefined>(undefined);
+    const [currentCard, setCurrentCard] = useState<Card | undefined>(undefined);
     const [itemToDelete, setItemToDelete] = useState<{ type: 'card'; id: string; name: string } | null>(null);
     const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
@@ -65,7 +58,7 @@ export function CategoryView({ category, refreshParent }: CategoryViewProps) {
             cardId: -1,
             deckId: category.deckId,
             cardName: '...',
-            description: '...',
+            cardDescription: '...',
             cardImageData: { data: new Uint8Array(), type: '' },
             qrCodeColor: '#000000',
             qrCodeLogoImageData: '',
@@ -84,19 +77,18 @@ export function CategoryView({ category, refreshParent }: CategoryViewProps) {
     };
 
     const getCardNumber = (cardId: number) => {
-        // Utilisation de findIndex
         const index = (category.cards ?? []).findIndex(card => card.cardId === cardId);
         return index !== -1 ? index + 1 : null;
     };
 
-    const openEditCardModal = (card: GameCard) => {
+    const openEditCardModal = (card: Card) => {
         setModalMode('edit');
 
         setCurrentCard({
             cardId: card.cardId || 0,
             deckId: category.deckId,
             cardName: card.cardName || '...',
-            description: card.description || '...',
+            cardDescription: card.cardDescription || '...',
             cardImageData: card.cardImageData || null,
             qrCodeColor: card.qrCodeColor || '#000000',
             qrCodeLogoImageData: card.qrCodeLogoImageData || '',
@@ -107,8 +99,6 @@ export function CategoryView({ category, refreshParent }: CategoryViewProps) {
             cardActual: ensureArray(card.cardActual),
             cardProposition: ensureArray(card.cardProposition),
             deckName: admin.getDeck(category.deckId) || '...',
-            // cardNumber: getCardNumber(card.cardId) || category.cards.length,
-            // totalCards: modalMode === "edit" ? category.cards.length : category.cards.length || 0,
             cardNumber: getCardNumber(card.cardId) || (category.cards?.length ?? 0) + 1,
             totalCards: modalMode === "edit" ? (category.cards?.length ?? 0) : (category.cards?.length ?? 0) + 1,
             cardCategoryId: card.cardCategoryId || -1,
@@ -117,12 +107,12 @@ export function CategoryView({ category, refreshParent }: CategoryViewProps) {
         setIsCardModalOpen(true);
     };
 
-    const openViewCardModal = (card: GameCard) => {
+    const openViewCardModal = (card: Card) => {
         setCurrentCard({
             cardId: card.cardId || 0,
             deckId: category.deckId,
             cardName: card.cardName || '...',
-            description: card.description || '...',
+            cardDescription: card.cardDescription || '...',
             cardImageData: card.cardImageData || '',
             qrCodeColor: card.qrCodeColor || '#000000',
             qrCodeLogoImageData: card.qrCodeLogoImageData || '',
@@ -146,7 +136,7 @@ export function CategoryView({ category, refreshParent }: CategoryViewProps) {
         setIsDeleteModalOpen(true);
     };
 
-    const handleCardSubmit = async (data: Partial<GameCard>) => {
+    const handleCardSubmit = async (data: Partial<Card>) => {
         try {
             // Convertir les tableaux en chaînes de caractères JSON et passer la value en number
             const formattedData = {
@@ -154,7 +144,7 @@ export function CategoryView({ category, refreshParent }: CategoryViewProps) {
                 cardValue: data.cardValue ? Number(data.cardValue) : undefined,
                 cardActual: Array.isArray(data.cardActual) ? JSON.stringify(data.cardActual) : JSON.stringify([]),
                 cardProposition: Array.isArray(data.cardProposition) ? JSON.stringify(data.cardProposition) : JSON.stringify([]),
-            } as unknown as Partial<GameCard>;
+            } as unknown as Partial<Card>;
 
             if (modalMode === 'add') {
                 await admin.addCard(formattedData);
@@ -215,7 +205,7 @@ export function CategoryView({ category, refreshParent }: CategoryViewProps) {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {category.cards && category.cards.map((card: GameCard) => (
+                {category.cards && category.cards.map((card: Card) => (
                     <div
                         key={card.cardId}
                         className="p-4 bg-white rounded-lg shadow border border-gray-200 flex flex-col h-full"
@@ -223,7 +213,7 @@ export function CategoryView({ category, refreshParent }: CategoryViewProps) {
                         {/* Contenu de la carte qui prendra l'espace disponible */}
                         <div className="flex-grow">
                             <h3 className="font-semibold text-lg mb-2">{card.cardName}</h3>
-                            <p className="text-gray-600">{card.description}</p>
+                            <p className="text-gray-600">{card.cardDescription}</p>
                         </div>
 
                         {/* Les boutons seront toujours en bas */}

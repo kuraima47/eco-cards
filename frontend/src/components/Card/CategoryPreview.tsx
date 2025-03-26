@@ -1,19 +1,8 @@
-import React, { useMemo } from 'react';
 import * as LucideIcons from 'lucide-react';
 import { Box } from 'lucide-react';
+import React, { useMemo } from 'react';
+import type { CategoryPreviewProps } from '../../types/props';
 import { toPascalCase } from '../../utils/formatting';
-
-interface CategoryPreviewProps {
-    categoryName: string;
-    categoryIcon?: string;
-    categoryColor?: string;
-    cardCount?: number;
-    totalCards?: number;
-    className?: string;
-    style?: React.CSSProperties;
-    iconSizePx?: string;
-    isForPdf?: boolean;
-}
 
 /**
  * Composant qui affiche la bannière de catégorie avec l'icône et la couleur correspondante

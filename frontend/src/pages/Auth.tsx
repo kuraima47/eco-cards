@@ -28,7 +28,7 @@ const Auth = () => {
         if (isAuthTokenValid()) {
             navigate('/');
         }
-    }, []);
+    }, [navigate]);
 
     const handleAuth = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -59,7 +59,7 @@ const Auth = () => {
                 navigate('/', { state: { message: 'Compte créé avec succès ! Vous pouvez maintenant vous connecter.' } });
             } else {
                 // Login
-                const data = await login(email, password);
+                const data = await login(username, email, password);
                 if (data.token) {
                     saveAuthToken(data.token, data.user);
                     setIsAuthenticated(true);
@@ -84,17 +84,17 @@ const Auth = () => {
         }
     };
 
-    const login = async (email: string, password: string) => {
+    const login = async (username: string, email: string, password: string) => {
         const response = await fetch(`${API_ENDPOINTS.AUTH}/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ username, email, password })
         });
 
         if (!response.ok) {
             const errorData = await response.json();
-            if (errorData.message === 'User not found') {
-                throw new Error('Adresse mail inexistante.');
+            if (errorData.message === 'User not found or invalid username') {
+                throw new Error('Nom d\'utilisateur incorrect ou adresse mail inexistante.');
             } else if (errorData.message === 'Invalid password') {
                 throw new Error('Mot de passe incorrect.');
             } else {

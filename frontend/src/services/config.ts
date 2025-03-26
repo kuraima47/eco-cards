@@ -1,5 +1,5 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-//const API_BASE_URL = "http://localhost:3000/api"
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api";
+
 export const API_ENDPOINTS = {
     AUTH: `${API_BASE_URL}/auth`,
     USERS: `${API_BASE_URL}/users`,
@@ -13,7 +13,6 @@ export const API_ENDPOINTS = {
     GROUP_ACCEPTED_CARDS: `${API_BASE_URL}/group-accepted-cards`,
 };
 
-// config.ts
 export const handleResponse = async (response: Response) => {
     if (!response.ok) {
       const error = await response.text();

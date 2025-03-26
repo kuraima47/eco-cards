@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Leaf, Users, PlaySquare, BarChart2, Settings, LogOut, LogIn, BookOpen, QrCode, FileText, Menu, X, UserPlus, Wallet } from 'lucide-react';
+import { BarChart2, BookOpen, Leaf, LogIn, LogOut, Menu, PlaySquare, Settings, UserPlus, Wallet, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 const Sidebar = () => {

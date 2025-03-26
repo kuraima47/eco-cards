@@ -7,7 +7,7 @@ import { deckService } from "../../services/deckService"
 import { userService } from "../../services/userService"
 import { groupService } from "../../services/groupService"
 import { groupPlayerService } from "../../services/groupPlayerService"
-import type { Session, GameDeck, User, Group, GroupPlayer } from "../../types/game"
+import type { Session, Deck, User, Group, GroupPlayer } from "../../types/game"
 
 const GameSetup: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -19,7 +19,7 @@ const GameSetup: React.FC = () => {
     deckId: undefined,
     adminId: 1,
   })
-  const [decks, setDecks] = useState<GameDeck[]>([])
+  const [decks, setDecks] = useState<Deck[]>([])
   const [users, setUsers] = useState<User[]>([])
   const [groups, setGroups] = useState<(Group & { players: GroupPlayer[] })[]>([])
   const [step, setStep] = useState(1)

@@ -11,7 +11,7 @@ function DeckPage() {
     const [selectedCategory, setSelectedCategory] = useState < number | undefined > (undefined);
     const [searchQuery, setSearchQuery] = useState('');
     const [refreshTrigger, setRefreshTrigger] = useState(0);
-    const [forceUpdateValue, setForceUpdate] = useState(0);
+    const [ ,setForceUpdate] = useState(0);
     const [isInitialLoad, setIsInitialLoad] = useState(true);
 
     const refreshUI = () => {
@@ -120,7 +120,7 @@ function DeckPage() {
                 return isDeckMatch;
             });
         return result;
-    }, [searchQuery, admin.decks, admin.categories, admin.cards, forceUpdateValue]);
+    }, [searchQuery, admin.decks, admin.categories, admin.cards]);
 
     // Recherche du deck et de la catégorie actuellement sélectionnés
     const currentDeck = filteredDecks.find(deck => deck.deckId === Number(admin.selectedDeck));

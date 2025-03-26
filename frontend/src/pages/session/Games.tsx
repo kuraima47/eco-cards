@@ -1,13 +1,13 @@
+import { Calendar, CheckCircle, Clock, MapPin, Play, Plus, Users, XCircle } from "lucide-react"
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
-import { Plus, Users, Calendar, MapPin, Play, CheckCircle, Clock, XCircle } from "lucide-react"
-import { sessionService } from "../../services/sessionService"
-import { groupService } from "../../services/groupService"
-import { groupPlayerService } from "../../services/groupPlayerService"
-import { deckService } from "../../services/deckService"
 import { useAuth } from "../../hooks/useAuth"
-import type { Session, Group, GroupPlayer, GameDeck } from "../../types/game"
+import { deckService } from "../../services/deckService"
+import { groupPlayerService } from "../../services/groupPlayerService"
+import { groupService } from "../../services/groupService"
+import { sessionService } from "../../services/sessionService"
+import type { Deck, Group, GroupPlayer, Session } from "../../types/game"
 
 const SESSION_STATUS = {
   ACTIVE: "active",
@@ -33,7 +33,7 @@ const Games: React.FC = () => {
   const [sessions, setSessions] = useState<
     (Session & {
       groups: (Group & { players: GroupPlayer[] })[]
-      deck?: GameDeck
+      deck?: Deck
     })[]
   >([])
   const [loading, setLoading] = useState(true)

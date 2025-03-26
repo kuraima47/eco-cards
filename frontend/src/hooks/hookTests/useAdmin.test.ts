@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { adminApi } from '../../services/admin';
-import type { Category, GameCard, GameDeck } from '../../types/game';
+import type { Card, Category, Deck } from '../../types/game';
 import { useAdmin } from '../useAdmin';
 import { useAuth } from '../useAuth';
 
@@ -54,7 +54,7 @@ describe('useAdmin', () => {
       deckId: 1,
       cardCategoryId: 1,
       cardName: 'Test Card',
-      description: 'Card description',
+      cardDescription: 'Card description',
       cardImageData: { data: new Uint8Array(), type: 'image/jpeg' },
       qrCodeColor: '#000000',
       qrCodeLogoImageData: 'base64data',
@@ -106,7 +106,7 @@ describe('useAdmin', () => {
     (adminApi.addCard as jest.Mock).mockResolvedValue({ 
       cardId: 2,
       cardName: 'New Card',
-      description: 'New description',
+      cardDescription: 'New description',
       cardValue: 50
     });
     (adminApi.updateCard as jest.Mock).mockResolvedValue({ success: true });
@@ -204,7 +204,7 @@ describe('useAdmin', () => {
       expect(result.current.loading).toBe(false);
     });
     
-    const newDeck: Partial<GameDeck> = { 
+    const newDeck: Partial<Deck> = { 
       deckName: 'New Deck' 
     };
     
@@ -260,7 +260,7 @@ describe('useAdmin', () => {
       expect(result.current.loading).toBe(false);
     });
     
-    const updates: Partial<GameDeck> = { 
+    const updates: Partial<Deck> = { 
       deckName: 'Updated Deck' 
     };
     
@@ -299,10 +299,10 @@ describe('useAdmin', () => {
       result.current.setSelectedDeck('1');
     });
     
-    // Add card - using properties that match the GameCard type
-    const newCard: Partial<GameCard> = {
+    // Add card - using properties that match the Card type
+    const newCard: Partial<Card> = {
       cardName: 'New Card',
-      description: 'New card description',
+      cardDescription: 'New card description',
       cardCategoryId: 1,
       cardValue: 50,
       cardActual: ['New current situation'],
@@ -342,9 +342,9 @@ describe('useAdmin', () => {
     });
     
     // Update card
-    const cardUpdates: Partial<GameCard> = { 
+    const cardUpdates: Partial<Card> = { 
       cardName: 'Updated Card Title',
-      description: 'Updated card description'
+      cardDescription: 'Updated card description'
     };
     
     await act(async () => {
@@ -417,11 +417,11 @@ describe('useAdmin', () => {
       result.current.setSelectedDeck('1');
     });
     
-    // Cards to import should match GameCard structure
-    const cardsToImport: Partial<GameCard>[] = [
+    // Cards to import should match Card structure
+    const cardsToImport: Partial<Card>[] = [
       {
         cardName: 'Imported Card 1',
-        description: 'Imported description 1',
+        cardDescription: 'Imported description 1',
         cardActual: ['Imported situation 1'],
         cardProposition: ['Imported proposal 1'],
         cardValue: 10,
@@ -432,7 +432,7 @@ describe('useAdmin', () => {
       },
       {
         cardName: 'Imported Card 2',
-        description: 'Imported description 2',
+        cardDescription: 'Imported description 2',
         cardActual: ['Imported situation 2'],
         cardProposition: ['Imported proposal 2'],
         cardValue: 20,

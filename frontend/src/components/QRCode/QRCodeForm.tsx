@@ -1,18 +1,17 @@
-import React from 'react';
-import { Upload, Download } from 'lucide-react';
-import { QRCodeFormProps } from '../../types';
+import { Download, Upload } from 'lucide-react';
+import { QRCodeFormProps } from '../../types/props';
 
 export function QRCodeForm({
-                               url,
-                               setUrl,
-                               qrColor,
-                               setQrColor,
-                               logo,
-                               fileInputRef,
-                               handleLogoUpload,
-                               handleLogoDelete,
-                               downloadQRCode,
-                           }: QRCodeFormProps) {
+    url,
+    setUrl,
+    qrColor,
+    setQrColor,
+    logo,
+    fileInputRef,
+    handleLogoUpload,
+    handleLogoDelete,
+    downloadQRCode,
+    }: QRCodeFormProps) {
     return (
         <div className="space-y-8">
             <URLInput url={url} setUrl={setUrl} />
@@ -47,9 +46,9 @@ export function URLInput({ url, setUrl }: { url: string; setUrl: (url: string) =
 }
 
 export function ColorPicker({
-                         qrColor,
-                         setQrColor,
-                     }: {
+    qrColor,
+    setQrColor,
+    }: {
     qrColor: string;
     setQrColor: (color: string) => void;
 }) {
@@ -73,13 +72,13 @@ export function ColorPicker({
 }
 
 export function LogoUploader({
-                          logo,
-                          fileInputRef,
-                          handleLogoUpload,
-                          handleLogoDelete,
-                      }: {
-    logo: string | null;
-    fileInputRef: React.RefObject<HTMLInputElement>;
+    logo,
+    fileInputRef,
+    handleLogoUpload,
+    handleLogoDelete,
+    }: {
+    logo: string | undefined;
+    fileInputRef: React.MutableRefObject<HTMLInputElement | null>;
     handleLogoUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
     handleLogoDelete: () => void;
 }) {

@@ -1,22 +1,19 @@
-import { CardPreview } from "./CardPreview";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
 import { Download } from "lucide-react";
 import { JSX, useRef, useState } from "react";
-import Modal from "../Modals/Modal";
-import { CardMetrics, Deck } from "../../types";
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
-import { CardBack, CardData } from "../Card/CardBack";
-import Card from "../Card/Card";
-import { useAdmin } from "../../hooks/useAdmin";
 import { createRoot } from 'react-dom/client';
+import { useAdmin } from "../../hooks/useAdmin";
+import { Card, DeckWithCategories } from "../../types/game";
+import { CardMetrics } from "../../types/index";
+import type { ModalCardsType } from "../../types/props";
 import { ensureArray } from "../../utils/formatting.ts";
-interface ModalCards {
-    initialData: Deck;
-    isOpen: boolean;
-    onClose: () => void;
-}
+import { CardFunc } from "../Card/Card";
+import { CardBack } from "../Card/CardBack";
+import Modal from "../Modals/Modal";
+import { CardPreview } from "./CardPreview";
 
-export function ModalCards({ initialData, isOpen, onClose }: ModalCards) {
+const ModalCards: React.FC<ModalCardsType> = ({ initialData, isOpen, onClose }) => {
     const [metrics, setMetrics] = useState<CardMetrics>({
         originalWidth: 0,
         originalHeight: 0,
@@ -30,9 +27,9 @@ export function ModalCards({ initialData, isOpen, onClose }: ModalCards) {
     const cardsRef = useRef<HTMLDivElement>(null);
     const admin = useAdmin();
 
-    const flattenAndTransformCards = (deck: Deck) => {
+    const flattenAndTransformCards = (deck: DeckWithCategories) => {
         if (!deck) return [];
-        return deck.categories.reduce((acc: CardData[], category) => {
+        return deck.categories.reduce((acc: Card[], category) => {
             const getCardNumber = (cardId: number) => {
                 const index = category.cards.findIndex(card => card.cardId === cardId);
                 return index !== -1 ? index + 1 : null;
@@ -41,7 +38,7 @@ export function ModalCards({ initialData, isOpen, onClose }: ModalCards) {
                 cardId: card.cardId || 0,
                 deckId: category.deckId,
                 cardName: card.cardName || '...',
-                description: card.cardDescription || '...',
+                cardDescription: card.cardDescription || '...',
                 cardImageData: card.cardImageData || '',
                 qrCodeColor: card.qrCodeColor || '#000000',
                 qrCodeLogoImageData: card.qrCodeLogoImageData || '',
@@ -52,23 +49,25 @@ export function ModalCards({ initialData, isOpen, onClose }: ModalCards) {
                 cardProposition: ensureArray(card.cardProposition),
                 deckName: admin.getDeck(category.deckId) || '...',
                 cardNumber: getCardNumber(card.cardId) || category.cards.length + 1,
-                totalCards: category.cards.length + 1 || 0
+                totalCards: category.cards.length + 1 || 0,
+                cardCategoryId: category.categoryId || 0,
+                selected: false
             }));
-            return acc.concat(transformedCards);
+            return acc.concat(transformedCards as Card[]);
         }, []);
     };
 
-    const flattenCategories = (deck: Deck) => {
+    const flattenCategories = (deck: DeckWithCategories) => {
         if (!deck) return [];
         return deck.categories
-            .map(category => category.cards.map(_ => ({
+            .map(category => category.cards.map(() => ({
                 categoryIcon: category.categoryIcon || 'box', // Valeur par défaut 'box'
                 categoryColor: category.categoryColor || '#6B7280' // Valeur par défaut gris
             })))
             .flat();
     };
 
-    const flattenCards = (deck: Deck) => {
+    const flattenCards = (deck: DeckWithCategories) => {
         if (!deck) return [];
         return flattenAndTransformCards(deck);
     };
@@ -115,7 +114,6 @@ export function ModalCards({ initialData, isOpen, onClose }: ModalCards) {
             orientation: 'portrait',
             unit: 'mm',
             format: 'a4',
-            // compress: true // ✅ Active la compression intégrée
         });
     
         const pageWidth = pdf.internal.pageSize.getWidth();
@@ -149,9 +147,9 @@ export function ModalCards({ initialData, isOpen, onClose }: ModalCards) {
     
             let currentX = margin;
             let currentY = margin;
-            let cardsOnPage = [];
+            const cardsOnPage = [];
     
-            // 1️⃣ Placement des rectos
+            // Placement des rectos
             while (pageIndex < cards.length) {
                 const card = cards[pageIndex];
     
@@ -173,7 +171,7 @@ export function ModalCards({ initialData, isOpen, onClose }: ModalCards) {
             // Ajouter les cartes recto
             for (const { card, x, y } of cardsOnPage) {
                 const frontImgData = await captureComponentPreview(
-                    <Card
+                    <CardFunc
                         cardData={card}
                         width={mmToPx(maxCardWidth)}
                         height={mmToPx(maxCardHeight)}
@@ -188,7 +186,7 @@ export function ModalCards({ initialData, isOpen, onClose }: ModalCards) {
                 setProgress(Math.round((step / totalSteps) * 100));
             }
     
-            // 2️⃣ Nouvelle page pour les versos
+            // Nouvelle page pour les versos
             pdf.addPage();
     
             for (const { card, x, y } of cardsOnPage) {
@@ -199,9 +197,6 @@ export function ModalCards({ initialData, isOpen, onClose }: ModalCards) {
                             deckName: initialData.deckName,
                             cardNumber: cards.indexOf(card) + 1,
                             totalCards: cards.length,
-                            // qrCodeColor: "#000000",
-                            // qrCodeLogoImageData: "",
-                            // backgroundColor: "#ffffff"
                         }}
                         width={mmToPx(maxCardWidth)}
                         height={mmToPx(maxCardHeight)}
@@ -211,7 +206,7 @@ export function ModalCards({ initialData, isOpen, onClose }: ModalCards) {
                     />
                 );
     
-                // 🔄 Mirroring pour aligner le verso au recto
+                // Mirroring pour aligner le verso au recto
                 const flippedX = pageWidth - margin - maxCardWidth - (x - margin);
                 pdf.addImage(backImgData, 'JPEG', flippedX, y, maxCardWidth, maxCardHeight);
                 step++;

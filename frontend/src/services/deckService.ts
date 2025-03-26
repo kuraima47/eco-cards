@@ -1,18 +1,18 @@
-import type { GameDeck, Category, GameCard } from '../types/game';
+import type { Card, Category, Deck } from '../types/game';
 import { API_ENDPOINTS, handleResponse } from './config';
 
 export const deckService = {
-    getAllDecks: async (): Promise<GameDeck[]> => {
+    getAllDecks: async (): Promise<Deck[]> => {
         const response = await fetch(API_ENDPOINTS.DECKS);
         return handleResponse(response);
     },
 
-    getDeckById: async (id: string): Promise<GameDeck> => {
+    getDeckById: async (id: string): Promise<Deck> => {
         const response = await fetch(`${API_ENDPOINTS.DECKS}/${id}`);
         return handleResponse(response);
     },
 
-    createDeck: async (deck: Partial<GameDeck>): Promise<GameDeck> => {
+    createDeck: async (deck: Partial<Deck>): Promise<Deck> => {
         const response = await fetch(API_ENDPOINTS.DECKS, {
             method: 'POST',
             headers: {
@@ -23,7 +23,7 @@ export const deckService = {
         return handleResponse(response);
     },
 
-    updateDeck: async (id: string, updates: Partial<GameDeck>): Promise<GameDeck> => {
+    updateDeck: async (id: string, updates: Partial<Deck>): Promise<Deck> => {
         const response = await fetch(`${API_ENDPOINTS.DECKS}/${id}`, {
             method: 'PUT',
             headers: {
@@ -45,7 +45,7 @@ export const deckService = {
         const response = await fetch(`${API_ENDPOINTS.DECKS}/${deckId}/categories`);
         return handleResponse(response);
     },
-    getDeckCards: async (deckId: string): Promise<GameCard[]> => {
+    getDeckCards: async (deckId: string): Promise<Card[]> => {
         const contentsResponse = await fetch(`${API_ENDPOINTS.DECKS}/${deckId}/cards`);
         const deckContents = await handleResponse(contentsResponse);
         

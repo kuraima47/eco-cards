@@ -139,23 +139,24 @@ describe('Category Service', () => {
             expect(result).to.deep.equal(createdCategory);
         });
 
-it('should handle validation errors when creating a category', async () => {
-    const newCategoryData = {
-        // Missing required fields such as categoryName
-        categoryDescription: 'New Description',
-        deckId: 1
-    };
-    
-    const error = new Error('Missing required field: categoryName');
-    sandbox.stub(Category, 'create').rejects(error);
-    
-    try {
-        await categoryService.createCategory(newCategoryData);
-        expect.fail('Expected an error to be thrown');
-    } catch (err) {
-        expect(err.message).to.equal('Missing required field: categoryName');
-    }
-});
+        it('should handle validation errors when creating a category', async () => {
+            const newCategoryData = {
+                // Missing required fields such as categoryName
+                categoryDescription: 'New Description',
+                deckId: 1
+            };
+            
+            // Create a custom error object without stack trace
+            const customError = { message: 'Missing required field: categoryName' };
+            sandbox.stub(Category, 'create').rejects(customError);
+            
+            try {
+                await categoryService.createCategory(newCategoryData);
+                expect.fail('Expected an error to be thrown');
+            } catch (err) {
+                expect(err.message).to.equal('Missing required field: categoryName');
+            }
+        });
     });
 
     describe('updateCategory', () => {

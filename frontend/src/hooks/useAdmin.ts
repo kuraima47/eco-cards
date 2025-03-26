@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { adminApi } from '../services/admin';
-import type { Category, GameCard, GameDeck, User } from '../types/game';
+import type { Card, Category, Deck, User } from '../types/game';
 import { useAuth } from "./useAuth";
 
 class AdminService {
-    public decks: GameDeck[] = [];
+    public decks: Deck[] = [];
     public categories: Category[] = [];
-    public cards: GameCard[] = [];
+    public cards: Card[] = [];
     public loading = true;
     public selectedDeck: string | null = null;
     public user: User | null = null;
@@ -27,7 +27,7 @@ class AdminService {
         this.selectedDeck = deckId;
     }
 
-    public setDecks(decks: GameDeck[]): void {
+    public setDecks(decks: Deck[]): void {
         this.decks = decks;
     }
 
@@ -35,7 +35,7 @@ class AdminService {
         this.categories = categories;
     }
 
-    public setCards(cards: GameCard[]): void {
+    public setCards(cards: Card[]): void {
         this.cards = cards;
     }
 
@@ -87,7 +87,7 @@ class AdminService {
         return { 
             ...category, 
             cards: categoryCards 
-        } as Category & { cards: GameCard[] };
+        } as Category & { cards: Card[] };
     }
     public async addCategory(category: { categoryName: string; categoryDescription: string; categoryIcon: string; categoryColor: string; deckId?: number }): Promise<void> {
         try {
@@ -111,12 +111,8 @@ class AdminService {
     }
 
     public async updateCategory(id: number, updates: Partial<Category>): Promise<void> {
-        try {
-            await adminApi.updateCategory(id, updates);
-            await this.loadAllData();
-        } catch (error) {
-            throw error;
-        }
+        await adminApi.updateCategory(id, updates);
+        await this.loadAllData();
     }
 
     public async deleteCategory(categoryId: number): Promise<void> {
@@ -139,41 +135,34 @@ class AdminService {
         return deck ? deck.adminId : 0;
     }
 
-    public async addDeck(deck: Partial<GameDeck>): Promise<void> {
+    public async addDeck(deck: Partial<Deck>): Promise<void> {
         if (!this.user) throw new Error('User not authenticated');
         deck.adminId = this.user.userId;
-        await adminApi.addDeck(deck as GameDeck);
+        await adminApi.addDeck(deck as Deck);
         await this.loadAllData();
     }
 
-    public async updateDeck(deckId: number, data: Partial<GameDeck>): Promise<void> {
-        console.log(`Mise à jour du deck ${deckId} avec`, data);
+    public async updateDeck(deckId: number, data: Partial<Deck>): Promise<void> {
         await adminApi.updateDeck(String(deckId), data);
         await this.loadAllData();
     }
 
     public async deleteDeck(deckId: number): Promise<void> {
-        console.log(`Suppression du deck ${deckId}`);
         await adminApi.deleteDeck(String(deckId));
         await this.loadAllData();
     }
 
     // Opérations sur les cartes
-    public async addCard(card: Partial<GameCard>): Promise<void> {
-        try {
-            if (!card.deckId && this.selectedDeck) {
-                card.deckId = parseInt(this.selectedDeck, 10);
-            }
-            await adminApi.addCard(card);
-            await this.loadAllData();
-        } catch (error) {
-            throw error;
+    public async addCard(card: Partial<Card>): Promise<void> {
+        if (!card.deckId && this.selectedDeck) {
+            card.deckId = parseInt(this.selectedDeck, 10);
         }
+        await adminApi.addCard(card);
+        await this.loadAllData();
     }
 
-    public async updateCard(cardId: number, updates: Partial<GameCard>): Promise<void> {
+    public async updateCard(cardId: number, updates: Partial<Card>): Promise<void> {
         try {
-            console.log(`Mise à jour de la carte ${cardId} avec`, updates);
             await adminApi.updateCard(String(cardId), updates);
             await this.loadAllData();
         } catch (error) {
@@ -192,20 +181,16 @@ class AdminService {
         }
     }
 
-    public async importCards(cards: Partial<GameCard>[]): Promise<void> {
-        try {
-            if (!this.selectedDeck) throw new Error('No deck selected');
-            await adminApi.importCards(Number(this.selectedDeck), cards as any);
-            await this.loadAllData();
-        } catch (error) {
-            throw error;
-        }
+    public async importCards(cards: Partial<Card>[]): Promise<void> {
+        if (!this.selectedDeck) throw new Error('No deck selected');
+        await adminApi.importCards(Number(this.selectedDeck), cards as Card[]);
+        await this.loadAllData();
     }
 }
 
 export const useAdmin = () => {
     const { user } = useAuth();
-    const [_, forceUpdate] = useState(0); // state pour forcer un re-render
+    const [, forceUpdate] = useState(0);
 
     // Utilisation de useMemo pour créer l'instance de service.
     const adminService = useMemo(() => {

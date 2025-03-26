@@ -1,32 +1,12 @@
-import type React from "react"
-import { useState, useCallback, useEffect } from "react"
-import { PlayingCard } from "../card/PlayingCard"
-import { AlertTriangle, Sparkles } from "lucide-react"
-import type { GameCard, Category, Group } from "../../../types/game"
-import CardZoomedInTableModal from "../card/CardZoomedInTableModal"
 import * as LucideIcons from "lucide-react"
+import { AlertTriangle, Sparkles } from "lucide-react"
+import type React from "react"
+import { useCallback, useEffect, useState } from "react"
+import type { Card } from "../../../types/game"
+import type { TableSurfaceProps } from "../../../types/props"
 import { toPascalCase } from "../../../utils/formatting"
-
-interface TableSurfaceProps {
-  tableId: number
-  groupId: number
-  category: Category | null
-  cards: GameCard[]
-  selectedCardIds: number[]
-  groups?: Group[]
-  isActive?: boolean
-  style?: React.CSSProperties
-  onCardSelect: (groupId: number, cardId: number) => void
-  phase: number
-  maxSelectableCards?: number
-  hideGroupInfo?: boolean
-  co2Estimations?: Record<number, number>
-  acceptanceLevels?: Record<number, "high" | "medium" | "low" | null>
-  onCO2Estimate?: (cardId: number, value: number) => void
-  onAcceptanceChange?: (cardId: number, level: "high" | "medium" | "low" | null) => void
-  isReadOnly?: boolean
-  hideCO2?: boolean
-}
+import CardZoomedInTableModal from "../card/CardZoomedInTableModal"
+import { PlayingCard } from "../card/PlayingCard"
 
 export const TableSurface: React.FC<TableSurfaceProps> = ({
   tableId,
@@ -52,7 +32,7 @@ export const TableSurface: React.FC<TableSurfaceProps> = ({
   const [animateWarning, setAnimateWarning] = useState(false)
   const [showUnselectModal, setShowUnselectModal] = useState(false)
   const [pendingUnselectCard, setPendingUnselectCard] = useState<number | null>(null)
-  const [selectedModalCard, setSelectedModalCard] = useState<GameCard | null>(null)
+  const [selectedModalCard, setSelectedModalCard] = useState<Card | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const iconName = category?.categoryIcon ? toPascalCase(category?.categoryIcon) : "Box"
@@ -93,7 +73,7 @@ export const TableSurface: React.FC<TableSurfaceProps> = ({
     [isActive, onCardSelect, groupId, selectedCardIds, maxSelectableCards, phase, isReadOnly],
   )
 
-  const handleOpenModal = useCallback((card: GameCard) => {
+  const handleOpenModal = useCallback((card: Card) => {
     setSelectedModalCard(card)
     setIsModalOpen(true)
   }, [])

@@ -1,11 +1,6 @@
 import { Search, X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-
-interface SearchBarProps {
-    value: string;
-    onChange: (value: string) => void;
-    debounceTime?: number;
-}
+import type { SearchBarProps } from '../../types/props';
 
 export function SearchBar({ value, onChange, debounceTime = 300 }: SearchBarProps) {
     const [inputValue, setInputValue] = useState(value);

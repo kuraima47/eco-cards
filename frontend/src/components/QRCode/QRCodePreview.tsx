@@ -1,8 +1,8 @@
-import { QRCodeSVG } from 'qrcode.react';
-import { QRCodePreviewProps } from '../../types';
-import { Check } from "lucide-react";
-import React, { useRef, useState } from "react";
 import { Html5Qrcode } from "html5-qrcode";
+import { Check } from "lucide-react";
+import { QRCodeSVG } from 'qrcode.react';
+import { useRef, useState } from "react";
+import { QRCodePreviewProps } from '../../types/props';
 
 export function QRCodePreview({ url, qrColor, bgColor, logo }: QRCodePreviewProps) {
     const [showScanner, setShowScanner] = useState(false);

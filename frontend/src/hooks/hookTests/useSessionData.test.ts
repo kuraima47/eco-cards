@@ -13,6 +13,11 @@ jest.mock('../../services/deckService');
 jest.mock('../../services/categoryService');
 jest.mock('../../services/groupAcceptedCardService');
 
+// Mock import.meta.env
+jest.mock('../../services/config', () => ({
+  API_BASE_URL: 'http://test-server.com/api'
+}));
+
 describe('useSessionData', () => {
   const mockSession = {
     sessionId: '123',

@@ -1,34 +1,11 @@
-import type React from "react"
-import { useState, useCallback, useMemo, useEffect } from "react"
-import type { TableData, Category, Group, GameCard, SelectedCard } from "../../../types/game"
-import { TableSurface } from "../table/TableSurface"
-import QRCodeReader from "../../QRCode/QRCodeReader"
-import { QrCode, Info, ChevronLeft, ChevronRight, X, Sparkles, Eye } from "lucide-react"
 import * as LucideIcons from "lucide-react"
+import { ChevronLeft, ChevronRight, Eye, Info, QrCode, Sparkles, X } from "lucide-react"
+import type React from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import type { TableCarouselProps } from "../../../types/props"
 import { toPascalCase } from "../../../utils/formatting"
-
-interface TableCarouselProps {
-  tables: TableData[]
-  groups: Group[]
-  categories: Category[]
-  cards: GameCard[]
-  selectedCardsByGroup: Record<number, SelectedCard[]>
-  onCardSelect: (groupId: number, cardId: number) => void
-  onCO2Estimate?: (groupId: number, cardId: number, value: number) => void
-  onAcceptanceChange?: (groupId: number, cardId: number, level: "high" | "medium" | "low" | null) => void
-  sessionId: string
-  currentRound: number
-  phase: number
-  maxSelectableCards?: number
-  currentCategory: Category | null
-  co2Estimations?: Record<number, Record<number, number>>
-  acceptanceLevels?: Record<number, Record<number, "high" | "medium" | "low" | null>>
-  isReadOnly?: boolean
-  currentIndex?: number
-  setCurrentIndex?: (index: number) => void
-  userGroupId?: number | null
-  hideCO2ForPlayers?: boolean
-}
+import QRCodeReader from "../../QRCode/QRCodeReader"
+import { TableSurface } from "../table/TableSurface"
 
 export const TableCarousel: React.FC<TableCarouselProps> = ({
   tables,

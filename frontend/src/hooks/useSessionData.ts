@@ -1,18 +1,18 @@
-import { useState, useEffect } from "react";
-import { sessionService } from "../services/sessionService";
-import { groupService } from "../services/groupService";
-import { deckService } from "../services/deckService";
+import { useEffect, useState } from "react";
 import { categoryService } from "../services/categoryService";
-import type { Session, Group, GameDeck, GameCard, Category, TableData } from "../types/game";
+import { deckService } from "../services/deckService";
 import { groupAcceptedCardService } from "../services/groupAcceptedCardService";
+import { groupService } from "../services/groupService";
+import { sessionService } from "../services/sessionService";
+import type { Card, Category, Deck, Group, Session, TableData } from "../types/game";
 
 export const useSessionData = (sessionId: string) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [groups, setGroups] = useState<Group[]>([]);
-  const [deck, setDeck] = useState<GameDeck | null>(null);
-  const [cards, setCards] = useState<GameCard[]>([]);
+  const [deck, setDeck] = useState<Deck | null>(null);
+  const [cards, setCards] = useState<Card[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [tables, setTables] = useState<TableData[]>([]);
   const [co2Estimations, setCO2Estimations] = useState({});
@@ -45,27 +45,29 @@ export const useSessionData = (sessionId: string) => {
         const deckContents = await deckService.getDeckCards(sessionData.deckId.toString());
         console.log("Deck contents:", deckContents);
 
-        // Map deck contents to GameCard interface
-        const cardsData = deckContents.map((content: any) => ({
-          cardCategoryId: content.dataValues?.cardCategoryId,
-          selected: false,
-          cardId: content.dataValues?.cardId,
-          deckId: content.dataValues?.deckId,
-          cardName: content.dataValues?.cardName,
-          description: content.dataValues?.cardDescription || content.dataValues?.description || "",
-          cardImageData: content.dataValues?.cardImageData || null,
-          qrCodeColor: content.dataValues?.qrCodeColor || "#000000",
-          qrCodeLogoImageData: content.dataValues?.qrCodeLogoImageData || null,
-          backgroundColor: content.dataValues?.backgroundColor || "#ffffff",
-          category: content.dataValues?.category || "",
-          cardValue: content.dataValues?.cardValue,
-          cardActual: content.dataValues?.cardActual ? [content.dataValues?.cardActual] : [],
-          cardProposition: content.dataValues?.cardProposition ? [content.dataValues?.cardProposition] : [],
-          deckName: deckData?.deckName || "",
-          cardNumber: content.dataValues?.cardNumber || 0,
-          totalCards: content.dataValues?.totalCards || 0,
-          times_selected: content.dataValues?.times_selected || 0,
-        }));
+        // Map deck contents to Card interface
+        const cardsData = deckContents.map((card: any) => {
+          return {
+            cardCategoryId: card.dataValues?.cardCategoryId,
+            selected: false,
+            cardId: card.dataValues?.cardId,
+            deckId: card.dataValues?.deckId,
+            cardName: card.dataValues?.cardName || "",
+            cardDescription: card.dataValues?.cardDescription || "",
+            cardImageData: card.dataValues?.cardImageData || null,
+            qrCodeColor: card.dataValues?.qrCodeColor || "#000000",
+            qrCodeLogoImageData: card.dataValues?.qrCodeLogoImageData || "",
+            backgroundColor: card.dataValues?.backgroundColor || "#ffffff",
+            category: card.dataValues?.category || "",
+            cardValue: card.dataValues?.cardValue || 0,
+            cardActual: card.dataValues?.cardActual || [],
+            cardProposition: card.dataValues?.cardProposition || [],
+            deckName: deckData?.deckName || "",
+            cardNumber: card.dataValues?.cardNumber || 0,
+            totalCards: card.dataValues?.totalCards || 0,
+            times_selected: card.dataValues?.times_selected || 0,
+          };
+        });
 
         // Initialize tables (one per group) with empty category and no cards.
         const initialTables = groupsData.map((group, index) => ({
@@ -107,17 +109,17 @@ export const useSessionData = (sessionId: string) => {
     if (sessionId) loadSessionData();
   }, [sessionId]);
 
-  return { 
-    loading, 
-    error, 
-    session, 
-    groups, 
-    deck, 
-    cards, 
-    categories, 
-    tables, 
-    co2Estimations, 
-    acceptanceLevels, 
+  return {
+    loading,
+    error,
+    session,
+    groups,
+    deck,
+    cards,
+    categories,
+    tables,
+    co2Estimations,
+    acceptanceLevels,
     setTables,
   };
 };

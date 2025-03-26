@@ -1,7 +1,7 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { DeckListView } from "../DeckListView";
-import { useAdmin } from "../../../hooks/useAdmin";
 import "@testing-library/jest-dom";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { useAdmin } from "../../../hooks/useAdmin";
+import { DeckListView } from "../DeckListView";
 jest.mock("../../../hooks/useAdmin", () => ({
     useAdmin: jest.fn()
 }));
@@ -29,6 +29,7 @@ jest.mock("../../../components/Pdf/ModalCards", () => ({
 }));
 
 describe("DeckListView Component", () => {
+    const mockOnCreateDeck = jest.fn();
     const mockOnSelectDeck = jest.fn();
     const mockRefreshParent = jest.fn();
     const mockAdmin = {
@@ -49,6 +50,7 @@ describe("DeckListView Component", () => {
         render(
             <DeckListView
                 decks={mockAdmin.decks}
+                onCreateDeck={mockOnCreateDeck}
                 onSelectDeck={mockOnSelectDeck}
                 refreshParent={mockRefreshParent}
             />
@@ -63,6 +65,7 @@ describe("DeckListView Component", () => {
         render(
             <DeckListView
                 decks={mockAdmin.decks}
+                onCreateDeck={mockOnCreateDeck}
                 onSelectDeck={mockOnSelectDeck}
                 refreshParent={mockRefreshParent}
             />
@@ -76,6 +79,7 @@ describe("DeckListView Component", () => {
         render(
             <DeckListView
                 decks={mockAdmin.decks}
+                onCreateDeck={mockOnCreateDeck}
                 onSelectDeck={mockOnSelectDeck}
                 refreshParent={mockRefreshParent}
             />
@@ -86,7 +90,14 @@ describe("DeckListView Component", () => {
     });
     //ecrit ce test "met à jour la liste des decks lorsqu'un nouveau est ajouté"
     test("met à jour la liste des decks lorsqu'un nouveau est ajouté", async () => {
-        const { rerender } = render(<DeckListView decks={mockAdmin.decks} onSelectDeck={jest.fn()} refreshParent={mockRefreshParent} />);
+        const { rerender } = render(
+        <DeckListView
+        decks={mockAdmin.decks}
+        onCreateDeck={mockOnCreateDeck}
+        onSelectDeck={jest.fn()}
+        refreshParent={mockRefreshParent}
+        />
+    );
         
         // Simuler un ajout de deck dans useAdmin
         (useAdmin as jest.Mock).mockReturnValueOnce({
@@ -97,7 +108,13 @@ describe("DeckListView Component", () => {
           ]
         });
       
-        rerender(<DeckListView decks={mockAdmin.decks} onSelectDeck={jest.fn()} refreshParent={mockRefreshParent} />);
+        rerender(<DeckListView
+            decks={mockAdmin.decks}
+            onCreateDeck={mockOnCreateDeck}
+            onSelectDeck={jest.fn()}
+            refreshParent={mockRefreshParent}
+            />
+        );
       
         await waitFor(() => {
           expect(screen.getByText("Nouveau Deck")).toBeInTheDocument();

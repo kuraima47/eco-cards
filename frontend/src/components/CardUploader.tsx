@@ -1,12 +1,8 @@
-// CardUploader.tsx
-import React, { useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
 import { Upload } from 'lucide-react';
-import { CardImage } from '../types';
-
-interface CardUploaderProps {
-    onImagesUploaded: (images: CardImage[]) => void;
-}
+import { useCallback } from 'react';
+import { useDropzone } from 'react-dropzone';
+import type { CardImage } from '../types/game';
+import type { CardUploaderProps } from '../types/props';
 
 export function CardUploader({ onImagesUploaded }: CardUploaderProps) {
     const onDrop = useCallback(

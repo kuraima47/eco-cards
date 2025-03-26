@@ -1,22 +1,11 @@
-import React, { useRef, useEffect, useState, useMemo } from 'react';
-import { ImageOff, Activity, Lightbulb, Sparkles } from 'lucide-react';
-import { GameCard } from '../../types/game';
-import { generateCodeFromCO2, formatImageName, arrayBufferToBase64 } from '../../utils/formatting';
-import CategoryPreview from './CategoryPreview';
+import { Activity, ImageOff, Lightbulb, Sparkles } from 'lucide-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import type { CardProps } from '../../types/props';
+import { arrayBufferToBase64, formatImageName, generateCodeFromCO2 } from '../../utils/formatting';
 import getCardStyles from './CardStyle';
+import CategoryPreview from './CategoryPreview';
 
-interface CardProps {
-    cardData: GameCard;
-    width?: number;
-    height?: number;
-    hiddenCo2?: boolean;
-    isFlipped?: boolean;
-    categoryIcon?: string;
-    categoryColor?: string;
-    isForPdf?: boolean;
-}
-
-export function Card({ cardData, width = 416, height = 650, hiddenCo2 = true, isFlipped = false, categoryIcon, categoryColor, isForPdf = false }: CardProps) {
+export function CardFunc({ cardData, width = 416, height = 650, hiddenCo2 = true, isFlipped = false, categoryIcon, categoryColor, isForPdf = false }: CardProps) {
     const { cardName, cardValue, cardActual, cardProposition, cardImageData } = cardData;
     const [imageHeight, setImageHeight] = useState<number | null>(null);
     const textRef = useRef<HTMLDivElement>(null);
@@ -200,4 +189,4 @@ export function Card({ cardData, width = 416, height = 650, hiddenCo2 = true, is
     );
 }
 
-export default React.memo(Card);
+export default React.memo(CardFunc);

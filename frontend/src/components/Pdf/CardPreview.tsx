@@ -1,17 +1,7 @@
-import React, { forwardRef } from 'react';
-import Card from '../Card/Card';
+import { forwardRef } from 'react';
+import type { CardPreviewProps } from '../../types/props';
+import { CardFunc } from '../Card/Card';
 import { CardBack } from '../Card/CardBack';
-import { CardMetrics } from '../../types';
-import { GameCard } from '../../types/game';
-
-interface CardPreviewProps {
-    cards: GameCard[];
-    metrics: CardMetrics;
-    categories: {
-        categoryIcon: string;
-        categoryColor: string;
-    }[];
-}
 
 export const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
     ({ cards, metrics, categories }, ref) => {
@@ -81,7 +71,7 @@ export const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
                                         }}
                                     >
                                         {card.type === 'front' ? (
-                                            <Card
+                                            <CardFunc
                                                 cardData={card.data}
                                                 width={mmToPx(metrics.printWidth) * previewScale}
                                                 height={mmToPx(metrics.printHeight) * previewScale}

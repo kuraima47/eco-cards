@@ -46,7 +46,7 @@ class CardController {
     async createCard(req, res) {
         console.log("Received POST request with body:", req.body);
         try {
-            const { cardName, description, cardActual, cardProposition, category, cardValue, cardImage, deckId, qrCodeColor, qrCodeLogoImage, backgroundColor } = req.body;
+            const { cardName, cardDescription, cardActual, cardProposition, category, cardValue, cardImage, deckId, qrCodeColor, qrCodeLogoImage, backgroundColor } = req.body;
 
             // Récupérer cardCategoryID à partir des infos envoyées
             const categoryRecord = await Category.findOne({
@@ -63,7 +63,7 @@ class CardController {
             let cardImageData = imageBase64ToBuffer(cardImage);
             let qrCodeLogoImageData = imageBase64ToBuffer(qrCodeLogoImage);
 
-            const newCard = await cardService.createCard({ cardName, description, cardActual, cardProposition, cardCategoryId, cardImageData, cardValue, qrCodeColor, qrCodeLogoImageData, backgroundColor });
+            const newCard = await cardService.createCard({ cardName, cardDescription, cardActual, cardProposition, cardCategoryId, cardImageData, cardValue, qrCodeColor, qrCodeLogoImageData, backgroundColor });
 
             res.status(201).json(newCard);
         } catch (error) {
@@ -74,7 +74,7 @@ class CardController {
 
     async updateCard(req, res) {
         try {
-            const { cardName, description, cardActual, cardProposition, category, cardValue, cardImage, deckId, qrCodeColor, qrCodeLogoImage, backgroundColor } = req.body;
+            const { cardName, cardDescription, cardActual, cardProposition, category, cardValue, cardImage, deckId, qrCodeColor, qrCodeLogoImage, backgroundColor } = req.body;
 
             // Récupérer cardCategoryID à partir des infos envoyées
             const categoryRecord = await Category.findOne({
@@ -91,7 +91,7 @@ class CardController {
             let cardImageData = imageBase64ToBuffer(cardImage);
             let qrCodeLogoImageData = imageBase64ToBuffer(qrCodeLogoImage);
 
-            const updatedCard = await cardService.updateCard(req.params.id, { cardName, description, cardActual, cardProposition, cardCategoryId, cardImageData, cardValue, qrCodeColor, qrCodeLogoImageData, backgroundColor });
+            const updatedCard = await cardService.updateCard(req.params.id, { cardName, cardDescription, cardActual, cardProposition, cardCategoryId, cardImageData, cardValue, qrCodeColor, qrCodeLogoImageData, backgroundColor });
 
             if (!updatedCard) {
                 return res.status(404).json({ message: "Card not found" });

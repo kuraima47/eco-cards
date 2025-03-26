@@ -1,37 +1,14 @@
-import React from 'react';
 import {
     ChevronDown,
     ChevronRight,
+    FileText,
     FolderClosed,
     FolderOpen,
-    FileText,
     Library
 } from 'lucide-react';
-
-interface CategoryType {
-    categoryId: number;
-    categoryName: string;
-    categoryColor: string;
-    categoryIcon: string;
-    cards: {
-        cardId: string;
-        cardName: string;
-    }[];
-}
-
-interface DeckWithCategories {
-    deckId: number;
-    deckName: string;
-    categories: CategoryType[];
-}
-
-interface SidebarProps {
-    decks: DeckWithCategories[];
-    selectedDeck?: number;
-    selectedCategory?: number;
-    onSelectDeck: (deckId: number) => void;
-    onSelectCategory: (deckId: number, categoryId: number) => void;
-}
+import React from 'react';
+import type { DeckWithCategories } from '../../types/game';
+import type { SidebarProps } from '../../types/props';
 
 export function Sidebar({
                             decks,

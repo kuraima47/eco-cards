@@ -1,38 +1,14 @@
-import React, {useState, useEffect} from 'react';
+import React, { useEffect, useState } from 'react';
+import type { DeckModalProps } from '../../types/props';
 import Modal from './Modal';
-import {Deck} from "../../types";
-import {GameDeck} from "../../types/game";
-
-// interface DeckModalProps {
-//     isOpen: boolean;
-//     onClose: () => void;
-//     mode: 'add' | 'edit';
-//     initialData?: Deck | null;
-//     onSubmit: (data: Partial<Deck>) => void;
-// }
-
-interface DeckModalProps {
-
-    isOpen: boolean;
-
-    onClose: () => void;
-
-    mode: 'add' | 'edit';
-
-    initialData?: GameDeck | null;
-
-    onSubmit: (data: Partial<GameDeck>) => void;
-
-}
-
 
 const DeckModal: React.FC<DeckModalProps> = ({
-                                                 isOpen,
-                                                 onClose,
-                                                 mode,
-                                                 initialData,
-                                                 onSubmit,
-                                             }) => {
+    isOpen,
+    onClose,
+    mode,
+    initialData,
+    onSubmit,
+    }) => {
     const [title, setTitle] = useState('');
     // Mettre à jour les états lorsque initialData change
     useEffect(() => {
@@ -48,8 +24,8 @@ const DeckModal: React.FC<DeckModalProps> = ({
         if (!initialData) {
             initialData = {
                 deckName: title,
-                deckId: 0, // Provide a default value for deckId
-                adminId: 0 // Provide a default value for adminId
+                deckId: 0,
+                adminId: 0
                 
             }
         }else {

@@ -1,11 +1,5 @@
-import { useState, useCallback, useRef } from 'react';
-
-interface UseQRCodeOptions {
-    initialUrl?: string;
-    initialQrColor?: string;
-    initialBgColor?: string;
-    initialLogo?: string;
-}
+import { useCallback, useRef, useState } from 'react';
+import type { UseQRCodeOptions } from '../types/game';
 
 export function useQRCode({
     initialUrl = '',
@@ -17,7 +11,7 @@ export function useQRCode({
     const [qrColor, setQrColor] = useState<string>(initialQrColor);
     const [bgColor, setBgColor] = useState<string>(initialBgColor);
     const [logo, setLogo] = useState<string | undefined>(initialLogo);
-  
+
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleLogoUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,7 +26,7 @@ export function useQRCode({
     }, []);
 
     const handleLogoDelete = useCallback(() => {
-        setLogo(null);
+        setLogo(undefined);
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }

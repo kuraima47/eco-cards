@@ -1,20 +1,9 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { X } from 'lucide-react';
-import { CreateCardForm } from '../CreateCardForm';
-import Card from '../Card/Card';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Card } from '../../types/game';
+import type { ViewCardModalProps } from '../../types/props';
+import CardFunc from '../Card/Card';
 import CardBack from '../Card/CardBack';
-import { GameCard } from '../../types/game';
-
-interface ViewCardModalProps {
-    initialData?: GameCard;
-    isOpen: boolean;
-    onClose: () => void;
-    mode: 'add' | 'edit';
-    onSubmit: (data: Partial<GameCard>) => void;
-    currentDeckId: string;
-    categoryIcon: string;
-    categoryColor: string;
-}
 
 function ViewCardModal({
     initialData,
@@ -24,7 +13,7 @@ function ViewCardModal({
     categoryColor
 }: ViewCardModalProps) {
     // Utiliser useState avec une fonction d'initialisation pour éviter les calculs inutiles
-    const [cardData, setCardData] = useState<GameCard>(() => initialData || {} as GameCard);
+    const [cardData, setCardData] = useState<Card>(() => initialData || {} as Card);
     const [windowWidth, setWindowWidth] = useState(() => window.innerWidth);
 
     // Calculer les dimensions de la carte une seule fois par changement de taille d'écran
@@ -60,7 +49,7 @@ function ViewCardModal({
         return () => {
             window.removeEventListener('resize', handleResize);
         };
-    }, [handleResize]); // Dépendre uniquement de handleResize
+    }, [handleResize]);
 
     // Court-circuit pour éviter de rendre le modal quand il est fermé
 
@@ -68,7 +57,7 @@ function ViewCardModal({
     const modalContent = useMemo(() => (
         <div className={`flex ${windowWidth < 600 ? 'flex-col' : 'flex-row'} gap-6 items-center justify-center`}>
             <div className={windowWidth < 600 ? 'mb-6' : ''}>
-                <Card
+                <CardFunc
                     cardData={cardData}
                     categoryIcon={categoryIcon}
                     categoryColor={categoryColor}
@@ -123,7 +112,7 @@ export default React.memo(ViewCardModal, (prevProps, nextProps) => {
             prevProps.categoryColor === nextProps.categoryColor;
     }
 
-    // Optimisation supplémentaire : comparer seulement les props qui affectent le rendu visuel
+    // comparer seulement les props qui affectent le rendu visuel
     return (
         prevProps.isOpen === nextProps.isOpen &&
         prevProps.initialData.cardId === nextProps.initialData.cardId &&

@@ -1,12 +1,7 @@
 import React, { forwardRef } from 'react';
-import { CardImage, CardMetrics } from '../types';
+import type { CardImagePreviewProps } from '../types/props';
 
-interface CardPreviewProps {
-    cards: CardImage[];
-    metrics: CardMetrics;
-}
-
-export const CardPreview = forwardRef<HTMLDivElement, CardPreviewProps>(
+export const CardPreview = forwardRef<HTMLDivElement, CardImagePreviewProps>(
     ({ cards, metrics }, ref) => {
         const cardStyle: React.CSSProperties = {
             width: metrics.printWidth + 'mm',

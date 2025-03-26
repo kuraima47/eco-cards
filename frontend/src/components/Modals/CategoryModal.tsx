@@ -1,15 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Category } from "../../types/game";
-import Modal from './Modal';
+import type { CategoryModalProps } from '../../types/props';
 import CategoryPreview from '../Card/CategoryPreview';
-
-interface CategoryModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    mode: 'add' | 'edit';
-    initialData: Partial<Category> | null;
-    onSubmit: (data: Partial<Category>) => void;
-}
+import Modal from './Modal';
 
 const CategoryModal: React.FC<CategoryModalProps> = ({
     isOpen,
@@ -20,7 +13,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({
 }) => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
-    const [color, setColor] = useState('#ffffff'); // Valeur par défaut : blanc
+    const [color, setColor] = useState('#ffffff');
     const [icon, setIcon] = useState('');
 
     // Mettre à jour l'état lorsque initialData change

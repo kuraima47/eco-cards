@@ -1,11 +1,5 @@
 import type { CSSProperties } from 'react';
-
-export interface CardStyleProps {
-    width: number;
-    height: number;
-    isFlipped: boolean;
-    isForPdf: boolean;
-}
+import type { CardStyleProps } from '../../types/props';
 
 export const getCardStyles = ({
     width = 416,

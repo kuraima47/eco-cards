@@ -1,16 +1,16 @@
+import * as LucideIcons from 'lucide-react';
 import { Download, Edit, FolderClosed, Plus, Trash2 } from 'lucide-react';
 import { useState } from "react";
 import { useAdmin } from "../../hooks/useAdmin.ts";
+import { Category, DeckWithCategories } from '../../types/game.ts';
+import { toPascalCase } from '../../utils/formatting';
 import CategoryModal from "../Modals/CategoryModal.tsx";
 import DeleteConfirmationModal from "../Modals/DeleteConfirmationModal.tsx";
 import Notification from "../Notification";
 import ModalCards from "../Pdf/ModalCards.tsx";
-import { toPascalCase } from '../../utils/formatting';
-import * as LucideIcons from 'lucide-react';
-import { Category, DeckWithCategories } from '../../types/game.ts';
 
 interface DeckViewProps {
-    deck: DeckWithCategories;  // deck contient déjà deck.categories filtrées par le parent
+    deck: DeckWithCategories;
     onSelectCategory: (categoryId: number) => void;
     onCreateCategory: () => void;
     refreshParent?: () => void;
@@ -52,7 +52,7 @@ export function DeckView({ deck, onSelectCategory, refreshParent }: DeckViewProp
     /**
      * Ouvre la modale d'édition de catégorie
      */
-    const openEditCategoryModal = (category: any) => {
+    const openEditCategoryModal = (category: Category) => {
         setModalMode('edit');
         setCurrentCategory(category);
         setIsCategoryModalOpen(true);
@@ -211,7 +211,7 @@ export function DeckView({ deck, onSelectCategory, refreshParent }: DeckViewProp
                         key={category.categoryId}
                         className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200"
                         onClick={() => {
-                            onSelectCategory(Number(category.categoryId));
+                            onSelectCategory(category.categoryId);
                         }}
                     >
                         <div className="flex items-center space-x-3">
@@ -259,8 +259,6 @@ export function DeckView({ deck, onSelectCategory, refreshParent }: DeckViewProp
                 initialData={deck}
                 isOpen={isDownloadModalOpen}
                 onClose={() => setIsDownloadModalOpen(false)}
-            // categoryIcon={deck.categoryIcon}
-            // categoryColor={deck.categoryColor}
             />
 
             {/* Modale d'ajout/édition de catégorie */}
