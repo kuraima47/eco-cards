@@ -456,94 +456,99 @@ const GameSetup: React.FC = () => {
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {groups.map((group) => (
-                <div key={group.groupId} className="p-4 border rounded-md bg-white shadow-sm">
-                  {groupErrors[group.groupId] && (
-                    <div className="mb-3 p-2 bg-red-50 border border-red-200 text-red-600 text-sm rounded">
-                      {groupErrors[group.groupId]}
-                    </div>
-                  )}
+            {groups.map((group) => (
+                  <div key={group.groupId} className="p-4 border rounded-md bg-white shadow-sm">
+                    {groupErrors[group.groupId] && (
+                      <div className="mb-3 p-2 bg-red-50 border border-red-200 text-red-600 text-sm rounded">
+                        {groupErrors[group.groupId]}
+                      </div>
+                    )}
 
-                  <div className="flex justify-between items-center mb-4">
-                    <input
-                      type="text"
-                      value={group.groupName}
-                      onChange={(e) =>
-                        setGroups((prev) =>
-                          prev.map((g) => (g.groupId === group.groupId ? { ...g, groupName: e.target.value } : g)),
-                        )
-                      }
-                      className="text-lg font-medium border border-gray-200 rounded px-2 focus:border-green-300 focus:ring-1 focus:ring-green-200 w-full"
-                      placeholder="Nom du groupe"
-                      disabled={!!processingAction}
-                    />
-                    <button
-                      onClick={() => handleRemoveGroup(group.groupId)}
-                      className="text-red-600 hover:text-red-800 disabled:opacity-50 ml-2"
-                      disabled={!!processingAction}
-                    >
-                      <X className="h-5 w-5" />
-                    </button>
-                  </div>
-
-                  <div className="space-y-4">
-                    <button
-                      onClick={() => handleAddPlayersToGroup(group.groupId, selectedUsers)}
-                      disabled={!selectedUsers.length || !!processingAction}
-                      className="w-full px-3 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:opacity-50"
-                    >
-                      Ajouter les joueurs sélectionnés
-                    </button>
-
-                    <div className="flex gap-2">
+                    <div className="flex justify-between items-center mb-4">
                       <input
                         type="text"
-                        value={guestUsernames[group.groupId] || ""}
+                        value={group.groupName}
                         onChange={(e) =>
-                          setGuestUsernames((prev) => ({
-                            ...prev,
-                            [group.groupId]: e.target.value,
-                          }))
+                          setGroups((prev) =>
+                            prev.map((g) =>
+                              g.groupId === group.groupId ? { ...g, groupName: e.target.value } : g,
+                            )
+                          )
                         }
-                        className="flex-1 rounded-md border border-gray-300 shadow-sm p-2"
-                        placeholder="Adresse email de l'invité"
+                        className="text-lg font-medium border border-gray-200 rounded px-2 focus:border-green-300 focus:ring-1 focus:ring-green-200 w-full"
+                        placeholder="Nom du groupe"
+                        disabled={!!processingAction}
                       />
                       <button
-                        onClick={() => handleAddGuestToGroup(group.groupId)}
-                        disabled={!guestUsernames[group.groupId]?.trim() || !!processingAction}
-                        className="px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50"
+                        onClick={() => handleRemoveGroup(group.groupId)}
+                        className="text-red-600 hover:text-red-800 disabled:opacity-50 ml-2"
+                        disabled={!!processingAction}
                       >
-                        Ajouter
+                        <X className="h-5 w-5" />
                       </button>
                     </div>
 
-                    {group.players.length === 0 ? (
-                      <p className="text-sm text-gray-500 italic text-center">Aucun joueur dans ce groupe</p>
-                    ) : (
-                      <ul className="space-y-2">
-                        {group.players.map((player) => (
-                          <li
-                            key={`${group.groupId}-${player.username}`}
-                            className="flex justify-between items-center bg-gray-50 p-2 rounded"
+                    <div className="space-y-4">
+                      <button
+                        onClick={() => handleAddPlayersToGroup(group.groupId, selectedUsers)}
+                        disabled={!selectedUsers.length || !!processingAction}
+                        className="w-full px-3 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:opacity-50"
+                      >
+                        Ajouter les joueurs sélectionnés
+                      </button>
+
+                      {/* Only show guest add UI if session id exists (i.e. on session update) */}
+                      {id && (
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={guestUsernames[group.groupId] || ""}
+                            onChange={(e) =>
+                              setGuestUsernames((prev) => ({
+                                ...prev,
+                                [group.groupId]: e.target.value,
+                              }))
+                            }
+                            className="flex-1 rounded-md border border-gray-300 shadow-sm p-2"
+                            placeholder="Adresse email de l'invité"
+                          />
+                          <button
+                            onClick={() => handleAddGuestToGroup(group.groupId)}
+                            disabled={!guestUsernames[group.groupId]?.trim() || !!processingAction}
+                            className="px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50"
                           >
-                            <div>
-                              {player.username}
-                              {!player.userId && <span className="ml-2 text-xs text-gray-500">(guest)</span>}
-                            </div>
-                            <button
-                              onClick={() => handleRemovePlayerFromGroup(group.groupId, player.username)}
-                              className="text-red-600 hover:text-red-800 disabled:opacity-50"
-                              disabled={!!processingAction}
+                            Ajouter
+                          </button>
+                        </div>
+                      )}
+
+                      {group.players.length === 0 ? (
+                        <p className="text-sm text-gray-500 italic text-center">Aucun joueur dans ce groupe</p>
+                      ) : (
+                        <ul className="space-y-2">
+                          {group.players.map((player) => (
+                            <li
+                              key={`${group.groupId}-${player.username}`}
+                              className="flex justify-between items-center bg-gray-50 p-2 rounded"
                             >
-                              <X className="h-4 w-4" />
-                            </button>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+                              <div>
+                                {player.username}
+                                {!player.userId && <span className="ml-2 text-xs text-gray-500">(guest)</span>}
+                              </div>
+                              <button
+                                onClick={() => handleRemovePlayerFromGroup(group.groupId, player.username)}
+                                className="text-red-600 hover:text-red-800 disabled:opacity-50"
+                                disabled={!!processingAction}
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
 
             <div className="flex flex-col sm:flex-row justify-between gap-4 mt-6">
